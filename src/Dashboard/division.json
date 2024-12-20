@@ -1,0 +1,62 @@
+{
+    "Amravati": {
+        "districts": [
+            "Amravati",
+            "Akola",
+            "Buldana",
+            "Washim",
+            "Yavatmal"
+        ]
+    },
+    "Chhatrapati Sambhaji Nagar": {
+        "districts": [
+            "Chhatrapati Sambhaji Nagar",
+            "Beed",
+            "Hingoli",
+            "Jalna",
+            "Latur",
+            "Nanded",
+            "Osmanabad",
+            "Parbhani"
+        ]
+    },
+    "Konkan": {
+        "districts": [
+            "Mumbai",
+            "Mumbai Suburban",
+            "Palghar",
+            "Raigad",
+            "Ratnagiri",
+            "Thane",
+            "Sindhudurg"
+        ]
+    },
+    "Nagpur": {
+        "districts": [
+            "Bhandara",
+            "Nagpur",
+            "Chandrapur",
+            "Gadchiroli",
+            "Gondia",
+            "Wardha"
+        ]
+    },
+    "Nashik": {
+        "districts": [
+            "Ahmednagar",
+            "Dhule",
+            "Jalgaon",
+            "Nandurbar",
+            "Nashik"
+        ]
+    },
+    "Pune": {
+        "districts": [
+            "Kolhapur",
+            "Pune",
+            "Sangli",
+            "Satara",
+            "Solapur"
+        ]
+    }
+}

@@ -1,0 +1,41 @@
+{
+  "homepage": "/analytics",
+  "name": "analytics",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build-only": "vite build",  
+    "build": "npm run build-only && npm run package-war",  
+    "lint": "eslint .",
+    "preview": "vite preview",
+    "package-war": "cd dist && jar -cvf analytics.war *" 
+  },
+  "dependencies": {
+    "@mui/icons-material": "^6.2.1",
+    "@mui/material": "^6.2.1",
+    "@reduxjs/toolkit": "^2.5.0",
+    "antd": "^5.22.5",
+    "axios": "^1.7.9",
+    "cytoscape": "^3.30.4",
+    "keycloak-js": "^26.0.7",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-redux": "^9.2.0",
+    "react-router-dom": "^7.0.2"
+  },
+  "devDependencies": {
+    "@eslint/js": "^9.15.0",
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react-swc": "^3.5.0",
+    "eslint": "^9.15.0",
+    "eslint-plugin-react": "^7.37.2",
+    "eslint-plugin-react-hooks": "^5.0.0",
+    "eslint-plugin-react-refresh": "^0.4.14",
+    "globals": "^15.12.0",
+    "tailwindcss": "^3.4.17",
+    "vite": "^6.0.1"
+  }
+}
