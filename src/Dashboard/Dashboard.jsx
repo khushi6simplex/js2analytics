@@ -1,10 +1,11 @@
-import { Button, Select, Space, Spin, Typography } from "antd";
+import { Button, Select, Space, Spin, Typography,Tabs,Flex,Card, Divider} from "antd";
 import { useRef, useState } from "react";
 import { useAppSelector } from "../Redux/store/store";
 import cytoscape from "cytoscape";
 import "./DashBoard.css";
 import { DownloadOutlined, RedoOutlined } from "@ant-design/icons";
 import ReveloTable from "./ReveloTable/ReveloTable";
+import WorkTable from "../Dashboard/ReveloTable/WorkTable"
 import Header from "./header/Header";
 
 const Dashboard = () => {
@@ -398,14 +399,73 @@ const Dashboard = () => {
     setSelectedOption(undefined);
   };
 
+  const items = [
+    {
+      key: '1',
+      label: 'District Wise Work',
+      children: <ReveloTable />,
+    },
+    {
+      key: '2',
+      label: 'Department Wise Work',
+      children: 'Comming Soon ...',
+    },
+    {
+      key: '3',
+      label: 'Village Wise Water budgeting',
+      children: 'Comming Soon ...',
+    },
+    {
+      key: '4',
+      label: 'Village Wise Water budgeting',
+      children: 'Comming Soon ...',
+    },
+    {
+      key: '5',
+      label: 'Village Wise Water budgeting',
+      children: 'Comming Soon ...',
+    },
+    {
+      key: '6',
+      label: 'Repair Works',
+      children: 'Comming Soon ...',
+    },
+    {
+      key: '7',
+      label: 'Work Monitoring',
+      children: <WorkTable/>,
+    },  {
+      key: '8',
+      label: 'User Defined Query',
+      children: 'Comming Soon ...',
+    },
+    {
+      key: '9',
+      label: 'Geotagging',
+      children: 'Comming Soon ...',
+    },
+  ];
+
+  const onChange = (key) => {
+    console.log(key);
+  };
+
   return (
     <>
-      <div className="main-dashBoard-wrapper">
+      <Card style={{marginTop:"4vh"}}>
           <Header />
-          <div style={{marginTop: "5%", height:"85vh", width: "100%", display: "flex", }}>
-            <ReveloTable />
-          </div>
-      </div>
+          <Flex vertical justify="center" style={{marginTop:"2vh"}}>
+            {/* <ReveloTable /> */}
+            <Typography.Text style={{fontSize:"20px",fontWeight:"600"}}>Reports</Typography.Text>
+            <Divider/>
+            <Tabs 
+            // defaultActiveKey="7" 
+            items={items} 
+            onChange={onChange}  
+            tabPosition="left" size="small" />
+            {/* <WorkTable/> */}
+          </Flex>
+      </Card>
     </>
   );
 };
