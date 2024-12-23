@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Table, Row, Col, Card } from "antd";
+import { Table, Row, Col, Card, Flex } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import WorkData from "../work.json";
@@ -40,43 +40,43 @@ const WorkTable: React.FC = () => {
       title: "District",
       dataIndex: "district",
       key: "district",
-      width: 150
+      width: "180px"
     },
     {
       title: "Taluka",
       dataIndex: "taluka",
       key: "taluka",
-      width: 150
+       width: "180px"
     },
     {
       title: "Department",
       dataIndex: "depname",
       key: "depname",
-      width: 150
+       width: "180px"
     },
     {
       title: "Work Type",
       dataIndex: "worktype",
       key: "worktype",
-      width: 150
+       width: "180px"
     },
     {
       title: "Estimated Cost",
       dataIndex: "estimatedcost",
       key: "estimatedcost",
-      width: 150
+       width: "180px"
     },
     {
       title: "Physical Target Area",
       dataIndex: "physicaltargetarea",
       key: "physicaltargetarea",
-      width: 150
+       width: "180px"
     },
     {
       title: "Expected Water Storage",
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
-      width: 150
+      width: "180px"
     },
   ];
 
@@ -93,9 +93,9 @@ const WorkTable: React.FC = () => {
     })) || [];
 
   return (
-    <Card>
-      <Row gutter={[16, 16]}>
-        <Col span={9}>
+    <Flex  gap={50}>
+      <Row gutter={[17, 17]} >
+        <Col span={8} >
           <Jurisdictions
             title="Divisions"
             data={Object.keys(divisionData)}
@@ -135,10 +135,12 @@ const WorkTable: React.FC = () => {
             placeholder="Select a District to see Talukas"
           />
         </Col>
-        <Col span={15}>
+        <Col span={16} >
           <Table
             columns={columns}
+            style={{alignItems:"top"}}
             dataSource={tableData}
+            size="large"
             pagination={{
               pageSize: 5,
               showSizeChanger: true,
@@ -148,7 +150,7 @@ const WorkTable: React.FC = () => {
           />
         </Col>
       </Row>
-    </Card>
+    </Flex>
   );
 };
 

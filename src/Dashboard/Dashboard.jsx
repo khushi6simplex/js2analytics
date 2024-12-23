@@ -79,25 +79,27 @@ const Dashboard = () => {
 
   return (
     <>
-      <Card style={{ marginTop: "4vh" }}>
+      <Card bordered={false} >
         <Header />
-        <Flex vertical justify="center" style={{ marginTop: "2vh" }}>
+        <Flex vertical justify="center" >
           {/* "Reports" Text on Left */}
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", left: "2vw" }}>
+          {/* <Typography.Text style={{ fontSize: "20px", fontWeight: "600", left: "2vw" }}>
             Reports
-          </Typography.Text>
+          </Typography.Text> */}
 
           {/* Selected Tab Label at Center */}
-          {selectedTabLabel && (
+          {/* {selectedTabLabel && (
             <Typography.Text style={{ fontSize: "20px", fontWeight: "600", textAlign: "center", width: "100%", position: "absolute", top: "5vh", left: "50%", transform: "translateX(-50%)" }}>
               {selectedTabLabel}
             </Typography.Text>
-          )}
+          )} */}
 
-          <Divider />
+          {/* <Divider /> */}
           <Tabs
+            style={{height:"88vh"}}
             items={items}
             onChange={onChange}
+            tabBarGutter={5}
             tabPosition="left"
             size="small"
           />
