@@ -1,0 +1,731 @@
+<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.sixsimplex.hawkeye</groupId>
+	<artifactId>hawkeye</artifactId>
+	<version>2.0</version>
+	<packaging>war</packaging>
+	<name>hawkeye Client</name>
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<js.build.directory>C:/MavenScripts/dojocomponent</js.build.directory>
+		<deployFolder>/tools/apache-tomcat-8.0.23/webapps </deployFolder>
+		<dojo.build.profileFile>target/checkout/WebContent/app.profile.js</dojo.build.profileFile>
+	</properties>
+	<scm>
+		<connection>scm:git:https://ajitdharmik@bitbucket.org/6simplex/hawkeyeweb.git</connection>
+		<developerConnection>scm:git:https://ajitdharmik@bitbucket.org/6simplex/hawkeyeweb.git</developerConnection>
+		<url>https://ajitdharmik@bitbucket.org/6simplex/hawkeyeweb.git</url>
+	</scm>
+	<build>
+		<finalName>hawkeye</finalName>
+		<sourceDirectory>target/checkout/src</sourceDirectory>
+		<plugins>
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>buildnumber-maven-plugin</artifactId>
+				<version>1.0-beta-1</version>
+				<configuration>
+					<format>Build: #{0} ({1,date})</format>
+					<items>
+						<item>buildNumber\d*</item>
+						<item>timestamp</item>
+					</items>
+				</configuration>
+				<executions>
+					<execution>
+						<phase>generate-resources</phase>
+						<goals>
+							<goal>create</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>2.6</version>
+				<configuration>
+					<webXml>${basedir}/target/checkout/WebContent/WEB-INF/web.xml</webXml>
+					<failOnMissingWebXml>true</failOnMissingWebXml>
+					<!--<packagingExcludes>
+			   WEB-INF/lib/commons-codec-1.9.jar,WEB-INF/lib/commons-logging-1.2.jar,WEB-INF/lib/tomcat-coyote-8.0.28.jar,WEB-INF/lib/tomcat-jni-8.0.28.jar,WEB-INF/lib/tomcat-juli-8.0.28.jar,WEB-INF/lib/tomcat-util-8.0.28.jar,WEB-INF/lib/tomcat-servlet-api-8.0.28.jar
+			   </packagingExcludes>-->
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-scm-plugin</artifactId>
+				<version>1.9.4</version>
+				<configuration>
+					<!-- <username>6simplexbutler</username>
+					<password>Butler46SimplexBitBucket000</password> -->
+					<username>pratiksinghaniya</username>
+					<password>pratik@20</password>
+				</configuration>
+				<executions>
+					<execution>
+						<id>id.generate-sources getting source code from bitbucket i.e. checkout</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>checkout</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.1</version>
+				<configuration>
+					<source>1.8</source>
+					<target>1.8</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<executions>
+					<!--    <execution>
+                        <id>id.deleting Dojo Built code</id>
+                        <phase>package</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete includeEmptyDirs="true"> -->
+					<!-- <fileset dir="target/" excludes="*.war" />-->
+					<!--<fileset dir="C:/MavenScripts/ProjectAt6Simplex/hawkeyeBitBucketMultiModule/hawkeyeWeb/hawkeyeRelease" /> -->
+					<!--  <fileset dir="C:/MavenScripts/ProjectAt6Simplex/hawkeyeBitBucketMultiModule/hawkeyeWeb/target/checkout/WebContent/js/hawkeye/surveymanager/areas/mapModules" /> 				
+                                </delete>
+                            </tasks>
+                        </configuration>
+                    </execution> -->
+					<!-- <execution>
+                        <id>id.deleting source code</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <delete includeEmptyDirs="true">                                    
+                                    <fileset dir="target/" excludes="*.war" />
+                                </delete>
+                            </tasks>
+                        </configuration>
+                    </execution>-->
+					<execution>
+						<id>id.generate-sources</id>
+						<phase>generate-sources</phase>
+						<goals>
+							<goal>run</goal>
+						</goals>
+						<configuration>
+							<tasks>
+								<echo>check out code</echo>
+							</tasks>
+						</configuration>
+					</execution>
+					<!--<execution>
+                        <id>id.initiating dojo build trigger for minification ...</id>
+                        <phase>generate-resources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <java classname="org.mozilla.javascript.tools.shell.Main" fork="true" maxmemory="512m" failonerror="false" classpath="${js.build.directory}/util/shrinksafe/js.jar;${js.build.directory}/util/closureCompiler/compiler.jar;${js.build.directory}/util/shrinksafe/shrinksafe.jar">
+                                    <arg value="${js.build.directory}/dojo/dojo.js" />
+                                    <arg value="baseUrl=${js.build.directory}/dojo" />
+                                    <arg value="load=build" />
+                                    <arg line="profile ${dojo.build.profileFile}" />
+                                </java>
+                            </tasks>
+                        </configuration>
+                    </execution>-->
+					<!--                    <execution>
+                        <id>id.install</id>
+                        <phase>install</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <tasks>
+                                <copy file="target/${project.build.finalName}.war" tofile="${deployFolder}\${project.build.finalName}.war" />
+                                <echo>in install phase</echo>
+                            </tasks>
+                        </configuration>
+                    </execution>-->
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-resources-plugin</artifactId>
+				<version>2.6</version>
+				<executions>
+					<execution>
+						<id>copying build number file</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${basedir}/</directory>
+									<includes>
+										<include>buildNumber.properties</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying hawkeye folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/hawkeye</outputDirectory>
+							<resources>
+								<resource>
+									<directory>target/checkout/WebContent/js/hawkeye/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<excludes>
+										<exclude>**/*.js.uncompressed.js</exclude>
+										<exclude>**/*/package.js</exclude>
+										<exclude>**/*/package.json</exclude>
+									</excludes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying conf folder</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/classes/conf/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>target/checkout/src/conf/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<!-- <execution>
+                        <id>copying dojo folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/dojo</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${js.build.directory}/SpecifiedDojoComponent/dojo/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution> -->
+					<!--  <execution>
+                        <id>copying dijit folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/dijit</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${js.build.directory}/SpecifiedDojoComponent/dijit/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+                    <execution>
+                        <id>copying dojox folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/dojox</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${js.build.directory}/SpecifiedDojoComponent/dojox/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution> -->
+					<execution>
+						<id>copying dgrid folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/dgrid</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/dgrid/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying put-selector folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/put-selector</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/put-selector/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying xstyle folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/xstyle</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/xstyle/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying images</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/images/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>target/checkout/WebContent/images</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying themes</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/themes/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>target/checkout/WebContent/themes/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<excludes>
+										<exclude>package.js</exclude>
+										<exclude>package.json</exclude>
+										<exclude>**/*/package.js</exclude>
+										<exclude>**/*/package.json</exclude>
+										<exclude>**/*.js.uncompressed.js</exclude>
+									</excludes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<!-- <execution>
+                        <id>copying basedata folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/basedata/</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>target/checkout/WebContent/js/basedata/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+                                    <excludes>
+										<exclude>package.js</exclude>
+                                        <exclude>package.json</exclude>
+                                        <exclude>**/*/package.js</exclude>
+                                        <exclude>**/*/package.json</exclude>
+                                        <exclude>**/*.js.uncompressed.js</exclude>
+                                    </excludes>
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution> -->
+					<execution>
+						<id>copying WEB-INF folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/WEB-INF/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>target/checkout/WebContent/WEB-INF/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying META-INF folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/META-INF/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>target/checkout/WebContent/META-INF/</directory>
+									<includes>
+										<!--  <include>**/*</include> -->
+										<include>context.xml</include>
+										<include>MANIFEST.MF</include>
+									</includes>
+									<excludes>
+										<exclude>**/maven/com.sixsimplex.hawkeye/hawkeyeweb/pom.xml</exclude>
+									</excludes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying .html files</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>target/checkout/WebContent/</directory>
+									<includes>
+										<include>*.html</include>
+										<!-- <include>home.html</include>
+                                        <include>survey.html</include>
+										<include>org.html</include>
+										<include>admin.html</include>
+										<include>editor.html</include>
+										<include>import.html</include> -->
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying keycloak.json file</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/</outputDirectory>
+							<resources>
+								<resource>
+									<directory>target/checkout/WebContent/WEB-INF/</directory>
+									<includes>
+										<include>keycloak.json</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying ol folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/ol</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/ol/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying jsts folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/jsts</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/jsts/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying cbtree folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/cbtree</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/cbtree/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying cytoscape folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/cytoscape</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/cytoscape/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<!--		<execution>
+                        <id>copying d3 folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/d3</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${js.build.directory}/SpecifiedDojoComponent/d3/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>-->
+					<!-- <execution>
+                        <id>copying parallel folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/parallel</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${js.build.directory}/SpecifiedDojoComponent/parallel/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution> -->
+					<!-- <execution>
+                        <id>copying dGrowl folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/dGrowl</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${js.build.directory}/dGrowl/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution> -->
+					<!-- <execution>
+                        <id>copying chartjs folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/chartjs</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${js.build.directory}/chartjs/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution>
+					<execution>
+                        <id>copying jszip folder</id>
+                        <phase>process-resources</phase>
+                        <goals>
+                            <goal>copy-resources</goal>
+                        </goals>
+                        <configuration>
+                            <outputDirectory>target/${project.build.finalName}/js/jszip</outputDirectory>
+                            <resources>
+                                <resource>
+                                    <directory>${js.build.directory}/jszip/</directory>
+                                    <includes>
+                                        <include>**/*</include>
+                                    </includes>
+
+                                </resource>
+                            </resources>
+                        </configuration>
+                    </execution> -->
+					<execution>
+						<id>copying dc folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/dc</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/dc/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+									<excludes>
+										<exclude>**/*.js.uncompressed.js</exclude>
+										<exclude>**/*/package.js</exclude>
+										<exclude>**/*/package.json</exclude>
+									</excludes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+					<execution>
+						<id>copying vis folder</id>
+						<phase>process-resources</phase>
+						<goals>
+							<goal>copy-resources</goal>
+						</goals>
+						<configuration>
+							<outputDirectory>target/${project.build.finalName}/js/vis</outputDirectory>
+							<resources>
+								<resource>
+									<directory>${js.build.directory}/SpecifiedDojoComponent/vis/</directory>
+									<includes>
+										<include>**/*</include>
+									</includes>
+								</resource>
+							</resources>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+	<dependencies>
+		<!--Added on 28-01-2016 -->
+		<!--for project -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5</version>
+			<exclusions>
+				<!-- transitive dependency excludes. e.g, there might be possible some dependencies may dependenct on other dependencies, that are not used in this project, so remove those dependencies from build. -->
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-codec</groupId>
+					<artifactId>commons-codec</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcore</artifactId>
+			<version>4.4.1</version>
+		</dependency>
+		<!--for maven -->
+		<dependency>
+			<groupId>org.apache.tomcat</groupId>
+			<artifactId>tomcat-coyote</artifactId>
+			<version>8.0.28</version>
+			<scope>provided</scope> <!--do not want to include in build. i.e .jar, .war, .ear -->
+		</dependency>
+	</dependencies>
+</project>

@@ -80,7 +80,6 @@ const Header = () => {
                   cursor: "pointer",
                   borderBottom: "1px solid #eee",
                 }}
-                onClick={() => alert("About clicked!")}
               >
                 About
               </li>
@@ -89,7 +88,6 @@ const Header = () => {
                   padding: "8px 12px",
                   cursor: "pointer",
                 }}
-                onClick={() => (window.__analytics__.logoutUrl)}
               >
                 Logout
               </li>

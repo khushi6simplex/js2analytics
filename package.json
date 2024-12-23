@@ -6,11 +6,11 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build-only": "vite build",  
-    "build": "npm run build-only && npm run package-war",  
+    "build-only": "vite build",
+    "build": "npm run build-only && npm run package-war",
     "lint": "eslint .",
     "preview": "vite preview",
-    "package-war": "cd dist && jar -cvf analytics.war *" 
+    "package-war": "cd dist && jar -cvf analytics.war *"
   },
   "dependencies": {
     "@mui/icons-material": "^6.2.1",

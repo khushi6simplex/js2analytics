@@ -1,7 +1,7 @@
 import Keycloak from "keycloak-js";
 
 const keycloak = new Keycloak({
-  url: "http://localhost:8081/auth",
+  url: "http://103.249.98.177:1001/auth",
   realm: "jalyuktashivar",
   clientId: "revelo35",
 });
@@ -14,7 +14,7 @@ export const initKeycloak = () => {
 
   return new Promise((resolve, reject) => {
     keycloak
-      .init({ onLoad: "check-sso", silentCheckSsoRedirectUri: `${window.location.origin}/silent-check-sso.html` })
+      .init({ onLoad: "check-sso", silentCheckSsoRedirectrUi: `${window.location.origin}/silent-check-sso.html` })
       .then((authenticated) => {
         if (authenticated) {
           console.log("Authenticated via check-sso");

@@ -10,7 +10,7 @@ export const MainRoutes = () => {
     [
       {
         label: "App",
-        link: '',
+        link: '/',
         type: true,
         component: () => (
           <Suspense fallback={<><span>Loading...</span></>}>

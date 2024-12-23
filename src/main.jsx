@@ -5,25 +5,8 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./Redux/store/store";
 import { MainRoutes } from "./Routes/Route";
-import { initKeycloak } from "./KeyCloakService";
 
 const AppWrapper = () => {
-  const [keycloakInitialized, setKeycloakInitialized] = useState(false);
-
-  useEffect(() => {
-    initKeycloak()
-      .then(() => {
-        setKeycloakInitialized(true);
-      })
-      .catch((error) => {
-        console.error("Keycloak initialization failed", error);
-      });
-  }, []);
-
-  if (!keycloakInitialized) {
-    return <div>Loading...</div>;
-  }
-
   return (
     <BrowserRouter basename="/analytics">
       <Provider store={store}>
@@ -40,7 +23,6 @@ const AppWrapper = () => {
     </BrowserRouter>
   );
 };
-
 
 async function init() {
   await fetch(window.__analytics__.appUrl + "/services.json")

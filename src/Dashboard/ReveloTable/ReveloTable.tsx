@@ -1,8 +1,9 @@
 import React, { useState } from "react";
-import { List, Typography, Table } from "antd";
+import { Table, Row, Col, Card } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import divisionData from "../division.json"; // Importing division.json
-import data from "../data.json"; // Importing data.json
+import Jurisdictions from "../Jurisdiction/Jurisdiction";
+import divisionData from "../division.json";
+import data from "../data.json";
 
 const ReveloTable: React.FC = () => {
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
@@ -24,157 +25,194 @@ const ReveloTable: React.FC = () => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
   };
 
-  const talukas =
-    selectedDistrict &&
-    Array.from(
-      new Set(
-        data.features
-          .filter((feature) => feature.properties.district === selectedDistrict)
-          .map((feature) => feature.properties.taluka)
-      )
-    );
+  const summarizedData = (() => {
+    let filteredData = [];
 
-  const filteredFeatures =
-    selectedTaluka &&
-    data.features.filter((feature) => feature.properties.taluka === selectedTaluka);
+    if (selectedTaluka) {
+      filteredData = data.features.filter(
+        (feature) => feature.properties.taluka === selectedTaluka
+      ).map((feature) => ({
+        key: feature.properties.taluka,
+        taluka: feature.properties.taluka,
+        district: feature.properties.district,
+        division: selectedDivision,
+        worksCount: 1,
+        worksGeotagged: feature.geometry ? 1 : 0,
+        worksStarted: feature.properties.workstartdate ? 1 : 0,
+        worksCompleted: feature.properties.wocompletiondate ? 1 : 0,
+        totalWoAmount: feature.properties.woamount || 0,
+        physicaltargetarea: feature.properties.physicaltargetarea || 0,
+      }));
+    } else if (selectedDistrict) {
+      const talukas = Array.from(
+        new Set(
+          data.features
+            .filter((feature) => feature.properties.district === selectedDistrict)
+            .map((feature) => feature.properties.taluka)
+        )
+      );
 
-  const columns: ColumnsType<any> = [
-    { title: "गट क्रमांक", dataIndex: "gatnumber", key: "gatnumber", width: 150 },
-    { title: "टप्प्यानुसार बिलाची एकूण किंमत (रु.)", dataIndex: "wocompletioncost", key: "wocompletioncost", width: 150},
-    { title: "अंदाजे किंमत", dataIndex: "estimatedcost", key: "estimatedcost", width: 150 },
-    { title: "आवश्यक रक्कम (अंदाजे खर्चापेक्षा कमी)", dataIndex: "amountrequired", key: "amountrequired", width: 150 },
-    { title: "काम सुरु झाल्याचा दिनांक", dataIndex: "workstartdate", key: "workstartdate", width: 150 },
-    { title: "काम संपल्याचा दिनांक", dataIndex: "wocompletiondate", key: "wocompletiondate", width: 150 },
-    { title: "जिओटॅग केलेले आहे?", dataIndex: "isGeotagged", key: "isGeotagged", width: 120, render: (isGeotagged) => (isGeotagged ? "Yes" : "No") }
+      filteredData = talukas.map((taluka) => {
+        const talukaFeatures = data.features.filter(
+          (feature) => feature.properties.taluka === taluka
+        );
+        return {
+          key: taluka,
+          taluka,
+          district: selectedDistrict,
+          division: selectedDivision,
+          worksCount: talukaFeatures.length,
+          worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
+          worksStarted: talukaFeatures.filter((feature) => feature.properties.workstartdate).length,
+          worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate).length,
+          totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
+          physicaltargetarea: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.physicaltargetarea || 0), 0),
+        };
+      });
+    } else if (selectedDivision) {
+      const districts = divisionData[selectedDivision]?.districts || [];
+
+      filteredData = districts.map((district) => {
+        const districtFeatures = data.features.filter(
+          (feature) => feature.properties.district === district
+        );
+        return {
+          key: district,
+          division: selectedDivision,
+          district,
+          worksCount: districtFeatures.length,
+          worksGeotagged: districtFeatures.filter((feature) => feature.geometry).length,
+          worksStarted: districtFeatures.filter((feature) => feature.properties.workstartdate).length,
+          worksCompleted: districtFeatures.filter((feature) => feature.properties.wocompletiondate).length,
+          totalWoAmount: districtFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
+          physicaltargetarea: districtFeatures.reduce((sum, feature) => sum + (feature.properties.physicaltargetarea || 0), 0),
+        };
+      });
+    }
+
+    return filteredData;
+  })();
+
+  const summaryColumns: ColumnsType<any> = [
+    {
+      title: "Division",
+      dataIndex: "division",
+      key: "division",
+      width: "110px"
+    },
+    {
+      title: "District",
+      dataIndex: "district",
+      key: "district",
+      width: "110px"
+    },
+    ...(selectedDistrict
+      ? [
+          {
+            title: "Taluka",
+            dataIndex: "taluka",
+            key: "taluka",
+            width: "110px"
+          },
+        ]
+      : []),
+    {
+      title: "Works Count",
+      dataIndex: "worksCount",
+      key: "worksCount",
+      width: "110px"
+    },
+    {
+      title: "Works Geotagged",
+      dataIndex: "worksGeotagged",
+      key: "worksGeotagged",
+      width: "110px"
+    },
+    {
+      title: "Works Started",
+      dataIndex: "worksStarted",
+      key: "worksStarted",
+      width: "110px"
+    },
+    {
+      title: "Works Completed",
+      dataIndex: "worksCompleted",
+      key: "worksCompleted",
+      width: "110px"
+    },
+    {
+      title: "Total Work Order Amount",
+      dataIndex: "totalWoAmount",
+      key: "totalWoAmount",
+      width: "110px"
+    },
+    {
+      title: "Physical Target Area",
+      dataIndex: "physicaltargetarea",
+      key: "physicaltargetarea",
+      width: "110px"
+    },
   ];
 
-  const tableData =
-    filteredFeatures?.map((feature, index) => ({
-      key: index,
-      gatnumber: feature.properties.gatnumber,
-      estimatedcost: feature.properties.estimatedcost,
-      wocompletioncost: feature.properties.wocompletioncost,
-      amountrequired: feature.properties.amountrequired,
-      workstartdate: feature.properties.workstartdate,
-      wocompletiondate: feature.properties.wocompletiondate,
-      isGeotagged: feature.geometry ? true : false,  // Check if geometry is null or not
-    })) || [];
-
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
-      {/* Sidebar: Fixed on the left */}
-      <div
-        style={{
-          width: "770px",
-          overflowY: "auto",
-          font: "10px",
-          backgroundColor: "#f8f9fa",
-          borderRight: "1px solid #ddd",
-          padding: "10px",
-          position: "fixed",
-          top: 0,
-          left: 0,
-          bottom: 0,
-        }}
-      >
-        <Typography.Title level={4}>Division Wise Work Data</Typography.Title>
-        <div style={{ display: "flex", justifyContent: "space-between" }}>
-          <div style={{ width: "30%" }}>
-            <Typography.Title level={5}>Divisions</Typography.Title>
-            <List
-              bordered
-              dataSource={Object.keys(divisionData)}
-              renderItem={(division) => (
-                <List.Item
-                  style={{
-                    backgroundColor: selectedDivision === division ? "#dfe6e9" : "white",
-                    cursor: "pointer",
-                  }}
-                  onClick={() => handleDivisionClick(division)}
-                >
-                  <Typography.Text>{division}</Typography.Text>
-                </List.Item>
-              )}
-            />
-          </div>
-
-          <div style={{ width: "30%" }}>
-            <Typography.Title level={5}>Districts</Typography.Title>
-            {selectedDivision ? (
-              <List
-                bordered
-                dataSource={divisionData[selectedDivision].districts}
-                renderItem={(district) => (
-                  <List.Item
-                    style={{
-                      backgroundColor: selectedDistrict === district ? "#dfe6e9" : "white",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => handleDistrictClick(district)}
-                  >
-                    <Typography.Text>{district}</Typography.Text>
-                  </List.Item>
-                )}
-              />
-            ) : (
-              <Typography.Text>Select a Division to see Districts</Typography.Text>
-            )}
-          </div>
-
-          <div style={{ width: "30%" }}>
-            <Typography.Title level={5}>Talukas</Typography.Title>
-            {selectedDistrict ? (
-              <List
-                bordered
-                dataSource={talukas}
-                renderItem={(taluka) => (
-                  <List.Item
-                    style={{
-                      backgroundColor: selectedTaluka === taluka ? "#dfe6e9" : "white",
-                      cursor: "pointer",
-                    }}
-                    onClick={() => handleTalukaClick(taluka)}
-                  >
-                    <Typography.Text>{taluka}</Typography.Text>
-                  </List.Item>
-                )}
-              />
-            ) : (
-              <Typography.Text>Select a District to see Talukas</Typography.Text>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content: Work Properties Table */}
-      <div
-        style={{
-          marginLeft: "800px",
-          flex: 1,
-          padding: "10px",
-          overflowY: "auto"
-        }}
-      >
-        {selectedTaluka ? (
-          <div>
-            <Typography.Title level={5} style={{marginTop: "-10px"}}>Works: {selectedTaluka}</Typography.Title>
+    <Card>
+      <Row gutter={[16, 16]}>
+        <Col span={9}>
+          <Jurisdictions
+            title="Divisions"
+            data={Object.keys(divisionData)}
+            selectedItem={selectedDivision}
+            onItemClick={handleDivisionClick}
+            placeholder="No divisions available"
+          />
+          <Jurisdictions
+            title="Districts"
+            data={
+              selectedDivision
+                ? divisionData[selectedDivision].districts
+                : []
+            }
+            selectedItem={selectedDistrict}
+            onItemClick={handleDistrictClick}
+            placeholder="Select a Division to see Districts"
+          />
+          <Jurisdictions
+            title="Talukas"
+            data={
+              selectedDistrict
+                ? Array.from(
+                    new Set(
+                      data.features
+                        .filter(
+                          (feature) =>
+                            feature.properties.district === selectedDistrict
+                        )
+                        .map((feature) => feature.properties.taluka)
+                    )
+                  )
+                : []
+            }
+            selectedItem={selectedTaluka}
+            onItemClick={handleTalukaClick}
+            placeholder="Select a District to see Talukas"
+          />
+        </Col>
+        <Col span={15}>
+          <Card>
             <Table
-              columns={columns}
-              dataSource={tableData}
+              columns={summaryColumns}
+              dataSource={summarizedData}
               pagination={{
-                pageSize: 8, // Adjust the number of rows per page
-                showSizeChanger: true, // Allows the user to change the page size
-                pageSizeOptions: ["10", "20", "50"], // Provide different page size options
-                total: tableData.length, // Show the total number of items
+                pageSize: 5,
+                showSizeChanger: true,
+                pageSizeOptions: ["5", "10", "20"],
+                total: summarizedData.length,
               }}
-              style={{ width: "100%" }}
             />
-          </div>
-        ) : (
-          <Typography.Text>Select a Taluka to see Work Properties</Typography.Text>
-        )}
-      </div>
-    </div>
+          </Card>
+        </Col>
+      </Row>
+    </Card>
   );
 };
 

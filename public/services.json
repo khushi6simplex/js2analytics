@@ -1,7 +1,7 @@
 {
     "serverUrl": "/reveloadmin35/revelo",
-    "securityUrl": "http://localhost:8081/auth",
+    "securityUrl": "http://103.249.98.177:1001/auth",
     "logoutUrl": "/reveloadmin35/revelo/access/logout",
     "baseUrl": "/analytics",
-    "dataUrl": "/reveloadmin35/revelo/conceptmodels/js2surveycm/entities/work/data?format=geojson&source=remote&targetArtifact=original"
+    "dataUrl": "http://103.249.98.177:1000/reveloadmin35/revelo/conceptmodels/js2surveycm/entities/work/data?format=geojson&source=remote&targetArtifact=original"
 }
