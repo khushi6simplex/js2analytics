@@ -1,3 +1,19 @@
 /* :where(.css-dev-only-do-not-override-1kf000u).ant-tabs-left >.ant-tabs-nav .ant-tabs-tab+.ant-tabs-tab, :where(.css-dev-only-do-not-override-1kf000u).ant-tabs-right >.ant-tabs-nav .ant-tabs-tab+.ant-tabs-tab, :where(.css-dev-only-do-not-override-1kf000u).ant-tabs-left >div>.ant-tabs-nav .ant-tabs-tab+.ant-tabs-tab, :where(.css-dev-only-do-not-override-1kf000u).ant-tabs-right >div>.ant-tabs-nav .ant-tabs-tab+.ant-tabs-tab {
     margin: 0px 0px 0px -25px;
 } */
+
+.ant-table
+  .ant-table-container
+  .ant-table-content
+  table
+  thead.ant-table-thead
+  .ant-table-cell {
+  /* background-color: rgb(248, 252, 248); */
+  vertical-align: top;
+  padding-bottom: auto;
+}
+
+:where(.css-dev-only-do-not-override-1kf000u).ant-card .ant-card-body {
+    padding: 7px;
+    border-radius: 0 0 8px 8px;
+}

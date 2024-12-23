@@ -50,7 +50,7 @@ const App = () => {
 
   return (
     <>
-      <Space direction="vertical" style={{ width: "100%" }} size={[0, 48]}>
+      <Space direction="vertical" style={{ paddingTop:"6vh"}} size={[0, 48]}>
         <Layout style={layoutStyle}>
           <Content style={contentStyle}>
             <Dashboard />
