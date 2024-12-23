@@ -84,13 +84,13 @@ const Dashboard = () => {
         <Flex vertical justify="center" >
           {/* "Reports" Text on Left */}
           <Flex style={{marginTop: "7px"}}>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "0vw"}}>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "-1vw"}}>
             Reports
           </Typography.Text>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "8vw"}}>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "8.5vw"}}>
             Jurisdictions
           </Typography.Text>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "24vw"}}>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "23vw"}}>
             Report Output
           </Typography.Text>
           </Flex>

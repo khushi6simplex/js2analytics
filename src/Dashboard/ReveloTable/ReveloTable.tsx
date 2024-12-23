@@ -147,7 +147,7 @@ const ReveloTable: React.FC = () => {
   return (
     <Flex gap={50}>
       <Row gutter={[17, 17]}>
-        <Col span={8}>
+        <Col span={8.1}>
           <Jurisdictions
             title="Divisions"
             data={Object.keys(divisionData)}

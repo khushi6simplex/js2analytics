@@ -8,7 +8,7 @@ const WorkTable: React.FC = () => {
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(6);
+  const [pageSize, setPageSize] = useState<number>(5);
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
@@ -111,7 +111,7 @@ const WorkTable: React.FC = () => {
   return (
     <Flex  gap={50}>
       <Row gutter={[17, 17]} >
-        <Col span={8} >
+        <Col span={8.1} >
           <Jurisdictions
             title="Divisions"
             data={Object.keys(divisionData)}
