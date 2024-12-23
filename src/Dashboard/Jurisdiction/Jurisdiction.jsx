@@ -3,13 +3,13 @@ import { List, Typography, Space } from "antd";
 
 const Jurisdiction = ({ title, data, selectedItem, onItemClick, placeholder }) => {
   return (
-    <Space direction="vertical">
-      <Typography.Title level={5}>{title}</Typography.Title>
+    <Space direction="vertical" style={{padding: "5px"}}>
+      <Typography.Text style={{fontSize:"18px",fontWeight:"400"}}>{title}</Typography.Text>
       {data && data.length > 0 ? (
         <List
           bordered
           dataSource={data}
-          style={{ width: "180px" }}
+          style={{ width: "180px"}}
           renderItem={(item) => (
             <List.Item
               style={{

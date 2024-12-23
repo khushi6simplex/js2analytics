@@ -5,21 +5,37 @@ import logo from "../../assets/gov.png";
 import header from "../../assets/header.png";
 import user from "../../assets/user.png";
 import mrsacLogo from "../../assets/mrsacLogo.png";
+import toolsgrid from "../../assets/toolsgrid.png";
+import userManager from "../../assets/userManager.png";
 
 const Header = () => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isGridOpen, setIsGridOpen] = useState(false);
 
   const toggleMenu = () => {
     setIsMenuOpen((prev) => !prev);
   };
 
+  const gridMenu = () => {
+    setIsGridOpen((prev) => !prev);
+  }
+
   const doLogout = () => {
     const logoutUrl = window.__analytics__.logoutUrl;
     axios.post(logoutUrl, "").finally(() => {
-      axios.post(process.env.PUBLIC_URL + "/logout").finally(() => {
-        const newLocation = process.env.PUBLIC_URL;
+      axios.post(window.__analytics__ + "/logout").finally(() => {
+        const newLocation = window.__analytics__;
         window.location.href = newLocation;
-        window.location.reload()
+      });
+    });
+  };
+
+  const openJS2 = () => {
+    const js2Url = window.__analytics__.js2Url;
+    axios.post("http://180.149.240.169:8080/js2/").finally(() => {
+      axios.post("http://180.149.240.169:8080/js2/").finally(() => {
+        const newLocation = "http://180.149.240.169:8080/js2/"
+        window.location.href = newLocation;
       });
     });
   };
@@ -54,7 +70,20 @@ const Header = () => {
       </div>
 
       {/* Profile */}
-      <div style={{ }}>
+      <div style={{justifyContent: "space-between" }}>
+      <img
+          src={toolsgrid}
+          alt="logo"
+          style={{
+            height: "50px",
+            width: "50px",
+            objectFit: "cover",
+            cursor: "pointer",
+            marginRight: "10px",
+          }}
+          onClick={gridMenu}
+        />
+
         <img
           src={user}
           alt="Profile"
@@ -85,8 +114,8 @@ const Header = () => {
           <div
             style={{
               position: "absolute",
-              top: "50px",
-              right: 0,
+              top: "70px",
+              right: "40px",
               background: "white",
               border: "1px solid #ccc",
               borderRadius: "4px",
@@ -121,6 +150,64 @@ const Header = () => {
               >
                 Logout
               </li>
+            </ul>
+          </div>
+        )}
+
+        {isGridOpen && (
+          <div
+            style={{
+              position: "absolute",
+              top: "70px",
+              right: "70px",
+              background: "white",
+              borderRadius: "4px",
+              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
+              width: "200px",
+            }}
+          >
+            <ul
+              style={{
+                display: "flex",
+                listStyleType: "none",
+                margin: 0,
+                padding: "10px",
+              }}
+            >
+              <div>
+              <img src={userManager} style={{
+                height: "70px",
+                width: "70px",
+                padding: "8px 12px",
+                  cursor: "pointer"
+                }}/>
+              <li
+                style={{
+                  padding: "0px 12px",
+                  cursor: "pointer"
+                }}
+              >
+                User Manager
+              </li>
+              </div>
+              <div>
+              <img src={logo} style={{
+                height: "70px",
+                width: "70px",
+                padding: "8px 12px",
+                  cursor: "pointer"
+                }}
+                onClick={openJS2}/>
+              <li
+                style={{
+                  padding: "0px 12px",
+                  cursor: "pointer",
+                }}
+                 onClick={openJS2}
+              >
+                Jalyukta Shivar 2.0
+              </li>
+              </div>
             </ul>
           </div>
         )}

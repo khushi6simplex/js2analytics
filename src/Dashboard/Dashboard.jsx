@@ -83,9 +83,17 @@ const Dashboard = () => {
         <Header />
         <Flex vertical justify="center" >
           {/* "Reports" Text on Left */}
-          {/* <Typography.Text style={{ fontSize: "20px", fontWeight: "600", left: "2vw" }}>
+          <Flex style={{marginTop: "20px", marginBottom: "20px"}}>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "25px"}}>
             Reports
-          </Typography.Text> */}
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "160px"}}>
+            Jurisdiction
+          </Typography.Text>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "510px"}}>
+            Report Output
+          </Typography.Text>
+          </Flex>
 
           {/* Selected Tab Label at Center */}
           {/* {selectedTabLabel && (
@@ -96,7 +104,7 @@ const Dashboard = () => {
 
           {/* <Divider /> */}
           <Tabs
-            style={{height:"88vh"}}
+            style={{height:"180vh"}}
             items={items}
             onChange={onChange}
             tabBarGutter={5}

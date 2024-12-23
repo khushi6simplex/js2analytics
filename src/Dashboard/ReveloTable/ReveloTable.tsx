@@ -1,5 +1,5 @@
-import React, { useState } from "react";
-import { Table, Row, Col, Card } from "antd";
+import React, { useState, useEffect } from "react";
+import { Table, Row, Col, Flex } from "antd";
 import type { ColumnsType } from "antd/es/table";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
@@ -9,41 +9,65 @@ const ReveloTable: React.FC = () => {
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedTaluka, setSelectedTaluka] = useState<string | null>(null);
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [pageSize, setPageSize] = useState<number>(6);
+
+  useEffect(() => {
+    const updatePageSize = () => {
+      const availableHeight = window.innerHeight - 300; // Adjust as needed
+      const rowHeight = 50; // Approx row height
+      setPageSize(Math.floor(availableHeight / rowHeight));
+    };
+
+    updatePageSize();
+    window.addEventListener("resize", updatePageSize);
+    return () => window.removeEventListener("resize", updatePageSize);
+  }, []);
 
   const handleDivisionClick = (division: string) => {
-    setSelectedDivision(selectedDivision === division ? null : division);
+    setSelectedDivision(division === selectedDivision ? null : division);
     setSelectedDistrict(null);
     setSelectedTaluka(null);
   };
 
   const handleDistrictClick = (district: string) => {
-    setSelectedDistrict(selectedDistrict === district ? null : district);
+    setSelectedDistrict(district === selectedDistrict ? null : district);
     setSelectedTaluka(null);
   };
 
   const handleTalukaClick = (taluka: string) => {
-    setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
+    setSelectedTaluka(taluka === selectedTaluka ? null : taluka);
   };
 
-  const summarizedData = (() => {
-    let filteredData = [];
-
+  const getSummarizedData = () => {
     if (selectedTaluka) {
-      filteredData = data.features.filter(
-        (feature) => feature.properties.taluka === selectedTaluka
-      ).map((feature) => ({
-        key: feature.properties.taluka,
-        taluka: feature.properties.taluka,
-        district: feature.properties.district,
-        division: selectedDivision,
-        worksCount: 1,
-        worksGeotagged: feature.geometry ? 1 : 0,
-        worksStarted: feature.properties.workstartdate ? 1 : 0,
-        worksCompleted: feature.properties.wocompletiondate ? 1 : 0,
-        totalWoAmount: feature.properties.woamount || 0,
-        physicaltargetarea: feature.properties.physicaltargetarea || 0,
-      }));
-    } else if (selectedDistrict) {
+      const talukaFeatures = data.features.filter(
+        (feature) =>
+          feature.properties.taluka === selectedTaluka &&
+          feature.properties.district === selectedDistrict
+      );
+  
+      // Summarize data for the selected taluka
+      return [
+        {
+          key: selectedTaluka,
+          taluka: selectedTaluka,
+          district: selectedDistrict,
+          division: selectedDivision,
+          worksCount: talukaFeatures.length,
+          worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
+          worksStarted: talukaFeatures.filter((feature) => feature.properties.workstartdate).length,
+          worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate).length,
+          totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
+          physicalTargetArea: talukaFeatures.reduce(
+            (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
+            0
+          ),
+        },
+      ];
+    }
+  
+    if (selectedDistrict && !selectedTaluka) {
       const talukas = Array.from(
         new Set(
           data.features
@@ -51,10 +75,11 @@ const ReveloTable: React.FC = () => {
             .map((feature) => feature.properties.taluka)
         )
       );
-
-      filteredData = talukas.map((taluka) => {
+      return talukas.map((taluka) => {
         const talukaFeatures = data.features.filter(
-          (feature) => feature.properties.taluka === taluka
+          (feature) =>
+            feature.properties.taluka === taluka &&
+            feature.properties.district === selectedDistrict
         );
         return {
           key: taluka,
@@ -66,18 +91,28 @@ const ReveloTable: React.FC = () => {
           worksStarted: talukaFeatures.filter((feature) => feature.properties.workstartdate).length,
           worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate).length,
           totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
-          physicaltargetarea: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.physicaltargetarea || 0), 0),
+          physicalTargetArea: talukaFeatures.reduce(
+            (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
+            0
+          ),
         };
       });
-    } else if (selectedDivision) {
+    }
+  
+    if (selectedDivision && !selectedDistrict && !selectedTaluka) {
       const districts = divisionData[selectedDivision]?.districts || [];
-
-      filteredData = districts.map((district) => {
+      return districts.map((district) => {
         const districtFeatures = data.features.filter(
           (feature) => feature.properties.district === district
         );
+         // Get unique talukas in this district
+    const uniqueTalukas = Array.from(
+      new Set(districtFeatures.map((feature) => feature.properties.taluka))
+    );
+
         return {
           key: district,
+          taluka: uniqueTalukas.length,
           division: selectedDivision,
           district,
           worksCount: districtFeatures.length,
@@ -85,78 +120,33 @@ const ReveloTable: React.FC = () => {
           worksStarted: districtFeatures.filter((feature) => feature.properties.workstartdate).length,
           worksCompleted: districtFeatures.filter((feature) => feature.properties.wocompletiondate).length,
           totalWoAmount: districtFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
-          physicaltargetarea: districtFeatures.reduce((sum, feature) => sum + (feature.properties.physicaltargetarea || 0), 0),
+          physicalTargetArea: districtFeatures.reduce(
+            (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
+            0
+          ),
         };
       });
     }
+  
+    return [];
+  };
+  
 
-    return filteredData;
-  })();
-
-  const summaryColumns: ColumnsType<any> = [
-    {
-      title: "Division",
-      dataIndex: "division",
-      key: "division",
-      width: "110px"
-    },
-    {
-      title: "District",
-      dataIndex: "district",
-      key: "district",
-      width: "110px"
-    },
-    ...(selectedDistrict
-      ? [
-          {
-            title: "Taluka",
-            dataIndex: "taluka",
-            key: "taluka",
-            width: "110px"
-          },
-        ]
-      : []),
-    {
-      title: "Works Count",
-      dataIndex: "worksCount",
-      key: "worksCount",
-      width: "110px"
-    },
-    {
-      title: "Works Geotagged",
-      dataIndex: "worksGeotagged",
-      key: "worksGeotagged",
-      width: "110px"
-    },
-    {
-      title: "Works Started",
-      dataIndex: "worksStarted",
-      key: "worksStarted",
-      width: "110px"
-    },
-    {
-      title: "Works Completed",
-      dataIndex: "worksCompleted",
-      key: "worksCompleted",
-      width: "110px"
-    },
-    {
-      title: "Total Work Order Amount",
-      dataIndex: "totalWoAmount",
-      key: "totalWoAmount",
-      width: "110px"
-    },
-    {
-      title: "Physical Target Area",
-      dataIndex: "physicaltargetarea",
-      key: "physicaltargetarea",
-      width: "110px"
-    },
+  const columns: ColumnsType<any> = [
+    { title: "Division", dataIndex: "division", key: "division", sorter: (a, b) => a.division.localeCompare(b.division),},
+    { title: "District", dataIndex: "district", key: "district", sorter: (a, b) => a.division.localeCompare(b.district),},
+    { title: "Taluka", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.division.localeCompare(b.taluka),},
+    { title: "Works Count", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount},
+    { title: "Works Geotagged", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged},
+    { title: "Works Started", dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted},
+    { title: "Works Completed", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted},
+    { title: "Total Work Order Amount", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount},
+    { title: "Physical Target Area", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea},
   ];
 
   return (
-    <Card>
-      <Row gutter={[16, 16]}>
+    <Flex gap={50}>
+      <Row gutter={[17, 17]}>
         <Col span={9}>
           <Jurisdictions
             title="Divisions"
@@ -167,11 +157,7 @@ const ReveloTable: React.FC = () => {
           />
           <Jurisdictions
             title="Districts"
-            data={
-              selectedDivision
-                ? divisionData[selectedDivision].districts
-                : []
-            }
+            data={selectedDivision ? divisionData[selectedDivision]?.districts || [] : []}
             selectedItem={selectedDistrict}
             onItemClick={handleDistrictClick}
             placeholder="Select a Division to see Districts"
@@ -183,10 +169,7 @@ const ReveloTable: React.FC = () => {
                 ? Array.from(
                     new Set(
                       data.features
-                        .filter(
-                          (feature) =>
-                            feature.properties.district === selectedDistrict
-                        )
+                        .filter((feature) => feature.properties.district === selectedDistrict)
                         .map((feature) => feature.properties.taluka)
                     )
                   )
@@ -198,21 +181,21 @@ const ReveloTable: React.FC = () => {
           />
         </Col>
         <Col span={15}>
-          <Card>
-            <Table
-              columns={summaryColumns}
-              dataSource={summarizedData}
-              pagination={{
-                pageSize: 5,
-                showSizeChanger: true,
-                pageSizeOptions: ["5", "10", "20"],
-                total: summarizedData.length,
-              }}
-            />
-          </Card>
+          <Table
+            columns={columns}
+            dataSource={getSummarizedData()}
+            pagination={{
+              pageSize: pageSize,
+              showSizeChanger: false,
+              onChange: (page, pageSize) => {
+                setCurrentPage(page);
+                setPageSize(pageSize);
+              },
+            }}
+          />
         </Col>
       </Row>
-    </Card>
+    </Flex>
   );
 };
 
