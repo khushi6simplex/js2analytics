@@ -111,7 +111,7 @@ const WorkTable: React.FC = () => {
   return (
     <Flex  gap={50}>
       <Row gutter={[17, 17]} >
-        <Col span={9} >
+        <Col span={8} >
           <Jurisdictions
             title="Divisions"
             data={Object.keys(divisionData)}
@@ -128,7 +128,7 @@ const WorkTable: React.FC = () => {
             }
             selectedItem={selectedDistrict}
             onItemClick={handleDistrictClick}
-            placeholder="Select a Division to see Districts"
+            placeholder="Select a Division"
           />
           <Jurisdictions
             title="Talukas"
@@ -148,10 +148,10 @@ const WorkTable: React.FC = () => {
             }
             selectedItem={selectedTaluka}
             onItemClick={handleTalukaClick}
-            placeholder="Select a District to see Talukas"
+            placeholder="Select a District"
           />
         </Col>
-        <Col span={15} >
+        <Col span={16} >
        
        <Table
          columns={columns}

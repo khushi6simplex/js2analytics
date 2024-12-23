@@ -10,7 +10,7 @@ const ReveloTable: React.FC = () => {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedTaluka, setSelectedTaluka] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(6);
+    const [pageSize, setPageSize] = useState<number>(5);
 
   useEffect(() => {
     const updatePageSize = () => {
@@ -147,7 +147,7 @@ const ReveloTable: React.FC = () => {
   return (
     <Flex gap={50}>
       <Row gutter={[17, 17]}>
-        <Col span={9}>
+        <Col span={8}>
           <Jurisdictions
             title="Divisions"
             data={Object.keys(divisionData)}
@@ -160,7 +160,7 @@ const ReveloTable: React.FC = () => {
             data={selectedDivision ? divisionData[selectedDivision]?.districts || [] : []}
             selectedItem={selectedDistrict}
             onItemClick={handleDistrictClick}
-            placeholder="Select a Division to see Districts"
+            placeholder="Select a Division"
           />
           <Jurisdictions
             title="Talukas"
@@ -177,20 +177,16 @@ const ReveloTable: React.FC = () => {
             }
             selectedItem={selectedTaluka}
             onItemClick={handleTalukaClick}
-            placeholder="Select a District to see Talukas"
+            placeholder="Select a District"
           />
         </Col>
-        <Col span={15}>
+        <Col span={16}>
           <Table
             columns={columns}
             dataSource={getSummarizedData()}
             pagination={{
-              pageSize: pageSize,
+              pageSize: 5,
               showSizeChanger: false,
-              onChange: (page, pageSize) => {
-                setCurrentPage(page);
-                setPageSize(pageSize);
-              },
             }}
           />
         </Col>
