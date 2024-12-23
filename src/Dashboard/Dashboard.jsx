@@ -83,7 +83,7 @@ const Dashboard = () => {
         <Header />
         <Flex vertical justify="center" >
           {/* "Reports" Text on Left */}
-          <Flex style={{marginTop: "20px", marginBottom: "20px"}}>
+          <Flex style={{marginTop: "20px"}}>
           <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "25px"}}>
             Reports
           </Typography.Text>
@@ -102,7 +102,7 @@ const Dashboard = () => {
             </Typography.Text>
           )} */}
 
-          {/* <Divider /> */}
+          <Divider />
           <Tabs
             style={{height:"180vh"}}
             items={items}

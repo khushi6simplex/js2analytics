@@ -1,7 +1,7 @@
 import Keycloak from "keycloak-js";
 
 const keycloak = new Keycloak({
-  url: "http://103.249.98.177:1001/auth",
+  url: "http://180.149.240.169:8081/auth",
   realm: "jalyuktashivar",
   clientId: "revelo35",
 });
