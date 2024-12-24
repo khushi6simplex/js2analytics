@@ -79,18 +79,18 @@ const Dashboard = () => {
 
   return (
     <>
-      <Card bordered={false} >
+      <Card bordered={false}>
         <Header />
         <Flex vertical justify="center" >
           {/* "Reports" Text on Left */}
-          <Flex style={{marginTop: "7px"}}>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "-1vw"}}>
+          <Flex style={{marginTop: "20px"}}>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "25px"}}>
             Reports
           </Typography.Text>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "8.5vw"}}>
-            Jurisdictions
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "160px"}}>
+            Jurisdiction
           </Typography.Text>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "23vw"}}>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "510px"}}>
             Report Output
           </Typography.Text>
           </Flex>
@@ -104,10 +104,10 @@ const Dashboard = () => {
 
           <Divider />
           <Tabs
-            style={{height:"75vh", marginLeft: "-2vw"}}
+            tabBarStyle={{height:"70vh",marginLeft:"-2vw"}}
             items={items}
             onChange={onChange}
-            tabBarGutter={5}
+            tabBarGutter={4}
             tabPosition="left"
             size="small"
           />
