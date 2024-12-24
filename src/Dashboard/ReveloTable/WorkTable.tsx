@@ -1,14 +1,16 @@
 import React, { useState } from "react";
-import { Table, Row, Col, Card, Flex } from "antd";
+import { Table, Row, Col, Card, Flex,Tooltip} from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import WorkData from "../work.json";
+import  "../../Dashboard/Dashboard.css";
+
 const WorkTable: React.FC = () => {
   const [selectedDivision, setSelectedDivision] = useState<any>();
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(5);
+  const [pageSize, setPageSize] = useState<number>(7);
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
@@ -35,7 +37,7 @@ const WorkTable: React.FC = () => {
       title: "#",
       dataIndex: "index",
       key: "index",
-      width: "80px",
+      width: "3%",
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1, 
     },
@@ -43,56 +45,93 @@ const WorkTable: React.FC = () => {
       title: "Division",
       dataIndex: "division",
       key: "division",
-      width: "180px",
-      render: () => selectedDivision || "N/A", 
+      width: "10%",
+      // render: () => selectedDivision || "N/A", 
+      // ellipsis: true,
+    //   render: (text) => (
+    //    <Tooltip placement="topLeft" title={text}>
+    //      {text}
+    //    </Tooltip>
+    //  ),
     },
     {
       title: "District",
       dataIndex: "district",
       key: "district",
-      width: "180px",
+      width: "10%",
       sorter: (a, b) => a.district.localeCompare(b.district),
+      // sortDirections: 'ascend'
+      defaultSortOrder : 'ascend',
+      // ellipsis: true,
+    //   render: (text) => (
+    //    <Tooltip placement="topLeft" title={text}>
+    //      {text}
+    //    </Tooltip>
+    //  ),
     },
     {
       title: "Taluka",
       dataIndex: "taluka",
       key: "taluka",
-       width: "180px",
+      width: "10%",
        sorter: (a, b) => a.district.localeCompare(b.taluka),
     },
     {
       title: "Department",
       dataIndex: "depname",
       key: "depname",
-       width: "180px",
+      width: "10%",
        sorter: (a, b) => a.district.localeCompare(b.depname),
+       ellipsis: true,
+      //  render: (text) => (
+      //   <Tooltip placement="topLeft" title={text}>
+      //     {text}
+      //   </Tooltip>
+      // ),
     },
+    
     {
       title: "Work Type",
       dataIndex: "worktype",
       key: "worktype",
-       width: "180px",
+      width: "10%",
        sorter: (a, b) => a.district.localeCompare(b.worktype),
+       ellipsis: true,
+      // render: (text) => (
+      //   <Tooltip placement="topLeft" title={text}>
+      //     {text}
+      //   </Tooltip>
+      // ),
     },
     {
       title: "Estimated Cost",
       dataIndex: "estimatedcost",
       key: "estimatedcost",
-       width: "180px",
+      width: "10%",
        sorter: (a, b) => a.estimatedcost - b.estimatedcost,
+       render: (text) => (
+        <p  title={text}>
+          {'₹'+parseFloat(text).toFixed(2)}
+        </p>
+      ),
     },
     {
       title: "Physical Target Area",
       dataIndex: "physicaltargetarea",
       key: "physicaltargetarea",
-       width: "180px",
+      width: "10%",
        sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
+       render: (text) => (
+        <p  title={text}>
+          {text+"sq.m"}
+        </p>
+      ),
     },
     {
       title: "Expected Water Storage",
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
-      width: "180px",
+      width: "10%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
     },
   ];
@@ -109,9 +148,11 @@ const WorkTable: React.FC = () => {
       expectedwaterstorage: feature.properties.expectedwaterstorage,
     })) || [];
   return (
-    <Flex  gap={50}>
-      <Row gutter={[17, 17]} >
+    <Flex  gap={50} wrap="nowrap" >
+      <Row gutter={[17, 17]} style={{flexWrap: "nowrap"}}>
         <Col span={8.1} >
+        <Row gutter={[10, 10]} style={{flexWrap: "nowrap"}}>
+          <Col span={8}>
           <Jurisdictions
             title="Divisions"
             data={Object.keys(divisionData)}
@@ -119,6 +160,8 @@ const WorkTable: React.FC = () => {
             onItemClick={handleDivisionClick}
             placeholder="No divisions available"
           />
+          </Col>
+          <Col span={8}>
           <Jurisdictions
             title="Districts"
             data={
@@ -130,6 +173,8 @@ const WorkTable: React.FC = () => {
             onItemClick={handleDistrictClick}
             placeholder="Select a Division"
           />
+          </Col>
+          <Col span={8}>
           <Jurisdictions
             title="Talukas"
             data={
@@ -150,6 +195,10 @@ const WorkTable: React.FC = () => {
             onItemClick={handleTalukaClick}
             placeholder="Select a District"
           />
+          </Col>
+
+        </Row>
+        
         </Col>
         <Col span={16} >
        
@@ -157,16 +206,19 @@ const WorkTable: React.FC = () => {
          columns={columns}
          style={{alignItems:"top"}}
          dataSource={ selectedDivision ? tableData : []}
-         size="large"
+         size="small"
+         tableLayout="fixed"
          pagination={{
            pageSize: pageSize,
            showSizeChanger: false,
-           total: tableData.length,
+           total:0,
            onChange: (page, pageSize) => {
              setCurrentPage(page);
              setPageSize(pageSize);
            },
          }}
+         scroll={{ x: "100%" }}
+          bordered
        />
      </Col>
         

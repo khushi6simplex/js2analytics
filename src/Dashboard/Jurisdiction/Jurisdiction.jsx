@@ -2,22 +2,27 @@ import PropTypes from "prop-types";
 import { List, Typography, Space } from "antd";
 
 const Jurisdiction = ({ title, data, selectedItem, onItemClick, placeholder }) => {
+
+  const sortedData = data.slice().sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
+
+  console.log("sortedData", sortedData);
+
   return (
-    <Space direction="vertical" style={{width: "9vw"}}>
+    <Space direction="vertical" style={{width: "9vw",padding:"2px"}}>
       <Typography.Text style={{fontSize:"18px",fontWeight:"400"}}>{title}</Typography.Text>
-      {data && data.length > 0 ? (
+      {sortedData && sortedData.length > 0 ? (
         <List
-          bordered
-          dataSource={data}
-          style={{ width: "8.5vw"}}
+          // bordered
+          dataSource={sortedData}
+          style={{border:"1px solid #dfe6e9", borderRadius: "0px"}}
           renderItem={(item) => (
             <List.Item
               style={{
                 backgroundColor: selectedItem === item ? "#dfe6e9" : "white",
                 cursor: "pointer",
                 padding: "10px",
-                width: "8.35vw",
-                borderRadius: "8px"
+               
+                
               }}
               onClick={() => onItemClick(item)}
             >
