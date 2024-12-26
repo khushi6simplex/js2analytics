@@ -3,6 +3,7 @@ import { useState } from "react";
 import "./DashBoard.css";
 import ReveloTable from "./ReveloTable/ReveloTable";
 import WorkTable from "../Dashboard/ReveloTable/WorkTable";
+import DepartmentTable from "../Dashboard/ReveloTable/DepartmentTable";
 import Header from "./header/Header";
 import Overview from "./ReveloTable/Overview";
 
@@ -39,9 +40,9 @@ const Dashboard = () => {
       children: <WorkTable />,
     },  
     {
-      key: '4',
+      key: '3',
       label: 'Department Wise Work',
-      children: 'Comming Soon ...',
+      children: <DepartmentTable/>,
     },
     {
       key: '5',
