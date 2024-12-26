@@ -5,6 +5,7 @@ import cytoscape from "cytoscape";
 import "./DashBoard.css";
 import ReveloTable from "./ReveloTable/ReveloTable";
 import WorkTable from "../Dashboard/ReveloTable/WorkTable";
+import DepartmentTable from "../Dashboard/ReveloTable/DepartmentTable";
 import Header from "./header/Header";
 
 const Dashboard = () => {
@@ -38,7 +39,7 @@ const Dashboard = () => {
     {
       key: '3',
       label: 'Department Wise Work',
-      children: 'Comming Soon ...',
+      children: <DepartmentTable/>,
     },
     {
       key: '4',
