@@ -3,6 +3,7 @@ import { Table, Row, Col, Card, Flex,Tooltip} from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import WorkData from "../work.json";
+import dayjs from "dayjs";
 import  "../../Dashboard/Dashboard.css";
 
 const WorkTable: React.FC = () => {
@@ -56,34 +57,14 @@ const WorkTable: React.FC = () => {
     //    </Tooltip>
     //  ),
     },
-    {
-      title: "District",
-      dataIndex: "district",
-      key: "district",
-      width: "10%",
-      sorter: (a, b) => a.district.localeCompare(b.district),
-      // sortDirections: 'ascend'
-      defaultSortOrder : 'ascend',
-      // ellipsis: true,
-    //   render: (text) => (
-    //    <Tooltip placement="topLeft" title={text}>
-    //      {text}
-    //    </Tooltip>
-    //  ),
-    },
-    {
-      title: "Taluka",
-      dataIndex: "taluka",
-      key: "taluka",
-      width: "10%",
-       sorter: (a, b) => a.district.localeCompare(b.taluka),
-    },
+   
     {
       title: "Department",
       dataIndex: "deptName",
       key: "deptName",
-      width: "10%",
-       sorter: (a, b) => a.district.localeCompare(b.deptName),
+      width: "20%",
+      defaultSortOrder : 'ascend',
+       sorter: (a, b) => a.deptName.localeCompare(b.deptName),
        ellipsis: true,
       //  render: (text) => (
       //   <Tooltip placement="topLeft" title={text}>
@@ -93,12 +74,12 @@ const WorkTable: React.FC = () => {
     },
     
     {
-      title: "Work Type",
-      dataIndex: "worktype",
-      key: "worktype",
-      width: "10%",
-       sorter: (a, b) => a.district.localeCompare(b.worktype),
-       ellipsis: true,
+      title: "Admin Approved",
+      dataIndex: "adminapprovalno",
+      key: "adminapprovalno",
+      width: "12%",
+       sorter: (a, b) => a.adminapprovalno - b.adminapprovalno,
+      //  ellipsis: true,
       // render: (text) => (
       //   <Tooltip placement="topLeft" title={text}>
       //     {text}
@@ -106,49 +87,78 @@ const WorkTable: React.FC = () => {
       // ),
     },
     {
-      title: "Estimated Cost",
-      dataIndex: "estimatedcost",
-      key: "estimatedcost",
-      width: "10%",
-       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
-       render: (text) => (
-        <p  title={text}>
-          {'₹'+parseFloat(text).toFixed(2)}
-        </p>
-      ),
+      title: "Works Started",
+      dataIndex: "workstarted",
+      key: "workstarted",
+      width: "12%",
+      sorter: (a, b) => a.workstarted - b.workstarted,
+      // render: (text) => {
+      //   const date = dayjs(text);
+      //   const formattedDate = date.format("MMMM D, YYYY");
+      //   return (
+      //     <p title={formattedDate}>
+      //       {formattedDate}
+      //     </p>
+      //   );
+      // },
     },
     {
-      title: "Physical Target Area",
-      dataIndex: "physicaltargetarea",
-      key: "physicaltargetarea",
-      width: "10%",
-       sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
-       render: (text) => (
-        <p  title={text}>
-          {text+"sq.m"}
-        </p>
-      ),
+      title: "Works Completed",
+      dataIndex: "worksCompleted",
+      key: "worksCompleted",
+      width: "12%",
+       sorter: (a, b) => a.worksCompleted - b.worksCompleted,
+      //  render: (text) => (
+      //   <p  title={text}>
+      //     {text+"sq.m"}
+      //   </p>
+      // ),
     },
     {
-      title: "Expected Water Storage",
+      title: "Expected Water Storage (MLD)",
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
-      width: "10%",
+      width: "12%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
     },
+      {
+        title: "Estimated Cost",
+        dataIndex: "estimatedcost",
+        key: "estimatedcost",
+        width: "12%",
+         sorter: (a, b) => a.estimatedcost - b.estimatedcost,
+         render: (text) => (
+          <p  title={text}>
+            {'₹'+parseFloat(text).toFixed(2)}
+          </p>
+        ),
+    }
   ];
+
   const tableData =
     filteredFeatures.map((feature, index) => ({
       key: index,
       division: selectedDivision,
-      district: feature.properties.district,
-      taluka: feature.properties.taluka,
       deptName: feature.properties.deptName,
-      worktype: feature.properties.worktype,
-      estimatedcost: feature.properties.estimatedcost,
-      physicaltargetarea: feature.properties.physicaltargetarea,
-      expectedwaterstorage: feature.properties.expectedwaterstorage,
+      adminapprovalno:  WorkData.features.filter((f) => f.properties.adminapprovalno && f.properties.deptName === feature.properties.deptName).length,
+      workstarted: WorkData.features.filter((f) => f.properties.workstartdate && f.properties.deptName === feature.properties.deptName).length,
+      estimatedcost: WorkData.features.filter((f)=> f.properties.deptName === feature.properties.deptName).reduce((sum, feature) => sum + (feature.properties.estimatedcost || 0), 0),
+      worksCompleted: WorkData.features.filter((f) => f.properties.wocompletiondate > f.properties.workstartdate && f.properties.deptName === feature.properties.deptName).length,
+      expectedwaterstorage: WorkData.features.filter((f)=> f.properties.deptName === feature.properties.deptName).reduce((sum, feature) => sum + (feature.properties.expectedwaterstorage || 0), 0),
     })) || [];
+
+    console.log(tableData,"tableData")
+
+    const tableMap = new Map();
+
+    tableData.forEach((item) => {
+      console.log(item.division,"item.depname")
+      tableMap.set(item.deptName, item);
+      console.log(Array.from(tableMap.values()),"tableMap1")
+    });
+
+    console.log(tableMap,"tableMap")
+
   return (
     <Flex  gap={50} wrap="nowrap" >
       <Row gutter={[17, 17]} style={{flexWrap: "nowrap"}}>
@@ -207,7 +217,7 @@ const WorkTable: React.FC = () => {
        <Table
          columns={columns}
          style={{alignItems:"top"}}
-         dataSource={ selectedDivision ? tableData : []}
+         dataSource={ selectedDivision ? Array.from(tableMap.values()) : []}
          size="small"
          tableLayout="fixed"
          pagination={{
