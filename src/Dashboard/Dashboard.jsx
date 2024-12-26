@@ -40,7 +40,7 @@ const Dashboard = () => {
       children: <WorkTable />,
     },  
     {
-      key: '3',
+      key: '4',
       label: 'Department Wise Work',
       children: <DepartmentTable/>,
     },

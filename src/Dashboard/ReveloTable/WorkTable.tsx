@@ -80,7 +80,7 @@ const WorkTable: React.FC = () => {
       width: "10%",
       sorter: (a, b) => a.district.localeCompare(b.district),
       // sortDirections: 'ascend'
-      defaultSortOrder : 'ascend',
+      defaultSortOrder : 'ascend' as const,
       // ellipsis: true,
     //   render: (text) => (
     //    <Tooltip placement="topLeft" title={text}>

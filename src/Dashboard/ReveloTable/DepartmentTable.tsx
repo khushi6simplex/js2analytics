@@ -1,17 +1,34 @@
-import React, { useState } from "react";
+import React, { useState,useEffect} from "react";
 import { Table, Row, Col, Card, Flex,Tooltip} from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import WorkData from "../work.json";
-import dayjs from "dayjs";
+import { fetchGeoData } from "../Data/useGeoData";
 import  "../../Dashboard/Dashboard.css";
 
 const WorkTable: React.FC = () => {
   const [selectedDivision, setSelectedDivision] = useState<any>();
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
+  const [loading, setLoading] = useState<boolean>(true);
+   const [geoData, setGeoData] = useState<any[]>([]);
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
+
+    useEffect(() => {
+        const fetchData = async () => {
+          try {
+            setLoading(true); // Set loading to true while fetching
+            const data = await fetchGeoData();
+            setGeoData(data.features || []); // Ensure it's always an array
+          } catch (error) {
+            console.error("Error fetching Geoserver data", error);
+          } finally {
+            setLoading(false); // Set loading to false after fetching
+          }
+        };
+        fetchData();
+      }, []);
 
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(selectedDivision === division ? null : division);
@@ -26,7 +43,7 @@ const WorkTable: React.FC = () => {
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
   };
-  const filteredFeatures = WorkData.features.filter((feature) => {
+  const filteredFeatures = geoData.filter((feature) => {
     const { district, taluka } = feature.properties;
     const isInDivision =
       selectedDivision &&
@@ -63,7 +80,7 @@ const WorkTable: React.FC = () => {
       dataIndex: "deptName",
       key: "deptName",
       width: "20%",
-      defaultSortOrder : 'ascend',
+      defaultSortOrder: 'ascend' as const,
        sorter: (a, b) => a.deptName.localeCompare(b.deptName),
        ellipsis: true,
       //  render: (text) => (
@@ -140,11 +157,11 @@ const WorkTable: React.FC = () => {
       key: index,
       division: selectedDivision,
       deptName: feature.properties.deptName,
-      adminapprovalno:  WorkData.features.filter((f) => f.properties.adminapprovalno && f.properties.deptName === feature.properties.deptName).length,
-      workstarted: WorkData.features.filter((f) => f.properties.workstartdate && f.properties.deptName === feature.properties.deptName).length,
-      estimatedcost: WorkData.features.filter((f)=> f.properties.deptName === feature.properties.deptName).reduce((sum, feature) => sum + (feature.properties.estimatedcost || 0), 0),
-      worksCompleted: WorkData.features.filter((f) => f.properties.wocompletiondate > f.properties.workstartdate && f.properties.deptName === feature.properties.deptName).length,
-      expectedwaterstorage: WorkData.features.filter((f)=> f.properties.deptName === feature.properties.deptName).reduce((sum, feature) => sum + (feature.properties.expectedwaterstorage || 0), 0),
+      adminapprovalno:  geoData.filter((f) => f.properties.adminapprovalno && f.properties.deptName === feature.properties.deptName).length,
+      workstarted: geoData.filter((f) => f.properties.workstartdate && f.properties.deptName === feature.properties.deptName).length,
+      estimatedcost: geoData.filter((f)=> f.properties.deptName === feature.properties.deptName).reduce((sum, feature) => sum + (feature.properties.estimatedcost || 0), 0),
+      worksCompleted: geoData.filter((f) => f.properties.wocompletiondate > f.properties.workstartdate && f.properties.deptName === feature.properties.deptName).length,
+      expectedwaterstorage: geoData.filter((f)=> f.properties.deptName === feature.properties.deptName).reduce((sum, feature) => sum + (feature.properties.expectedwaterstorage || 0), 0),
     })) || [];
 
     console.log(tableData,"tableData")
@@ -157,7 +174,7 @@ const WorkTable: React.FC = () => {
       console.log(Array.from(tableMap.values()),"tableMap1")
     });
 
-    console.log(tableMap,"tableMap")
+    // console.log(geoData,"geoData")
 
   return (
     <Flex  gap={50} wrap="nowrap" >
@@ -193,7 +210,7 @@ const WorkTable: React.FC = () => {
               selectedDistrict
                 ? Array.from(
                     new Set(
-                      WorkData.features
+                      geoData
                         .filter(
                           (feature) =>
                             feature.properties.district === selectedDistrict
