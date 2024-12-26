@@ -26,7 +26,7 @@ const Header = () => {
       axios.post(window.__analytics__ + "/logout").finally(() => {
         const newLocation = window.__analytics__;
         window.location.href = newLocation;
-        window.reload();
+        window.location.reload()
       });
     });
   };

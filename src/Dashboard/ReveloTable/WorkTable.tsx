@@ -1,17 +1,34 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Table, Row, Col, Card, Flex,Tooltip} from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
-import WorkData from "../work.json";
+import { fetchGeoData } from "../Data/useGeoData";
 import  "../../Dashboard/Dashboard.css";
 
 const WorkTable: React.FC = () => {
+  const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
+  const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selectedDivision, setSelectedDivision] = useState<any>();
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
 
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          setLoading(true); // Set loading to true while fetching
+          const data = await fetchGeoData();
+          setGeoData(data.features || []); // Ensure it's always an array
+        } catch (error) {
+          console.error("Error fetching Geoserver data", error);
+        } finally {
+          setLoading(false); // Set loading to false after fetching
+        }
+      };
+      fetchData();
+    }, []);
+    
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
@@ -25,7 +42,7 @@ const WorkTable: React.FC = () => {
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
   };
-  const filteredFeatures = WorkData.features.filter((feature) => {
+  const filteredFeatures = geoData.filter((feature) => {
     const { district, taluka } = feature.properties;
     const isInDivision =
       selectedDivision &&
@@ -183,7 +200,7 @@ const WorkTable: React.FC = () => {
               selectedDistrict
                 ? Array.from(
                     new Set(
-                      WorkData.features
+                      geoData
                         .filter(
                           (feature) =>
                             feature.properties.district === selectedDistrict

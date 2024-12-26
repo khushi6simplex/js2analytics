@@ -1,27 +1,30 @@
 import React, { useState, useEffect } from "react";
-import { Table, Row, Col, Flex } from "antd";
-import type { ColumnsType } from "antd/es/table";
-import Jurisdictions from "../Jurisdiction/Jurisdiction";
+import { Table, Row, Col, Spin, Empty, Flex, Typography, Divider } from "antd";
+import { fetchGeoData } from "../Data/useGeoData";
+import Jurisdictions from "../Jurisdiction/Jurisdiction"; // Importing Jurisdictions
 import divisionData from "../division.json";
-import data from "../data.json";
 
 const ReveloTable: React.FC = () => {
+  const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedTaluka, setSelectedTaluka] = useState<string | null>(null);
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(5);
+  const [loading, setLoading] = useState<boolean>(true); // Loading state
 
   useEffect(() => {
-    const updatePageSize = () => {
-      const availableHeight = window.innerHeight - 300; // Adjust as needed
-      const rowHeight = 50; // Approx row height
-      setPageSize(Math.floor(availableHeight / rowHeight));
+    const fetchData = async () => {
+      try {
+        setLoading(true); // Set loading to true while fetching
+        const filter = `state='Maharashtra'`; // Your CQL filter for state
+        const data = await fetchGeoData();
+        setGeoData(data.features || []); // Ensure it's always an array
+      } catch (error) {
+        console.error("Error fetching Geoserver data", error);
+      } finally {
+        setLoading(false); // Set loading to false after fetching
+      }
     };
-
-    updatePageSize();
-    window.addEventListener("resize", updatePageSize);
-    return () => window.removeEventListener("resize", updatePageSize);
+    fetchData();
   }, []);
 
   const handleDivisionClick = (division: string) => {
@@ -40,13 +43,17 @@ const ReveloTable: React.FC = () => {
   };
 
   const getSummarizedData = () => {
+    if (loading) return []; // Return empty array if still loading
+
+    const dataToUse = geoData || [];
+
     if (selectedTaluka) {
-      const talukaFeatures = data.features.filter(
+      const talukaFeatures = dataToUse.filter(
         (feature) =>
           feature.properties.taluka === selectedTaluka &&
           feature.properties.district === selectedDistrict
       );
-  
+
       // Summarize data for the selected taluka
       return [
         {
@@ -66,17 +73,17 @@ const ReveloTable: React.FC = () => {
         },
       ];
     }
-  
+
     if (selectedDistrict && !selectedTaluka) {
       const talukas = Array.from(
         new Set(
-          data.features
+          dataToUse
             .filter((feature) => feature.properties.district === selectedDistrict)
             .map((feature) => feature.properties.taluka)
         )
       );
       return talukas.map((taluka) => {
-        const talukaFeatures = data.features.filter(
+        const talukaFeatures = dataToUse.filter(
           (feature) =>
             feature.properties.taluka === taluka &&
             feature.properties.district === selectedDistrict
@@ -98,17 +105,16 @@ const ReveloTable: React.FC = () => {
         };
       });
     }
-  
+
     if (selectedDivision && !selectedDistrict && !selectedTaluka) {
       const districts = divisionData[selectedDivision]?.districts || [];
       return districts.map((district) => {
-        const districtFeatures = data.features.filter(
+        const districtFeatures = dataToUse.filter(
           (feature) => feature.properties.district === district
         );
-         // Get unique talukas in this district
-    const uniqueTalukas = Array.from(
-      new Set(districtFeatures.map((feature) => feature.properties.taluka))
-    );
+        const uniqueTalukas = Array.from(
+          new Set(districtFeatures.map((feature) => feature.properties.taluka))
+        );
 
         return {
           key: district,
@@ -127,68 +133,94 @@ const ReveloTable: React.FC = () => {
         };
       });
     }
-  
+
     return [];
   };
-  
 
-  const columns: ColumnsType<any> = [
-    { title: "Division", dataIndex: "division", key: "division", sorter: (a, b) => a.division.localeCompare(b.division),},
-    { title: "District", dataIndex: "district", key: "district", sorter: (a, b) => a.division.localeCompare(b.district),},
-    { title: "Taluka", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.division.localeCompare(b.taluka),},
-    { title: "Works Count", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount},
-    { title: "Works Geotagged", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged},
-    { title: "Works Started", dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted},
-    { title: "Works Completed", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted},
-    { title: "Total Work Order Amount", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount},
-    { title: "Physical Target Area", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea},
+  const columns = [
+    { title: "Division", dataIndex: "division", key: "division" },
+    { title: "District", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" },
+    { title: "Taluka", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.district.localeCompare(b.taluka) },
+    { title: "Works Count", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount },
+    { title: "Works Geotagged", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged },
+    { title: "Works Started", dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted },
+    { title: "Works Completed", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted },
+    { title: "Total Work Order Amount", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount, render: (text) => <p title={text}>{"₹" + parseFloat(text).toFixed(2)}</p> },
+    { title: "Physical Target Area", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p> },
   ];
 
   return (
-    <Flex gap={50}>
-      <Row gutter={[17, 17]}>
+    <Flex gap={50} wrap="nowrap">
+      <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
         <Col span={8.1}>
-          <Jurisdictions
-            title="Divisions"
-            data={Object.keys(divisionData)}
-            selectedItem={selectedDivision}
-            onItemClick={handleDivisionClick}
-            placeholder="No divisions available"
-          />
-          <Jurisdictions
-            title="Districts"
-            data={selectedDivision ? divisionData[selectedDivision]?.districts || [] : []}
-            selectedItem={selectedDistrict}
-            onItemClick={handleDistrictClick}
-            placeholder="Select a Division"
-          />
-          <Jurisdictions
-            title="Talukas"
-            data={
-              selectedDistrict
-                ? Array.from(
-                    new Set(
-                      data.features
-                        .filter((feature) => feature.properties.district === selectedDistrict)
-                        .map((feature) => feature.properties.taluka)
-                    )
-                  )
-                : []
-            }
-            selectedItem={selectedTaluka}
-            onItemClick={handleTalukaClick}
-            placeholder="Select a District"
-          />
+        {/* <Typography.Text style={{ fontSize: "18px", fontWeight: "400", paddingBottom: "10px", display: "block" }}>
+          Jurisdictions
+        </Typography.Text> */}
+          <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
+            <Col span={8}>
+              <Jurisdictions
+                title="Divisions"
+                data={Object.keys(divisionData)}
+                selectedItem={selectedDivision}
+                onItemClick={handleDivisionClick}
+                placeholder="No divisions available"
+              />
+            </Col>
+            <Col span={8}>
+              <Jurisdictions
+                title="Districts"
+                data={selectedDivision ? divisionData[selectedDivision]?.districts || [] : []}
+                selectedItem={selectedDistrict}
+                onItemClick={handleDistrictClick}
+                placeholder="Select a Division"
+              />
+            </Col>
+            <Col span={8}>
+              <Jurisdictions
+                title="Talukas"
+                data={
+                  selectedDistrict
+                    ? Array.from(
+                        new Set(
+                          geoData
+                            .filter((feature) => feature.properties.district === selectedDistrict)
+                            .map((feature) => feature.properties.taluka)
+                        )
+                      )
+                    : []
+                }
+                selectedItem={selectedTaluka}
+                onItemClick={handleTalukaClick}
+                placeholder="Select a District"
+              />
+            </Col>
+          </Row>
         </Col>
+        {/* <Divider type="vertical" style={{ height: "100%", borderColor: "blue" }} /> */}
         <Col span={16}>
-          <Table
-            columns={columns}
-            dataSource={getSummarizedData()}
-            pagination={{
-              pageSize: 5,
-              showSizeChanger: false,
-            }}
-          />
+        {/* <Typography.Text style={{ fontSize: "20px", fontWeight: "400", paddingBottom: "10px", display: "block" }}>
+          Report Output
+        </Typography.Text> */}
+          {loading ? (
+            <Spin size="large" /> // Show loading spinner
+          ) : geoData.length === 0 ? (
+            <Empty description="No data available" /> // Show empty state
+          ) : (
+            <Table
+              columns={columns}
+              style={{ alignItems: "top" }}
+              size="small"
+              tableLayout="fixed"
+              dataSource={getSummarizedData()}
+              pagination={{
+                pageSize: 6,
+                showSizeChanger: false,
+                total: getSummarizedData().length,
+              }}
+              scroll={{ x: "100%" }}
+              bordered
+            />
+          )}
         </Col>
       </Row>
     </Flex>

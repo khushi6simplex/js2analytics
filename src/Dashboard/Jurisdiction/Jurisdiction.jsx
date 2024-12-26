@@ -5,9 +5,8 @@ const Jurisdiction = ({ title, data, selectedItem, onItemClick, placeholder }) =
 
   const sortedData = data.slice().sort((a, b) => a.localeCompare(b, undefined, { sensitivity: 'base' }));
 
-  console.log("sortedData", sortedData);
-
   return (
+    <>
     <Space direction="vertical" style={{width: "9vw",padding:"2px"}}>
       <Typography.Text style={{fontSize:"18px",fontWeight:"400"}}>{title}</Typography.Text>
       {sortedData && sortedData.length > 0 ? (
@@ -34,6 +33,7 @@ const Jurisdiction = ({ title, data, selectedItem, onItemClick, placeholder }) =
         <Typography.Text>{placeholder}</Typography.Text>
       )}
     </Space>
+    </>
   );
 };
 
