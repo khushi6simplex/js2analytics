@@ -1,18 +1,16 @@
-import { Button, Select, Space, Spin, Typography, Tabs, Flex, Card, Divider } from "antd";
-import { useRef, useState } from "react";
-import { useAppSelector } from "../Redux/store/store";
-import cytoscape from "cytoscape";
+import { Typography, Tabs, Flex, Card, Divider } from "antd";
+import { useState } from "react";
 import "./DashBoard.css";
 import ReveloTable from "./ReveloTable/ReveloTable";
 import WorkTable from "../Dashboard/ReveloTable/WorkTable";
 import Header from "./header/Header";
+import Overview from "./ReveloTable/Overview";
 
 const Dashboard = () => {
   const [jurisdiction, setJurisdiction] = useState();
   const [selectedValues, setSelectedValues] = useState({});
   const [selectedOption, setSelectedOption] = useState({});
-  const [selectedTabLabel, setSelectedTabLabel] = useState("District Wise Work"); // Set the default tab label
-  const { userInfo } = useAppSelector((state) => state.reveloUserInfo);
+  const [selectedTabLabel, setSelectedTabLabel] = useState("Overview"); // Set the default tab label
 
   const handleReset = () => {
     const resetValues = {};
@@ -27,22 +25,22 @@ const Dashboard = () => {
   const items = [
     {
       key: '1',
+      label: 'Overview',
+      children: <Overview/>,
+    },
+    {
+      key: '2',
       label: 'District Wise Work',
       children: <ReveloTable />,
     },
     {
-      key: '2',
+      key: '3',
       label: 'Work Monitoring',
       children: <WorkTable />,
     },  
     {
-      key: '3',
-      label: 'Department Wise Work',
-      children: 'Comming Soon ...',
-    },
-    {
       key: '4',
-      label: 'Village Wise Water budgeting',
+      label: 'Department Wise Work',
       children: 'Comming Soon ...',
     },
     {
@@ -52,21 +50,16 @@ const Dashboard = () => {
     },
     {
       key: '6',
-      label: 'Village Wise Water budgeting',
-      children: 'Comming Soon ...',
-    },
-    {
-      key: '7',
       label: 'Repair Works',
       children: 'Comming Soon ...',
     },
     {
-      key: '8',
+      key: '7',
       label: 'User Defined Query',
       children: 'Comming Soon ...',
     },
     {
-      key: '9',
+      key: '8',
       label: 'Geotagging',
       children: 'Comming Soon ...',
     },
@@ -84,13 +77,13 @@ const Dashboard = () => {
         <Flex vertical justify="center" >
           {/* "Reports" Text on Left */}
           <Flex style={{marginTop: "20px"}}>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "25px"}}>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "-10px"}}>
             Reports
           </Typography.Text>
           <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "160px"}}>
-            Jurisdiction
+            Jurisdictions
           </Typography.Text>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "510px"}}>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "600", marginLeft: "400px"}}>
             Report Output
           </Typography.Text>
           </Flex>
