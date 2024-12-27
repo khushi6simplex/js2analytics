@@ -4,6 +4,7 @@ import "./DashBoard.css";
 import ReveloTable from "./ReveloTable/ReveloTable";
 import WorkTable from "../Dashboard/ReveloTable/WorkTable";
 import DepartmentTable from "../Dashboard/ReveloTable/DepartmentTable";
+import RepairWiseReport from "./ReveloTable/RepairWiseTable";
 import Header from "./header/Header";
 import Overview from "./ReveloTable/Overview";
 
@@ -51,16 +52,21 @@ const Dashboard = () => {
     },
     {
       key: '6',
-      label: 'Repair Works',
+      label: 'Village Wise Work',
       children: 'Comming Soon ...',
     },
     {
       key: '7',
+      label: 'Repair Works',
+      children: <RepairWiseReport/>,
+    },
+    {
+      key: '8',
       label: 'User Defined Query',
       children: 'Comming Soon ...',
     },
     {
-      key: '8',
+      key: '9',
       label: 'Geotagging',
       children: 'Comming Soon ...',
     },
@@ -89,14 +95,8 @@ const Dashboard = () => {
           </Typography.Text>
           </Flex>
 
-          {/* Selected Tab Label at Center */}
-          {/* {selectedTabLabel && (
-            <Typography.Text style={{ fontSize: "20px", fontWeight: "600", textAlign: "center", width: "100%", position: "absolute", top: "5vh", left: "50%", transform: "translateX(-50%)" }}>
-              {selectedTabLabel}
-            </Typography.Text>
-          )} */}
-
           <Divider />
+
           <Tabs
             tabBarStyle={{height:"70vh",marginLeft:"-2vw"}}
             items={items}
@@ -105,6 +105,7 @@ const Dashboard = () => {
             tabPosition="left"
             size="small"
           />
+          
         </Flex>
       </Card>
     </>
