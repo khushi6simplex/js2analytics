@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Table, Row, Col, Card, Flex,Tooltip} from "antd";
+import { Table, Row, Col, Card, Flex,Spin, Empty,Tooltip} from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import { fetchGeoData } from "../Data/useGeoData";
@@ -65,13 +65,6 @@ const WorkTable: React.FC = () => {
       dataIndex: "division",
       key: "division",
       width: "10%",
-      // render: () => selectedDivision || "N/A", 
-      // ellipsis: true,
-    //   render: (text) => (
-    //    <Tooltip placement="topLeft" title={text}>
-    //      {text}
-    //    </Tooltip>
-    //  ),
     },
     {
       title: "District",
@@ -79,14 +72,7 @@ const WorkTable: React.FC = () => {
       key: "district",
       width: "10%",
       sorter: (a, b) => a.district.localeCompare(b.district),
-      // sortDirections: 'ascend'
       defaultSortOrder : 'ascend' as const,
-      // ellipsis: true,
-    //   render: (text) => (
-    //    <Tooltip placement="topLeft" title={text}>
-    //      {text}
-    //    </Tooltip>
-    //  ),
     },
     {
       title: "Taluka",
@@ -102,11 +88,6 @@ const WorkTable: React.FC = () => {
       width: "10%",
        sorter: (a, b) => a.district.localeCompare(b.deptName),
        ellipsis: true,
-      //  render: (text) => (
-      //   <Tooltip placement="topLeft" title={text}>
-      //     {text}
-      //   </Tooltip>
-      // ),
     },
     
     {
@@ -116,19 +97,14 @@ const WorkTable: React.FC = () => {
       width: "10%",
        sorter: (a, b) => a.district.localeCompare(b.worktype),
        ellipsis: true,
-      // render: (text) => (
-      //   <Tooltip placement="topLeft" title={text}>
-      //     {text}
-      //   </Tooltip>
-      // ),
     },
     {
       title: "Estimated Cost",
       dataIndex: "estimatedcost",
       key: "estimatedcost",
       width: "10%",
-       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
-       render: (text) => (
+      sorter: (a, b) => a.estimatedcost - b.estimatedcost,
+      render: (text) => (
         <p  title={text}>
           {'₹'+parseFloat(text).toFixed(2)}
         </p>
@@ -220,7 +196,12 @@ const WorkTable: React.FC = () => {
         
         </Col>
         <Col span={16} >
-       
+         {/* Show loading spinner */}
+        {loading ? (
+            <Spin size="large" /> 
+          ) : geoData.length === 0 ? (
+            <Empty description="No data available" /> // Show empty state
+          ) : (
        <Table
          columns={columns}
          style={{alignItems:"top"}}
@@ -239,8 +220,8 @@ const WorkTable: React.FC = () => {
          scroll={{ x: "100%" }}
           bordered
        />
-     </Col>
-        
+        )}
+     </Col>  
       </Row>
     </Flex>
   );

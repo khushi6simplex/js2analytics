@@ -1,5 +1,5 @@
 import React, { useState,useEffect} from "react";
-import { Table, Row, Col, Card, Flex,Tooltip} from "antd";
+import { Table, Row, Col, Card, Flex, Tooltip, Spin, Empty } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import WorkData from "../work.json";
@@ -10,7 +10,7 @@ const WorkTable: React.FC = () => {
   const [selectedDivision, setSelectedDivision] = useState<any>();
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [loading, setLoading] = useState<boolean>(true);
-   const [geoData, setGeoData] = useState<any[]>([]);
+  const [geoData, setGeoData] = useState<any[]>([]);
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
@@ -230,7 +230,11 @@ const WorkTable: React.FC = () => {
         
         </Col>
         <Col span={16} >
-       
+        {loading ? (
+            <Spin size="large" /> // Show loading spinner
+          ) : geoData.length === 0 ? (
+            <Empty description="No data available" /> // Show empty state
+          ) : (
        <Table
          columns={columns}
          style={{alignItems:"top"}}
@@ -249,6 +253,7 @@ const WorkTable: React.FC = () => {
          scroll={{ x: "100%" }}
           bordered
        />
+        )}
      </Col>
         
       </Row>
