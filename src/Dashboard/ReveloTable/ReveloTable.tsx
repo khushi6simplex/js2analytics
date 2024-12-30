@@ -64,7 +64,7 @@ const ReveloTable: React.FC = () => {
           worksCount: talukaFeatures.length,
           worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
           worksStarted: talukaFeatures.filter((feature) => feature.properties.workstartdate).length,
-          worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate).length,
+          worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate > feature.properties.workstartdate).length,
           totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
           physicalTargetArea: talukaFeatures.reduce(
             (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
@@ -96,7 +96,7 @@ const ReveloTable: React.FC = () => {
           worksCount: talukaFeatures.length,
           worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
           worksStarted: talukaFeatures.filter((feature) => feature.properties.workstartdate).length,
-          worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate).length,
+          worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate > feature.properties.workstartdate).length,
           totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
           physicalTargetArea: talukaFeatures.reduce(
             (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
@@ -124,7 +124,7 @@ const ReveloTable: React.FC = () => {
           worksCount: districtFeatures.length,
           worksGeotagged: districtFeatures.filter((feature) => feature.geometry).length,
           worksStarted: districtFeatures.filter((feature) => feature.properties.workstartdate).length,
-          worksCompleted: districtFeatures.filter((feature) => feature.properties.wocompletiondate).length,
+          worksCompleted: districtFeatures.filter((feature) => feature.properties.wocompletiondate > feature.properties.workstartdate).length,
           totalWoAmount: districtFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
           physicalTargetArea: districtFeatures.reduce(
             (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),

@@ -26,7 +26,7 @@ const Dashboard = () => {
   const items = [
     {
       key: '1',
-      label: 'Overview',
+      label: 'Summary',
       children: <Overview/>,
     },
     {

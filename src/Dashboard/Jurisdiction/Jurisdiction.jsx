@@ -10,7 +10,7 @@ const Jurisdiction = ({ title, data, selectedItem, onItemClick, placeholder }) =
     <Space direction="vertical" style={{width: "9vw",padding:"2px"}}>
       <Typography.Text style={{fontSize:"18px",fontWeight:"400"}}>{title}</Typography.Text>
       {sortedData && sortedData.length > 0 ? (
-        <List
+      <List
           // bordered
           dataSource={sortedData}
           style={{border:"1px solid #dfe6e9", borderRadius: "0px"}}

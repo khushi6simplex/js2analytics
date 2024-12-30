@@ -1,15 +1,14 @@
 import { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
 
-const Chart2 = () => {
+const Chart1 = () => {
   const [jsonData, setJsonData] = useState(null);
-
   const workStartedChartRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const dataUrl = window.__analytics__.waterBudget;
+        const dataUrl = window.__analytics__.works; // Replace this with your actual data URL if needed
         const response = await fetch(dataUrl);
         if (!response.ok) {
           throw new Error("Network response was not ok");
@@ -25,19 +24,19 @@ const Chart2 = () => {
   }, []);
 
   const getTreeMapData = (data) => {
-    const districtsWithWorkStarted = data
+    const talukaData = data
       .filter(
         (hit) =>
-          hit._source.jurisdictionType === "district" &&
-          hit._source.countofwaterbudgets > 0
+          hit._source.jurisdictionType === "taluka" &&
+          hit._source.workcount > 0
       )
       .map((hit) => ({
         name: hit._source.jurisdictionName,
-        value: hit._source.countofwaterbudgets,
+        value: hit._source.workcount,
       }));
 
-    return districtsWithWorkStarted.length > 0
-      ? districtsWithWorkStarted
+    return talukaData.length > 0
+      ? talukaData
       : [{ name: "No Data Available", value: 1 }];
   };
 
@@ -53,7 +52,7 @@ const Chart2 = () => {
 
       const treeMapOption = {
         title: {
-          text: "Water Budgets Created by Districts",
+          text: "Works Started by Taluka",
           left: "center",
         },
         tooltip: {
@@ -102,4 +101,4 @@ const Chart2 = () => {
   );
 };
 
-export default Chart2;
+export default Chart1;
