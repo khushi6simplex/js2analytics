@@ -144,11 +144,16 @@ const WorkTable: React.FC = () => {
       // ),
     },
     {
-      title: "Expected Water Storage (MLD)",
+      title: "Expected Water Storage",
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
       width: "8%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
+      render: (text) => (
+        <p  title={text}>
+          {text+" TCM"}
+        </p>
+      ),
     },
     {
       title: "Estimated Cost",
@@ -156,7 +161,7 @@ const WorkTable: React.FC = () => {
       key: "estimatedcost",
       width: "8%",
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
-      render: (text) => <p title={text}>{"₹" + parseFloat(text).toFixed(2)}</p>,
+      render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>,
     },
   ];
 

@@ -1,51 +1,47 @@
 import { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
+import { fetchGeoData } from "../../Data/useGeoData"; // Assuming fetchGeoData is similar to ReveloTable
 
 const Chart1 = () => {
-  const [jsonData, setJsonData] = useState(null);
+  const [geoData, setGeoData] = useState([]);
   const workStartedChartRef = useRef(null);
 
+  // Fetch data from GeoServer
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const dataUrl = window.__analytics__.works; // Replace this with your actual data URL if needed
-        const response = await fetch(dataUrl);
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
-        }
-        const data = await response.json();
-        setJsonData(data);
+        const data = await fetchGeoData();
+        setGeoData(data.features || []);
       } catch (error) {
-        console.error("Error fetching data:", error);
+        console.error("Error fetching GeoServer data:", error);
       }
     };
 
     fetchData();
   }, []);
 
+  // Extract distinct talukas and calculate total work counts
   const getTreeMapData = (data) => {
-    const talukaData = data
-      .filter(
-        (hit) =>
-          hit._source.jurisdictionType === "taluka" &&
-          hit._source.workcount > 0
-      )
-      .map((hit) => ({
-        name: hit._source.jurisdictionName,
-        value: hit._source.workcount,
-      }));
-
-    return talukaData.length > 0
-      ? talukaData
-      : [{ name: "No Data Available", value: 1 }];
-  };
-
-  useEffect(() => {
-    if (!jsonData || !jsonData.hits?.hits) {
-      return;
+    if (!data || data.length === 0) {
+      return [{ name: "No Data Available", value: 1 }];
     }
 
-    const treeMapData = getTreeMapData(jsonData.hits.hits);
+    // Summarize data by taluka
+    const talukaMap = data.reduce((acc, feature) => {
+      const taluka = feature.properties.taluka || "Unknown Taluka";
+      acc[taluka] = (acc[taluka] || 0) + 1; // Count works for each taluka
+      return acc;
+    }, {});
+
+    // Convert to array format suitable for TreeMap
+    return Object.entries(talukaMap).map(([name, value]) => ({ name, value }));
+  };
+
+  // Initialize and update the TreeMap chart
+  useEffect(() => {
+    if (!geoData.length) return;
+
+    const treeMapData = getTreeMapData(geoData);
 
     if (workStartedChartRef.current) {
       const treeMapChart = echarts.init(workStartedChartRef.current);
@@ -66,7 +62,6 @@ const Chart1 = () => {
           {
             type: "treemap",
             data: treeMapData,
-            leafDepth: 1,
             label: {
               show: true,
               formatter: "{b}",
@@ -92,7 +87,7 @@ const Chart1 = () => {
         treeMapChart.dispose();
       };
     }
-  }, [jsonData]);
+  }, [geoData]);
 
   return (
     <div>

@@ -106,7 +106,7 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
       render: (text) => (
         <p  title={text}>
-          {'₹'+parseFloat(text).toFixed(2)}
+          {'₹ '+parseFloat(text).toFixed(2)}
         </p>
       ),
     },
@@ -118,7 +118,7 @@ const WorkTable: React.FC = () => {
        sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
        render: (text) => (
         <p  title={text}>
-          {text+"sq.m"}
+          {text+" sq.m"}
         </p>
       ),
     },
@@ -128,6 +128,11 @@ const WorkTable: React.FC = () => {
       key: "expectedwaterstorage",
       width: "10%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
+      render: (text) => (
+        <p  title={text}>
+          {text+" TCM"}
+        </p>
+      ),
     },
   ];
   const tableData =
