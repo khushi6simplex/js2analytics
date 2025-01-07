@@ -1,10 +1,21 @@
 import React, { useState, useEffect } from "react";
-import { Table, Row, Col, Card, Flex, Tooltip, Spin, Empty } from "antd";
+import {
+  Table,
+  Row,
+  Col,
+  Card,
+  Flex,
+  Tooltip,
+  Spin,
+  Empty,
+  Button,
+} from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import WorkData from "../work.json";
 import { fetchGeoData } from "../Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
+import { exportToExcel } from "../Excel/Excel";
 
 const WorkTable: React.FC = () => {
   const [selectedDivision, setSelectedDivision] = useState<any>();
@@ -44,8 +55,8 @@ const WorkTable: React.FC = () => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
   };
 
-  const handleDepartmentClick = (taluka: string) => {
-    setSelectedDepartment(selectedTaluka === taluka ? null : taluka);
+  const handleDepartmentClick = (deptName: string) => {
+    setSelectedDepartment(selectedDepartment === deptName ? null : deptName);
   };
 
   const filteredFeatures = geoData.filter((feature) => {
@@ -64,6 +75,7 @@ const WorkTable: React.FC = () => {
       isInDepartment
     );
   });
+
   const columns = [
     {
       title: "#",
@@ -77,7 +89,7 @@ const WorkTable: React.FC = () => {
       title: "Division",
       dataIndex: "division",
       key: "division",
-      width: "5%",
+      width: "10%",
       // render: () => selectedDivision || "N/A",
       // ellipsis: true,
       //   render: (text) => (
@@ -91,7 +103,7 @@ const WorkTable: React.FC = () => {
       title: "Department",
       dataIndex: "deptName",
       key: "deptName",
-      width: "9%",
+      width: "15%",
       defaultSortOrder: "ascend" as const,
       sorter: (a, b) => a.deptName.localeCompare(b.deptName),
       ellipsis: true,
@@ -106,7 +118,7 @@ const WorkTable: React.FC = () => {
       title: "Admin Approved",
       dataIndex: "adminapprovalno",
       key: "adminapprovalno",
-      width: "8%",
+      width: "10%",
       sorter: (a, b) => a.adminapprovalno - b.adminapprovalno,
       //  ellipsis: true,
       // render: (text) => (
@@ -119,7 +131,7 @@ const WorkTable: React.FC = () => {
       title: "Works Started",
       dataIndex: "workstarted",
       key: "workstarted",
-      width: "8%",
+      width: "10%",
       sorter: (a, b) => a.workstarted - b.workstarted,
       // render: (text) => {
       //   const date = dayjs(text);
@@ -135,7 +147,7 @@ const WorkTable: React.FC = () => {
       title: "Works Completed",
       dataIndex: "worksCompleted",
       key: "worksCompleted",
-      width: "8%",
+      width: "15%",
       sorter: (a, b) => a.worksCompleted - b.worksCompleted,
       //  render: (text) => (
       //   <p  title={text}>
@@ -147,14 +159,14 @@ const WorkTable: React.FC = () => {
       title: "Expected Water Storage (MLD)",
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
-      width: "8%",
+      width: "15%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
     },
     {
       title: "Estimated Cost",
       dataIndex: "estimatedcost",
       key: "estimatedcost",
-      width: "8%",
+      width: "15%",
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
       render: (text) => <p title={text}>{"₹" + parseFloat(text).toFixed(2)}</p>,
     },
@@ -162,7 +174,7 @@ const WorkTable: React.FC = () => {
 
   const tableData =
     filteredFeatures.map((feature, index) => ({
-      key: index,
+      key: index + 1,
       division: selectedDivision,
       deptName: selectedDepartment,
       // deptName: geoData.filter(
@@ -199,7 +211,7 @@ const WorkTable: React.FC = () => {
         ),
     })) || [];
 
-  console.log(tableData, "tableData");
+  // console.log(tableData, "tableData5");
 
   const tableMap = new Map();
 
@@ -209,11 +221,19 @@ const WorkTable: React.FC = () => {
     console.log(Array.from(tableMap.values()), "tableMap1");
   });
 
-  // console.log(geoData,"geoData")
+  const downloadExcel = () => {
+    exportToExcel({
+      data: Array.from(tableMap.values()),
+      columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
+      fileName: "RepairWorks.xlsx",
+      sheetName: "Work Data",
+      tableTitle: "Repair Works Table",
+    });
+  };
 
   return (
     <Flex gap={50} wrap="nowrap">
-      <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
+      <Row gutter={[20, 20]} style={{ flexWrap: "nowrap" }}>
         <Col span={10}>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
             <Col span={6}>
@@ -265,13 +285,13 @@ const WorkTable: React.FC = () => {
               <Jurisdictions
                 title="Department"
                 data={
-                  selectedDistrict
+                  selectedTaluka
                     ? Array.from(
                         new Set(
                           geoData
                             .filter(
                               (feature) =>
-                                feature.properties.district === selectedTaluka,
+                                feature.properties.taluka === selectedTaluka,
                             )
                             .map((feature) => feature.properties.deptName),
                         ),
@@ -285,30 +305,46 @@ const WorkTable: React.FC = () => {
             </Col>
           </Row>
         </Col>
-        <Col span={13}>
+        <Col span={14}>
           {loading ? (
             <Spin size="large" /> // Show loading spinner
           ) : geoData.length === 0 ? (
             <Empty description="No data available" /> // Show empty state
           ) : (
-            <Table
-              columns={columns}
-              style={{ alignItems: "top" }}
-              dataSource={selectedDivision ? Array.from(tableMap.values()) : []}
-              size="small"
-              tableLayout="fixed"
-              pagination={{
-                pageSize: pageSize,
-                showSizeChanger: false,
-                total: 0,
-                onChange: (page, pageSize) => {
-                  setCurrentPage(page);
-                  setPageSize(pageSize);
-                },
-              }}
-              scroll={{ x: "100%", y: "100%" }}
-              bordered
-            />
+            <div>
+              <Flex justify="right">
+                <Button
+                  onClick={downloadExcel}
+                  style={{
+                    backgroundColor: "#008CBA",
+                    color: "white",
+                    marginBottom: "10px",
+                  }}>
+                  Download As Excel
+                </Button>
+              </Flex>
+
+              <Table
+                columns={columns}
+                style={{ alignItems: "top" }}
+                dataSource={
+                  selectedDepartment ? Array.from(tableMap.values()) : []
+                }
+                size="small"
+                tableLayout="fixed"
+                pagination={{
+                  pageSize: pageSize,
+                  showSizeChanger: false,
+                  total: 0,
+                  onChange: (page, pageSize) => {
+                    setCurrentPage(page);
+                    setPageSize(pageSize);
+                  },
+                }}
+                scroll={{ x: "100%", y: "100%" }}
+                bordered
+              />
+            </div>
           )}
         </Col>
       </Row>
