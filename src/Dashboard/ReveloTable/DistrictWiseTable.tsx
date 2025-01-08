@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { Table, Row, Col, Spin, Empty, Flex, Typography, Divider } from "antd";
+import { Table, Row, Col, Spin, Empty, Flex, Button, Typography, Divider} from "antd";
 import { fetchGeoData } from "../Data/useGeoData";
 import Jurisdictions from "../Jurisdiction/Jurisdiction"; // Importing Jurisdictions
 import divisionData from "../division.json";
+import { exportToExcel } from "../Excel/Excel";
 
-const ReveloTable: React.FC = () => {
+const DistrictWiseTable: React.FC = () => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
@@ -149,13 +150,23 @@ const ReveloTable: React.FC = () => {
     { title: "Physical Target Area", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p> },
   ];
 
+    const handleExport = () => {
+    exportToExcel({
+      data: getSummarizedData(),
+      columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
+      fileName: "DistrictWiseWork.xlsx",
+      sheetName: "District Wise Work Data",
+      tableTitle: "District Wise Work Table",
+    });
+  };
+
   return (
     <Flex gap={50} wrap="nowrap">
       <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
         <Col span={8.1}>
-        {/* <Typography.Text style={{ fontSize: "18px", fontWeight: "400", paddingBottom: "10px", display: "block" }}>
+        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
           Jurisdictions
-        </Typography.Text> */}
+        </Typography.Text>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
             <Col span={8}>
               <Jurisdictions
@@ -196,30 +207,44 @@ const ReveloTable: React.FC = () => {
             </Col>
           </Row>
         </Col>
-        {/* <Divider type="vertical" style={{ height: "100%", borderColor: "blue" }} /> */}
+        <Divider type="vertical" style={{ height: "100%", borderColor: "" }} />
         <Col span={16}>
-        {/* <Typography.Text style={{ fontSize: "20px", fontWeight: "400", paddingBottom: "10px", display: "block" }}>
-          Report Output
-        </Typography.Text> */}
           {loading ? (
             <Spin size="large" /> // Show loading spinner
           ) : geoData.length === 0 ? (
             <Empty description="No data available" /> // Show empty state
           ) : (
-            <Table
-              columns={columns}
-              style={{ alignItems: "top" }}
-              size="small"
-              tableLayout="fixed"
-              dataSource={getSummarizedData()}
-              pagination={{
-                pageSize: 6,
-                showSizeChanger: false,
-                total: getSummarizedData().length,
-              }}
-              scroll={{ x: "100%" }}
-              bordered
-            />
+            <div>
+              <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "0px", display: "block" }}>
+                Report Output
+              </Typography.Text>
+              <Flex justify="right" gap="large">
+                <Button
+                  onClick={handleExport}
+                  style={{
+                    backgroundColor: "#008CBA",
+                    color: "white",
+                    marginBottom: "10px",
+                  }}>
+                  Export As Excel
+                </Button>
+              </Flex>
+
+              <Table
+                columns={columns}
+                style={{ alignItems: "top" }}
+                size="small"
+                tableLayout="fixed"
+                dataSource={getSummarizedData()}
+                pagination={{
+                  pageSize: 6,
+                  showSizeChanger: false,
+                  total: getSummarizedData().length,
+                }}
+                scroll={{ x: "100%" }}
+                bordered
+              />
+            </div>
           )}
         </Col>
       </Row>
@@ -227,4 +252,4 @@ const ReveloTable: React.FC = () => {
   );
 };
 
-export default ReveloTable;
+export default DistrictWiseTable;

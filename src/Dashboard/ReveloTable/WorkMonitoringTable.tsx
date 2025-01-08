@@ -5,26 +5,24 @@ import {
   Col,
   Card,
   Flex,
-  Tooltip,
   Spin,
   Empty,
+  Tooltip,
   Button,
-  Divider,
   Typography,
+  Divider,
 } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
-import WorkData from "../work.json";
 import { fetchGeoData } from "../Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
 import { exportToExcel } from "../Excel/Excel";
 
 const WorkTable: React.FC = () => {
+  const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
+  const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selectedDivision, setSelectedDivision] = useState<any>();
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
-  const [selectedDepartment, setSelectedDepartment] = useState<any>();
-  const [loading, setLoading] = useState<boolean>(true);
-  const [geoData, setGeoData] = useState<any[]>([]);
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
@@ -56,33 +54,21 @@ const WorkTable: React.FC = () => {
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
   };
-
-  const handleDepartmentClick = (deptName: string) => {
-    setSelectedDepartment(selectedDepartment === deptName ? null : deptName);
-  };
-
   const filteredFeatures = geoData.filter((feature) => {
-    const { district, taluka, deptName } = feature.properties;
+    const { district, taluka } = feature.properties;
     const isInDivision =
       selectedDivision &&
       divisionData[selectedDivision]?.districts.includes(district);
     const isInDistrict = !selectedDistrict || district === selectedDistrict;
     const isInTaluka = !selectedTaluka || taluka === selectedTaluka;
-    const isInDepartment =
-      !selectedDepartment || deptName === selectedDepartment;
-    return (
-      (!selectedDivision || isInDivision) &&
-      isInDistrict &&
-      isInTaluka &&
-      isInDepartment
-    );
+    return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka;
   });
 
   const columns = [
     {
       title: "#",
-      dataIndex: "index",
-      key: "index",
+      dataIndex: "key",
+      key: "key",
       width: "3%",
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
@@ -92,90 +78,62 @@ const WorkTable: React.FC = () => {
       dataIndex: "division",
       key: "division",
       width: "10%",
-      // render: () => selectedDivision || "N/A",
-      // ellipsis: true,
-      //   render: (text) => (
-      //    <Tooltip placement="topLeft" title={text}>
-      //      {text}
-      //    </Tooltip>
-      //  ),
     },
-
+    {
+      title: "District",
+      dataIndex: "district",
+      key: "district",
+      width: "10%",
+      sorter: (a, b) => a.district.localeCompare(b.district),
+      defaultSortOrder: "ascend" as const,
+    },
+    {
+      title: "Taluka",
+      dataIndex: "taluka",
+      key: "taluka",
+      width: "10%",
+      sorter: (a, b) => a.district.localeCompare(b.taluka),
+    },
     {
       title: "Department",
       dataIndex: "deptName",
       key: "deptName",
-      width: "15%",
-      defaultSortOrder: "ascend" as const,
-      sorter: (a, b) => a.deptName.localeCompare(b.deptName),
+      width: "10%",
+      sorter: (a, b) => a.district.localeCompare(b.deptName),
       ellipsis: true,
-      //  render: (text) => (
-      //   <Tooltip placement="topLeft" title={text}>
-      //     {text}
-      //   </Tooltip>
-      // ),
     },
 
     {
-      title: "Admin Approved",
-      dataIndex: "adminapprovalno",
-      key: "adminapprovalno",
+      title: "Work Type",
+      dataIndex: "worktype",
+      key: "worktype",
       width: "10%",
-      sorter: (a, b) => a.adminapprovalno - b.adminapprovalno,
-      //  ellipsis: true,
-      // render: (text) => (
-      //   <Tooltip placement="topLeft" title={text}>
-      //     {text}
-      //   </Tooltip>
-      // ),
-    },
-    {
-      title: "Works Started",
-      dataIndex: "workstarted",
-      key: "workstarted",
-      width: "10%",
-      sorter: (a, b) => a.workstarted - b.workstarted,
-      // render: (text) => {
-      //   const date = dayjs(text);
-      //   const formattedDate = date.format("MMMM D, YYYY");
-      //   return (
-      //     <p title={formattedDate}>
-      //       {formattedDate}
-      //     </p>
-      //   );
-      // },
-    },
-    {
-      title: "Works Completed",
-      dataIndex: "worksCompleted",
-      key: "worksCompleted",
-      width: "15%",
-      sorter: (a, b) => a.worksCompleted - b.worksCompleted,
-      //  render: (text) => (
-      //   <p  title={text}>
-      //     {text+"sq.m"}
-      //   </p>
-      // ),
-    },
-    {
-      title: "Expected Water Storage",
-      dataIndex: "expectedwaterstorage",
-      key: "expectedwaterstorage",
-      width: "15%",
-      sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
-      render: (text) => (
-        <p  title={text}>
-          {text+" TCM"}
-        </p>
-      ),
+      sorter: (a, b) => a.district.localeCompare(b.worktype),
+      ellipsis: true,
     },
     {
       title: "Estimated Cost",
       dataIndex: "estimatedcost",
       key: "estimatedcost",
-      width: "15%",
+      width: "10%",
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
       render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>,
+    },
+    {
+      title: "Physical Target Area",
+      dataIndex: "physicaltargetarea",
+      key: "physicaltargetarea",
+      width: "10%",
+      sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
+      render: (text) => <p title={text}>{text + " sq.m"}</p>,
+    },
+    {
+      title: "Expected Water Storage",
+      dataIndex: "expectedwaterstorage",
+      key: "expectedwaterstorage",
+      width: "10%",
+      sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
+      render: (text) => <p title={text}>{text + " TCM"}</p>,
     },
   ];
 
@@ -183,70 +141,34 @@ const WorkTable: React.FC = () => {
     filteredFeatures.map((feature, index) => ({
       key: index + 1,
       division: selectedDivision,
-      deptName: selectedDepartment,
-      // deptName: geoData.filter(
-      //   (f) => f.properties.deptName === selectedDepartment,
-      // ),
-
-      adminapprovalno: geoData.filter(
-        (f) =>
-          f.properties.adminapprovalno &&
-          f.properties.deptName === feature.properties.deptName,
-      ).length,
-      workstarted: geoData.filter(
-        (f) =>
-          f.properties.workstartdate &&
-          f.properties.deptName === feature.properties.deptName,
-      ).length,
-      estimatedcost: geoData
-        .filter((f) => f.properties.deptName === feature.properties.deptName)
-        .reduce(
-          (sum, feature) => sum + (feature.properties.estimatedcost || 0),
-          0,
-        ),
-      worksCompleted: geoData.filter(
-        (f) =>
-          f.properties.wocompletiondate > f.properties.workstartdate &&
-          f.properties.deptName === feature.properties.deptName,
-      ).length,
-      expectedwaterstorage: geoData
-        .filter((f) => f.properties.deptName === feature.properties.deptName)
-        .reduce(
-          (sum, feature) =>
-            sum + (feature.properties.expectedwaterstorage || 0),
-          0,
-        ),
+      district: feature.properties.district,
+      taluka: feature.properties.taluka,
+      deptName: feature.properties.deptName,
+      worktype: feature.properties.worktype,
+      estimatedcost: feature.properties.estimatedcost,
+      physicaltargetarea: feature.properties.physicaltargetarea,
+      expectedwaterstorage: feature.properties.expectedwaterstorage,
     })) || [];
 
-  // console.log(tableData, "tableData5");
-
-  const tableMap = new Map();
-
-  tableData.forEach((item) => {
-    console.log(item.division, "item.depname");
-    tableMap.set(item.deptName, item);
-    console.log(Array.from(tableMap.values()), "tableMap1");
-  });
-
-  const downloadExcel = () => {
+  const handleExport = () => {
     exportToExcel({
-      data: Array.from(tableMap.values()),
+      data: tableData,
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
-      fileName: "RepairWorks.xlsx",
+      fileName: "WorkMonitoring.xlsx",
       sheetName: "Work Data",
-      tableTitle: "Repair Works Table",
+      tableTitle: "Work Monitoring Table",
     });
   };
 
   return (
     <Flex gap={50} wrap="nowrap">
-      <Row gutter={[20, 20]} style={{ flexWrap: "nowrap" }}>
-        <Col span={10}>
-        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "0px", display: "block" }}>
-                        Jurisdictions
-                      </Typography.Text>
+      <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
+        <Col span={8.1}>
+        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
+                  Jurisdictions
+                </Typography.Text>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
-            <Col span={6}>
+            <Col span={8}>
               <Jurisdictions
                 title="Divisions"
                 data={Object.keys(divisionData)}
@@ -255,7 +177,7 @@ const WorkTable: React.FC = () => {
                 placeholder="No divisions available"
               />
             </Col>
-            <Col span={6}>
+            <Col span={8}>
               <Jurisdictions
                 title="Districts"
                 data={
@@ -268,7 +190,7 @@ const WorkTable: React.FC = () => {
                 placeholder="Select a Division"
               />
             </Col>
-            <Col span={6}>
+            <Col span={8}>
               <Jurisdictions
                 title="Talukas"
                 data={
@@ -291,34 +213,13 @@ const WorkTable: React.FC = () => {
                 placeholder="Select a District"
               />
             </Col>
-            <Col span={6}>
-              <Jurisdictions
-                title="Department"
-                data={
-                  selectedTaluka
-                    ? Array.from(
-                        new Set(
-                          geoData
-                            .filter(
-                              (feature) =>
-                                feature.properties.taluka === selectedTaluka,
-                            )
-                            .map((feature) => feature.properties.deptName),
-                        ),
-                      )
-                    : []
-                }
-                selectedItem={selectedDepartment}
-                onItemClick={handleDepartmentClick}
-                placeholder="No Departments Available"
-              />
-            </Col>
           </Row>
         </Col>
         <Divider type="vertical" style={{ height: "100%", borderColor: "" }} />
-        <Col span={14}>
+        <Col span={16}>
+          {/* Show loading spinner */}
           {loading ? (
-            <Spin size="large" /> // Show loading spinner
+            <Spin size="large" />
           ) : geoData.length === 0 ? (
             <Empty description="No data available" /> // Show empty state
           ) : (
@@ -326,9 +227,9 @@ const WorkTable: React.FC = () => {
               <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "0px", display: "block" }}>
                 Report Output
               </Typography.Text>
-              <Flex justify="right">
+              <Flex justify="right" gap="large">
                 <Button
-                  onClick={downloadExcel}
+                  onClick={handleExport}
                   style={{
                     backgroundColor: "#008CBA",
                     color: "white",
@@ -341,9 +242,7 @@ const WorkTable: React.FC = () => {
               <Table
                 columns={columns}
                 style={{ alignItems: "top" }}
-                dataSource={
-                  selectedDepartment ? Array.from(tableMap.values()) : []
-                }
+                dataSource={selectedDivision ? tableData : []}
                 size="small"
                 tableLayout="fixed"
                 pagination={{
@@ -355,7 +254,7 @@ const WorkTable: React.FC = () => {
                     setPageSize(pageSize);
                   },
                 }}
-                scroll={{ x: "100%", y: "100%" }}
+                scroll={{ x: "100%" }}
                 bordered
               />
             </div>

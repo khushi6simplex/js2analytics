@@ -108,6 +108,7 @@ const Chart2 = () => {
               borderWidth: 2,
             },
             breadcrumb: { show: false },
+            nodeClick: "none", // Disable zooming on node click
           },
         ],
       };
@@ -144,7 +145,7 @@ const Chart2 = () => {
           cursor: "pointer",
         }}
       >
-        Export as Excel
+        Export As Excel
       </button>
 
       <div

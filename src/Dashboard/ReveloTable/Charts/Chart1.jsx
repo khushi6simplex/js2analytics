@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
+import * as XLSX from "xlsx"; // Import XLSX for exporting data
 import { fetchGeoData } from "../../Data/useGeoData"; // Assuming fetchGeoData is similar to ReveloTable
 
 const Chart1 = () => {
@@ -37,6 +38,32 @@ const Chart1 = () => {
     return Object.entries(talukaMap).map(([name, value]) => ({ name, value }));
   };
 
+  // Export distinct talukas with total counts to Excel
+  const handleExport = () => {
+    if (!geoData || geoData.length === 0) {
+      console.error("No data available to export");
+      return;
+    }
+
+    // Summarize data by taluka for Excel
+    const talukaMap = geoData.reduce((acc, feature) => {
+      const taluka = feature.properties.taluka || "Unknown Taluka";
+      acc[taluka] = (acc[taluka] || 0) + 1;
+      return acc;
+    }, {});
+
+    const exportData = Object.entries(talukaMap).map(([taluka, count]) => ({
+      Taluka: taluka,
+      TotalCount: count,
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(exportData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Taluka Data");
+
+    XLSX.writeFile(workbook, "TalukaData.xlsx");
+  };
+
   // Initialize and update the TreeMap chart
   useEffect(() => {
     if (!geoData.length) return;
@@ -48,7 +75,7 @@ const Chart1 = () => {
 
       const treeMapOption = {
         title: {
-          text: "Works Started by Taluka",
+          text: "Work Started by Taluka",
           left: "center",
         },
         tooltip: {
@@ -62,6 +89,7 @@ const Chart1 = () => {
           {
             type: "treemap",
             data: treeMapData,
+            leafDepth: 1,
             label: {
               show: true,
               formatter: "{b}",
@@ -71,6 +99,7 @@ const Chart1 = () => {
               borderWidth: 2,
             },
             breadcrumb: { show: false },
+            nodeClick: "none", // Disable zooming on node click
           },
         ],
       };
@@ -90,8 +119,30 @@ const Chart1 = () => {
   }, [geoData]);
 
   return (
-    <div>
-      <div ref={workStartedChartRef} style={{ width: "100%", height: "40vh" }}></div>
+    <div style={{ position: "relative" }}>
+      {/* Export Button */}
+      <button
+        onClick={handleExport}
+        style={{
+          position: "absolute",
+          top: "10px",
+          right: "10px",
+          zIndex: 10, // Ensure it's on top
+          padding: "5px 10px",
+          backgroundColor: "#007bff",
+          color: "#fff",
+          border: "none",
+          borderRadius: "4px",
+          cursor: "pointer",
+        }}
+      >
+        Export as Excel
+      </button>
+
+      <div
+        ref={workStartedChartRef}
+        style={{ width: "100%", height: "40vh" }}
+      ></div>
     </div>
   );
 };
