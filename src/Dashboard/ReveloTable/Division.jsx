@@ -3,24 +3,24 @@ import ReveloTable from "./ReveloTable";
 
 const Division = () => {
   // List of divisions
-  const divisions = ["Nagpur", "Mumbai", "Pune", "Nashik", "Aurangabad"];
+  const divisions = [ "Nagpur", "Mumbai", "Pune", "Nashik", "Aurangabad" ];
 
   // State to store the selected division
-  const [selectedDivision, setSelectedDivision] = useState("Nagpur");
+  const [ selectedDivision, setSelectedDivision ] = useState( "Nagpur" );
 
   // Handle click on a division
-  const handleDivisionClick = (division) => {
-    setSelectedDivision(division);
+  const handleDivisionClick = ( division ) => {
+    setSelectedDivision( division );
   };
 
   return (
     <div style={{ padding: "20px", maxWidth: "800px", margin: "0 auto" }}>
       <h2>Divisions</h2>
       <div style={{ display: "flex", flexDirection: "row", gap: "10px" }}>
-        {divisions.map((division) => (
+        {divisions.map( ( division ) => (
           <div
             key={division}
-            onClick={() => handleDivisionClick(division)}
+            onClick={() => handleDivisionClick( division )}
             style={{
               padding: "10px",
               backgroundColor:
@@ -35,7 +35,7 @@ const Division = () => {
           >
             {division}
           </div>
-        ))}
+        ) )}
       </div>
       {/* Pass the selected division to the ReveloTable */}
       <ReveloTable selectedDivision={selectedDivision} />

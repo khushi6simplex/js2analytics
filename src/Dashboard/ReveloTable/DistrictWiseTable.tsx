@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from "react";
-import { Table, Row, Col, Spin, Empty, Flex, Button, Typography, Divider} from "antd";
+import { Table, Row, Col, Spin, Empty, Flex, Button, Typography, Divider } from "antd";
 import { fetchGeoData } from "../Data/useGeoData";
 import Jurisdictions from "../Jurisdiction/Jurisdiction"; // Importing Jurisdictions
 import divisionData from "../division.json";
 import { exportToExcel } from "../Excel/Excel";
+import '../Dashboard.css';
 
 const DistrictWiseTable: React.FC = () => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
@@ -41,6 +42,22 @@ const DistrictWiseTable: React.FC = () => {
 
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(taluka === selectedTaluka ? null : taluka);
+  };
+
+  const calculateTotals = (data) => {
+    const totals = {
+      key: "totals",
+      division: "Total",
+      district: "",
+      taluka: "",
+      worksCount: data.reduce((sum, item) => sum + (item.worksCount || 0), 0),
+      worksGeotagged: data.reduce((sum, item) => sum + (item.worksGeotagged || 0), 0),
+      worksStarted: data.reduce((sum, item) => sum + (item.worksStarted || 0), 0),
+      worksCompleted: data.reduce((sum, item) => sum + (item.worksCompleted || 0), 0),
+      totalWoAmount: data.reduce((sum, item) => sum + (item.totalWoAmount || 0), 0).toFixed(2),
+      physicalTargetArea: data.reduce((sum, item) => sum + (item.physicalTargetArea || 0), 0).toFixed(2),
+    };
+    return totals;
   };
 
   const getSummarizedData = () => {
@@ -139,18 +156,18 @@ const DistrictWiseTable: React.FC = () => {
   };
 
   const columns = [
-    { title: "Division", dataIndex: "division", key: "division" },
-    { title: "District", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const },
-    { title: "Taluka", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.district.localeCompare(b.taluka) },
-    { title: "Works Count", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount },
-    { title: "Works Geotagged", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged },
-    { title: "Works Started", dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted },
-    { title: "Works Completed", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted },
-    { title: "Total Work Order Amount", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount, render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p> },
-    { title: "Physical Target Area", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p> },
+    { title: "Division", dataIndex: "division", key: "division", className: "center" },
+    { title: "District", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const, className: "center" },
+    { title: "Taluka", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.district.localeCompare(b.taluka), className: "center" },
+    { title: "Works Count", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount, className: "center" },
+    { title: "Works Geotagged", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged, className: "center" },
+    { title: "Works Started", dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted, className: "center" },
+    { title: "Works Completed", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted, className: "center" },
+    { title: "Total Work Order Amount", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount, render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>, className: "center" },
+    { title: "Physical Target Area", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p>, className: "center" },
   ];
 
-    const handleExport = () => {
+  const handleExport = () => {
     exportToExcel({
       data: getSummarizedData(),
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
@@ -164,9 +181,9 @@ const DistrictWiseTable: React.FC = () => {
     <Flex gap={50} wrap="nowrap">
       <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
         <Col span={8.1}>
-        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
-          Jurisdictions
-        </Typography.Text>
+          <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
+            Jurisdictions
+          </Typography.Text>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
             <Col span={8}>
               <Jurisdictions
@@ -192,12 +209,12 @@ const DistrictWiseTable: React.FC = () => {
                 data={
                   selectedDistrict
                     ? Array.from(
-                        new Set(
-                          geoData
-                            .filter((feature) => feature.properties.district === selectedDistrict)
-                            .map((feature) => feature.properties.taluka)
-                        )
+                      new Set(
+                        geoData
+                          .filter((feature) => feature.properties.district === selectedDistrict)
+                          .map((feature) => feature.properties.taluka)
                       )
+                    )
                     : []
                 }
                 selectedItem={selectedTaluka}
@@ -215,7 +232,7 @@ const DistrictWiseTable: React.FC = () => {
             <Empty description="No data available" /> // Show empty state
           ) : (
             <div>
-              
+
               <Flex gap="large" justify="space-between" align="center">
                 <Typography.Text
                   style={{
@@ -252,7 +269,36 @@ const DistrictWiseTable: React.FC = () => {
                 }}
                 scroll={{ x: "100%" }}
                 bordered
+                summary={(pageData) => {
+                  const totals = calculateTotals(pageData);
+                  return (
+                    <Table.Summary.Row>
+                      <Table.Summary.Cell index={0} colSpan={3}>
+                        <div style={{ textAlign: "center", fontWeight: "bolder"}}>Total</div>
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={1} className="center">
+                        {totals.worksCount}
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={2} className="center">
+                        {totals.worksGeotagged}
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={3} className="center">
+                        {totals.worksStarted}
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={4} className="center">
+                        {totals.worksCompleted}
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={5} className="center">
+                        ₹{totals.totalWoAmount}
+                      </Table.Summary.Cell>
+                      <Table.Summary.Cell index={6} className="center">
+                        {totals.physicalTargetArea} sq.m.
+                      </Table.Summary.Cell>
+                    </Table.Summary.Row>
+                  );
+                }}
               />
+
             </div>
           )}
         </Col>

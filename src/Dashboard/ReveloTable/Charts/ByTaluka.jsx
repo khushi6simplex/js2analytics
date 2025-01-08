@@ -3,7 +3,8 @@ import * as echarts from "echarts";
 import * as XLSX from "xlsx";
 import { fetchGeoData } from "../../Data/useGeoData";
 
-const Chart1 = () => {
+// eslint-disable-next-line react/prop-types
+const ByTaluka = ({ linkedData }) => {
   const [geoData, setGeoData] = useState([]);
   const barChartRef = useRef(null);
 
@@ -20,6 +21,17 @@ const Chart1 = () => {
 
     fetchData();
   }, []);
+
+  // Filter data by the selected district
+  const getFilteredData = () => {
+    if (!linkedData || !linkedData.taluka) {
+      return []; // Return empty if no district is selected
+    }
+    return geoData.filter(
+      (feature) =>
+        feature.properties.district === linkedData.taluka // Match district name with clicked district
+    );
+  };
 
   // Extract distinct talukas and calculate total work counts
   const getBarChartData = (data) => {
@@ -39,37 +51,60 @@ const Chart1 = () => {
     return { talukas, counts };
   };
 
-  // Export distinct talukas with total counts to Excel
+  // Export filtered talukas with total counts to Excel
   const handleExport = () => {
-    if (!geoData || geoData.length === 0) {
+    const filteredData = getFilteredData();
+    if (!filteredData || filteredData.length === 0) {
       console.error("No data available to export");
       return;
     }
-
-    const exportData = geoData.map((feature) => ({
-      Taluka: feature.properties.taluka || "Unknown Taluka",
+  
+    // Aggregate talukas and calculate works count
+    const talukaMap = filteredData.reduce((acc, feature) => {
+      const taluka = feature.properties.taluka || "Unknown Taluka";
+      acc[taluka] = (acc[taluka] || 0) + 1; // Count works for each taluka
+      return acc;
+    }, {});
+  
+    // Prepare export data with two columns: Taluka and Works Count
+    const exportData = Object.entries(talukaMap).map(([taluka, count]) => ({
+      Taluka: taluka,
+      WorksCount: count,
     }));
-
+  
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Taluka Data");
-
-    XLSX.writeFile(workbook, "TalukaData.xlsx");
+  
+    // Generate a readable filename with a timestamp
+    const now = new Date();
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+      now.getDate()
+    ).padStart(2, "0")}T${String(now.getHours()).padStart(2, "0")}-${String(
+      now.getMinutes()
+    ).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}`;
+  
+    const fileName = `TalukaData_${timestamp}.xlsx`;
+  
+    // Download the Excel file
+    XLSX.writeFile(workbook, fileName);
   };
+  
 
   useEffect(() => {
-    if (!geoData || geoData.length === 0) {
+    const filteredData = getFilteredData();
+    if (!filteredData || filteredData.length === 0) {
       return;
     }
 
-    const { talukas, counts } = getBarChartData(geoData);
+    const { talukas, counts } = getBarChartData(filteredData);
 
     if (barChartRef.current) {
       const barChart = echarts.init(barChartRef.current);
 
       const barChartOption = {
         title: {
-          text: "Works Count by Taluka",
+          text: `Works Count by Taluka in ${linkedData?.taluka || "District"}`,
           left: "center",
           top: "10px",
         },
@@ -112,7 +147,7 @@ const Chart1 = () => {
         barChart.dispose();
       };
     }
-  }, [geoData]);
+  }, [geoData, linkedData]);
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
@@ -141,4 +176,4 @@ const Chart1 = () => {
   );
 };
 
-export default Chart1;
+export default ByTaluka;

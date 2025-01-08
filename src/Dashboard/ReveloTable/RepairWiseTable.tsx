@@ -92,6 +92,7 @@ function RepairWiseReport() {
       key: "workcount",
       width: "20%",
       sorter: (a, b) => a.workcount - b.workcount,
+      className: "center"
     },
     {
       title: "Estimated Cost",
@@ -99,6 +100,7 @@ function RepairWiseReport() {
       key: "workprice",
       width: "20%",
       sorter: (a, b) => a.workprice - b.workprice,
+      className: "center"
     },
   ];
 

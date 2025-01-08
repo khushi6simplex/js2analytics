@@ -31,6 +31,10 @@
   display: inline-block !important;
   max-width: 50% !important;
   /* white-space: nowrap !important; */
-  overflow: hidden !important;
-  text-overflow: ellipsis !important;
+  /* overflow: hidden !important;
+  text-overflow: ellipsis !important; 
 } */
+
+.center {
+  text-align: center;
+}

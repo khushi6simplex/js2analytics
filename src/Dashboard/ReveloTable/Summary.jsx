@@ -1,10 +1,19 @@
+import { useState } from "react";
 import { Card } from "antd";
-import Chart2 from "./Charts/Chart2";
-import Chart1 from "./Charts/Chart1";
+import ByDistrict from "./Charts/ByDistrict";
+import ByTaluka from "./Charts/ByTaluka";
 
 const Summary = () => {
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
+
+  // Callback function to handle the selected district from ByDistrict
+  const handleDistrictClick = (clickedDistrict) => {
+    setSelectedDistrict({ taluka: clickedDistrict });
+  };
+
   return (
     <div>
+      {/* ByDistrict Card */}
       <Card
         style={{
           height: "40vh",
@@ -16,8 +25,11 @@ const Summary = () => {
           alignItems: "center",
         }}
       >
-        <Chart2 />
+        {/* Pass the callback to handle district click */}
+        <ByDistrict onBarClick={handleDistrictClick} />
       </Card>
+
+      {/* ByTaluka Card */}
       <Card
         style={{
           height: "40vh",
@@ -28,7 +40,8 @@ const Summary = () => {
           alignItems: "center",
         }}
       >
-        <Chart1 />
+        {/* Pass the selected district to ByTaluka */}
+        <ByTaluka linkedData={selectedDistrict} />
       </Card>
     </div>
   );
