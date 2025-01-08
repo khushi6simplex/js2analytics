@@ -6,29 +6,16 @@ import WorkMonitoringTable from "../Dashboard/ReveloTable/WorkMonitoringTable";
 import DepartmentTable from "../Dashboard/ReveloTable/DepartmentTable";
 import RepairWiseReport from "./ReveloTable/RepairWiseTable";
 import Header from "./header/Header";
-import Overview from "./ReveloTable/Overview";
+import Summary from "./ReveloTable/Summary";
 
 const Dashboard = () => {
-  const [jurisdiction, setJurisdiction] = useState();
-  const [selectedValues, setSelectedValues] = useState({});
-  const [selectedOption, setSelectedOption] = useState({});
-  const [selectedTabLabel, setSelectedTabLabel] = useState("Overview"); // Set the default tab label
-
-  const handleReset = () => {
-    const resetValues = {};
-    Object.keys(selectedValues).forEach((panel) => {
-      resetValues[panel] = "All";
-    });
-    setSelectedValues(resetValues);
-    setJurisdiction(undefined);
-    setSelectedOption(undefined);
-  };
+  const [setSelectedTabLabel] = useState("Summary"); // Set the default tab label
 
   const items = [
     {
       key: "1",
       label: "Summary",
-      children: <Overview />,
+      children: <Summary />,
     },
     {
       key: "2",
@@ -88,12 +75,13 @@ const Dashboard = () => {
         <Header />
         <Flex vertical justify="center">
           {/* "Reports" Text on Left */}
-          <Flex style={{ marginTop: "20px" }}>
+          <Flex style={{ marginTop: "0px", marginBottom: "-10px" }}>
             <Typography.Text
               style={{
                 fontSize: "20px",
                 fontWeight: "600",
-                marginLeft: "-10px",
+                marginLeft: "-20px",
+                alignContent: "start"
               }}>
               Reports
             </Typography.Text>

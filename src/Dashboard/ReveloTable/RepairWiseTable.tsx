@@ -178,7 +178,7 @@ function RepairWiseReport() {
                 }
                 selectedItem={selectedDistrict}
                 onItemClick={handleDistrictClick}
-                placeholder="Select a Division"
+                placeholder=""
               />
             </Col>
             <Col span={8}>
@@ -201,7 +201,7 @@ function RepairWiseReport() {
                 }
                 selectedItem={selectedTaluka}
                 onItemClick={handleTalukaClick}
-                placeholder="Select a District"
+                placeholder=""
               />
             </Col>
           </Row>
@@ -214,15 +214,27 @@ function RepairWiseReport() {
             <Empty description="No data available" /> // Show empty state
           ) : (
             <div>
-              <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
-                        Report Output
-                      </Typography.Text>
-              <Flex justify="right" gap="small">
-                <Button
-                  onClick={handleExport}
-                  style={{ backgroundColor: "#008CBA", color: "white" }}>
-                  Export As Excel
-                </Button>
+              <Flex gap="large" justify="space-between" align="center">
+                <Typography.Text
+                                  style={{
+                                    fontSize: "20px",
+                                    fontWeight: "700",
+                                    paddingBottom: "10px",
+                                    display: "block",
+                                  }}
+                                >
+                                  Report Output
+                                </Typography.Text>
+                  <Button
+                                    onClick={handleExport}
+                                    style={{
+                                      backgroundColor: "#008CBA",
+                                      color: "white",
+                                      marginBottom: "10px",
+                                    }}
+                                  >
+                                    Export As Excel
+                                  </Button>              
               </Flex>
 
               <Flex vertical>

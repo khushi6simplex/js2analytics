@@ -1,11 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 import * as echarts from "echarts";
-import * as XLSX from "xlsx"; // Import XLSX for exporting data
-import { fetchGeoData } from "../../Data/useGeoData"; // Assuming fetchGeoData is similar to ReveloTable
+import * as XLSX from "xlsx";
+import { fetchGeoData } from "../../Data/useGeoData";
 
 const Chart1 = () => {
   const [geoData, setGeoData] = useState([]);
-  const workStartedChartRef = useRef(null);
+  const barChartRef = useRef(null);
 
   // Fetch data from GeoServer
   useEffect(() => {
@@ -22,20 +22,21 @@ const Chart1 = () => {
   }, []);
 
   // Extract distinct talukas and calculate total work counts
-  const getTreeMapData = (data) => {
+  const getBarChartData = (data) => {
     if (!data || data.length === 0) {
-      return [{ name: "No Data Available", value: 1 }];
+      return { talukas: ["No Data Available"], counts: [0] };
     }
 
-    // Summarize data by taluka
     const talukaMap = data.reduce((acc, feature) => {
       const taluka = feature.properties.taluka || "Unknown Taluka";
       acc[taluka] = (acc[taluka] || 0) + 1; // Count works for each taluka
       return acc;
     }, {});
 
-    // Convert to array format suitable for TreeMap
-    return Object.entries(talukaMap).map(([name, value]) => ({ name, value }));
+    const talukas = Object.keys(talukaMap);
+    const counts = Object.values(talukaMap);
+
+    return { talukas, counts };
   };
 
   // Export distinct talukas with total counts to Excel
@@ -45,16 +46,8 @@ const Chart1 = () => {
       return;
     }
 
-    // Summarize data by taluka for Excel
-    const talukaMap = geoData.reduce((acc, feature) => {
-      const taluka = feature.properties.taluka || "Unknown Taluka";
-      acc[taluka] = (acc[taluka] || 0) + 1;
-      return acc;
-    }, {});
-
-    const exportData = Object.entries(talukaMap).map(([taluka, count]) => ({
-      Taluka: taluka,
-      TotalCount: count,
+    const exportData = geoData.map((feature) => ({
+      Taluka: feature.properties.taluka || "Unknown Taluka",
     }));
 
     const worksheet = XLSX.utils.json_to_sheet(exportData);
@@ -64,70 +57,72 @@ const Chart1 = () => {
     XLSX.writeFile(workbook, "TalukaData.xlsx");
   };
 
-  // Initialize and update the TreeMap chart
   useEffect(() => {
-    if (!geoData.length) return;
+    if (!geoData || geoData.length === 0) {
+      return;
+    }
 
-    const treeMapData = getTreeMapData(geoData);
+    const { talukas, counts } = getBarChartData(geoData);
 
-    if (workStartedChartRef.current) {
-      const treeMapChart = echarts.init(workStartedChartRef.current);
+    if (barChartRef.current) {
+      const barChart = echarts.init(barChartRef.current);
 
-      const treeMapOption = {
+      const barChartOption = {
         title: {
-          text: "Work Started by Taluka",
+          text: "Works Count by Taluka",
           left: "center",
+          top: "10px",
         },
         tooltip: {
-          formatter: (info) => {
-            const value = info.value || 0;
-            return `${info.name}: ${value}`;
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+        },
+        xAxis: {
+          type: "category",
+          data: talukas,
+          axisLabel: {
+            rotate: 45, // Rotate labels for better readability
+            interval: 0,
           },
         },
-        legend: { show: false },
+        yAxis: {
+          type: "value",
+        },
         series: [
           {
-            type: "treemap",
-            data: treeMapData,
-            leafDepth: 1,
-            label: {
-              show: true,
-              formatter: "{b}",
-            },
+            name: "Work Counts",
+            type: "bar",
+            data: counts,
             itemStyle: {
-              borderColor: "#fff",
-              borderWidth: 2,
+              color: "#90EE90", // Light green color
             },
-            breadcrumb: { show: false },
-            nodeClick: "none", // Disable zooming on node click
           },
         ],
       };
 
-      treeMapChart.setOption(treeMapOption);
+      barChart.setOption(barChartOption);
 
       const handleResize = () => {
-        treeMapChart.resize();
+        barChart.resize();
       };
       window.addEventListener("resize", handleResize);
 
       return () => {
         window.removeEventListener("resize", handleResize);
-        treeMapChart.dispose();
+        barChart.dispose();
       };
     }
   }, [geoData]);
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* Export Button */}
+    <div style={{ width: "100%", height: "100%" }}>
       <button
         onClick={handleExport}
         style={{
           position: "absolute",
           top: "10px",
           right: "10px",
-          zIndex: 10, // Ensure it's on top
+          zIndex: 10,
           padding: "5px 10px",
           backgroundColor: "#007bff",
           color: "#fff",
@@ -136,12 +131,11 @@ const Chart1 = () => {
           cursor: "pointer",
         }}
       >
-        Export as Excel
+        Export As Excel
       </button>
-
       <div
-        ref={workStartedChartRef}
-        style={{ width: "100%", height: "40vh" }}
+        ref={barChartRef}
+        style={{ width: "100vw", height: "40vh" }}
       ></div>
     </div>
   );

@@ -37,7 +37,7 @@ const Chart2 = () => {
     fetchData();
   }, []);
 
-  const getTreeMapData = (data) => {
+  const getBarChartData = (data) => {
     const districtsWithWorkStarted = data
       .filter(
         (hit) =>
@@ -51,7 +51,7 @@ const Chart2 = () => {
 
     return districtsWithWorkStarted.length > 0
       ? districtsWithWorkStarted
-      : [{ name: "No Data Available", value: 1 }];
+      : [{ name: "No Data Available", value: 0 }];
   };
 
   const handleExport = () => {
@@ -77,66 +77,67 @@ const Chart2 = () => {
       return;
     }
 
-    const treeMapData = getTreeMapData(jsonData.hits.hits);
+    const barChartData = getBarChartData(jsonData.hits.hits);
 
     if (workStartedChartRef.current) {
-      const treeMapChart = echarts.init(workStartedChartRef.current);
+      const barChart = echarts.init(workStartedChartRef.current);
 
-      const treeMapOption = {
+      const barChartOption = {
         title: {
           text: "Water Budgets Created by Districts",
           left: "center",
+          top: "10px",
         },
         tooltip: {
-          formatter: (info) => {
-            const value = info.value || 0;
-            return `${info.name}: ${value}`;
+          trigger: "axis",
+          axisPointer: { type: "shadow" },
+        },
+        xAxis: {
+          type: "category",
+          data: barChartData.map((item) => item.name),
+          axisLabel: {
+            rotate: 45, // Rotate labels for better readability
+            interval: 0,
           },
         },
-        legend: { show: false },
+        yAxis: {
+          type: "value",
+        },
         series: [
           {
-            type: "treemap",
-            data: treeMapData,
-            leafDepth: 1,
-            label: {
-              show: true,
-              formatter: "{b}",
-            },
+            name: "Water Budgets",
+            type: "bar",
+            data: barChartData.map((item) => item.value),
             itemStyle: {
-              borderColor: "#fff",
-              borderWidth: 2,
+              color: "#007bff",
             },
-            breadcrumb: { show: false },
-            nodeClick: "none", // Disable zooming on node click
           },
         ],
       };
 
-      treeMapChart.setOption(treeMapOption);
+      barChart.setOption(barChartOption);
 
       const handleResize = () => {
-        treeMapChart.resize();
+        barChart.resize();
       };
       window.addEventListener("resize", handleResize);
 
       return () => {
         window.removeEventListener("resize", handleResize);
-        treeMapChart.dispose();
+        barChart.dispose();
       };
     }
   }, [jsonData]);
 
   return (
-    <div style={{ position: "relative" }}>
-      {/* Export Button */}
+    <div style={{ width: "100%", height: "100%" }}>
       <button
         onClick={handleExport}
         style={{
           position: "absolute",
           top: "10px",
           right: "10px",
-          zIndex: 10, // Ensure it's on top
+          zIndex: 10,
           padding: "5px 10px",
           backgroundColor: "#007bff",
           color: "#fff",
@@ -147,10 +148,9 @@ const Chart2 = () => {
       >
         Export As Excel
       </button>
-
       <div
         ref={workStartedChartRef}
-        style={{ width: "100%", height: "40vh" }}
+        style={{ width: "100vw", height: "40vh" }}
       ></div>
     </div>
   );

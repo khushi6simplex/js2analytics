@@ -92,13 +92,6 @@ const WorkTable: React.FC = () => {
       dataIndex: "division",
       key: "division",
       width: "10%",
-      // render: () => selectedDivision || "N/A",
-      // ellipsis: true,
-      //   render: (text) => (
-      //    <Tooltip placement="topLeft" title={text}>
-      //      {text}
-      //    </Tooltip>
-      //  ),
     },
 
     {
@@ -109,11 +102,6 @@ const WorkTable: React.FC = () => {
       defaultSortOrder: "ascend" as const,
       sorter: (a, b) => a.deptName.localeCompare(b.deptName),
       ellipsis: true,
-      //  render: (text) => (
-      //   <Tooltip placement="topLeft" title={text}>
-      //     {text}
-      //   </Tooltip>
-      // ),
     },
 
     {
@@ -122,12 +110,6 @@ const WorkTable: React.FC = () => {
       key: "adminapprovalno",
       width: "10%",
       sorter: (a, b) => a.adminapprovalno - b.adminapprovalno,
-      //  ellipsis: true,
-      // render: (text) => (
-      //   <Tooltip placement="topLeft" title={text}>
-      //     {text}
-      //   </Tooltip>
-      // ),
     },
     {
       title: "Works Started",
@@ -135,15 +117,6 @@ const WorkTable: React.FC = () => {
       key: "workstarted",
       width: "10%",
       sorter: (a, b) => a.workstarted - b.workstarted,
-      // render: (text) => {
-      //   const date = dayjs(text);
-      //   const formattedDate = date.format("MMMM D, YYYY");
-      //   return (
-      //     <p title={formattedDate}>
-      //       {formattedDate}
-      //     </p>
-      //   );
-      // },
     },
     {
       title: "Works Completed",
@@ -151,11 +124,6 @@ const WorkTable: React.FC = () => {
       key: "worksCompleted",
       width: "15%",
       sorter: (a, b) => a.worksCompleted - b.worksCompleted,
-      //  render: (text) => (
-      //   <p  title={text}>
-      //     {text+"sq.m"}
-      //   </p>
-      // ),
     },
     {
       title: "Expected Water Storage",
@@ -184,10 +152,6 @@ const WorkTable: React.FC = () => {
       key: index + 1,
       division: selectedDivision,
       deptName: selectedDepartment,
-      // deptName: geoData.filter(
-      //   (f) => f.properties.deptName === selectedDepartment,
-      // ),
-
       adminapprovalno: geoData.filter(
         (f) =>
           f.properties.adminapprovalno &&
@@ -218,8 +182,6 @@ const WorkTable: React.FC = () => {
         ),
     })) || [];
 
-  // console.log(tableData, "tableData5");
-
   const tableMap = new Map();
 
   tableData.forEach((item) => {
@@ -228,7 +190,7 @@ const WorkTable: React.FC = () => {
     console.log(Array.from(tableMap.values()), "tableMap1");
   });
 
-  const downloadExcel = () => {
+  const handleExport = () => {
     exportToExcel({
       data: Array.from(tableMap.values()),
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
@@ -242,9 +204,9 @@ const WorkTable: React.FC = () => {
     <Flex gap={50} wrap="nowrap">
       <Row gutter={[20, 20]} style={{ flexWrap: "nowrap" }}>
         <Col span={10}>
-        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "0px", display: "block" }}>
-                        Jurisdictions
-                      </Typography.Text>
+        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
+          Jurisdictions
+        </Typography.Text>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
             <Col span={6}>
               <Jurisdictions
@@ -265,7 +227,7 @@ const WorkTable: React.FC = () => {
                 }
                 selectedItem={selectedDistrict}
                 onItemClick={handleDistrictClick}
-                placeholder="Select a Division"
+                placeholder=""
               />
             </Col>
             <Col span={6}>
@@ -288,7 +250,7 @@ const WorkTable: React.FC = () => {
                 }
                 selectedItem={selectedTaluka}
                 onItemClick={handleTalukaClick}
-                placeholder="Select a District"
+                placeholder=""
               />
             </Col>
             <Col span={6}>
@@ -323,20 +285,28 @@ const WorkTable: React.FC = () => {
             <Empty description="No data available" /> // Show empty state
           ) : (
             <div>
-              <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "0px", display: "block" }}>
-                Report Output
-              </Typography.Text>
-              <Flex justify="right">
-                <Button
-                  onClick={downloadExcel}
-                  style={{
-                    backgroundColor: "#008CBA",
-                    color: "white",
-                    marginBottom: "10px",
-                  }}>
-                  Export As Excel
-                </Button>
-              </Flex>
+              <Flex gap="large" justify="space-between" align="center">
+                              <Typography.Text
+                                style={{
+                                  fontSize: "20px",
+                                  fontWeight: "700",
+                                  paddingBottom: "10px",
+                                  display: "block",
+                                }}
+                              >
+                                Report Output
+                              </Typography.Text>
+                              <Button
+                                onClick={handleExport}
+                                style={{
+                                  backgroundColor: "#008CBA",
+                                  color: "white",
+                                  marginBottom: "10px",
+                                }}
+                              >
+                                Export As Excel
+                              </Button>
+                            </Flex>
 
               <Table
                 columns={columns}

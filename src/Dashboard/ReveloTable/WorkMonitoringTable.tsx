@@ -187,7 +187,7 @@ const WorkTable: React.FC = () => {
                 }
                 selectedItem={selectedDistrict}
                 onItemClick={handleDistrictClick}
-                placeholder="Select a Division"
+                placeholder=""
               />
             </Col>
             <Col span={8}>
@@ -210,7 +210,7 @@ const WorkTable: React.FC = () => {
                 }
                 selectedItem={selectedTaluka}
                 onItemClick={handleTalukaClick}
-                placeholder="Select a District"
+                placeholder=""
               />
             </Col>
           </Row>
@@ -224,20 +224,28 @@ const WorkTable: React.FC = () => {
             <Empty description="No data available" /> // Show empty state
           ) : (
             <div>
-              <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "0px", display: "block" }}>
-                Report Output
-              </Typography.Text>
-              <Flex justify="right" gap="large">
-                <Button
-                  onClick={handleExport}
-                  style={{
-                    backgroundColor: "#008CBA",
-                    color: "white",
-                    marginBottom: "10px",
-                  }}>
-                  Export As Excel
-                </Button>
-              </Flex>
+              <Flex gap="large" justify="space-between" align="center">
+                              <Typography.Text
+                                style={{
+                                  fontSize: "20px",
+                                  fontWeight: "700",
+                                  paddingBottom: "10px",
+                                  display: "block",
+                                }}
+                              >
+                                Report Output
+                              </Typography.Text>
+                              <Button
+                                onClick={handleExport}
+                                style={{
+                                  backgroundColor: "#008CBA",
+                                  color: "white",
+                                  marginBottom: "10px",
+                                }}
+                              >
+                                Export As Excel
+                              </Button>
+                            </Flex>
 
               <Table
                 columns={columns}

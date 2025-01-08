@@ -140,7 +140,7 @@ const DistrictWiseTable: React.FC = () => {
 
   const columns = [
     { title: "Division", dataIndex: "division", key: "division" },
-    { title: "District", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" },
+    { title: "District", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const },
     { title: "Taluka", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.district.localeCompare(b.taluka) },
     { title: "Works Count", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount },
     { title: "Works Geotagged", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged },
@@ -183,7 +183,7 @@ const DistrictWiseTable: React.FC = () => {
                 data={selectedDivision ? divisionData[selectedDivision]?.districts || [] : []}
                 selectedItem={selectedDistrict}
                 onItemClick={handleDistrictClick}
-                placeholder="Select a Division"
+                placeholder=""
               />
             </Col>
             <Col span={8}>
@@ -202,7 +202,7 @@ const DistrictWiseTable: React.FC = () => {
                 }
                 selectedItem={selectedTaluka}
                 onItemClick={handleTalukaClick}
-                placeholder="Select a District"
+                placeholder=""
               />
             </Col>
           </Row>
@@ -215,17 +215,26 @@ const DistrictWiseTable: React.FC = () => {
             <Empty description="No data available" /> // Show empty state
           ) : (
             <div>
-              <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "0px", display: "block" }}>
-                Report Output
-              </Typography.Text>
-              <Flex justify="right" gap="large">
+              
+              <Flex gap="large" justify="space-between" align="center">
+                <Typography.Text
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    paddingBottom: "10px",
+                    display: "block",
+                  }}
+                >
+                  Report Output
+                </Typography.Text>
                 <Button
                   onClick={handleExport}
                   style={{
                     backgroundColor: "#008CBA",
                     color: "white",
                     marginBottom: "10px",
-                  }}>
+                  }}
+                >
                   Export As Excel
                 </Button>
               </Flex>
