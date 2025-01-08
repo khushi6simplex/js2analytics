@@ -48,13 +48,16 @@ const WorkTable: React.FC = () => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
   const handleDistrictClick = (district: string) => {
     setSelectedDistrict(selectedDistrict === district ? null : district);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
+    setCurrentPage(1);
   };
 
   const handleDepartmentClick = (deptName: string) => {
@@ -131,11 +134,7 @@ const WorkTable: React.FC = () => {
       key: "expectedwaterstorage",
       width: "15%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
-      render: (text) => (
-        <p  title={text}>
-          {text+" TCM"}
-        </p>
-      ),
+      render: (text) => <p title={text}>{text + " TCM"}</p>,
     },
     {
       title: "Estimated Cost",
@@ -143,7 +142,19 @@ const WorkTable: React.FC = () => {
       key: "estimatedcost",
       width: "15%",
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
-      render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>,
+      render: (text) => (
+        <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
+      ),
+    },
+    {
+      title: "GeoTagged",
+      dataIndex: "geometry",
+      key: "geometry",
+      width: "15%",
+      // sorter: (a, b) => a.estimatedcost - b.estimatedcost,
+      // render: (text) => (
+      //   <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
+      // ),
     },
   ];
 
@@ -180,6 +191,7 @@ const WorkTable: React.FC = () => {
             sum + (feature.properties.expectedwaterstorage || 0),
           0,
         ),
+      geometry: feature.geometry === null ? "No" : "Yes",
     })) || [];
 
   const tableMap = new Map();
@@ -192,7 +204,7 @@ const WorkTable: React.FC = () => {
 
   const handleExport = () => {
     exportToExcel({
-      data: Array.from(tableMap.values()),
+      data: selectedDivision ? Array.from(tableMap.values()) : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
       fileName: "RepairWorks.xlsx",
       sheetName: "Work Data",
@@ -201,12 +213,18 @@ const WorkTable: React.FC = () => {
   };
 
   return (
-    <Flex gap={50} wrap="nowrap">
+    <Flex gap={30} wrap="nowrap">
       <Row gutter={[20, 20]} style={{ flexWrap: "nowrap" }}>
         <Col span={10}>
-        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
-          Jurisdictions
-        </Typography.Text>
+          <Typography.Text
+            style={{
+              fontSize: "20px",
+              fontWeight: "700",
+              paddingBottom: "10px",
+              display: "block",
+            }}>
+            Jurisdictions
+          </Typography.Text>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
             <Col span={6}>
               <Jurisdictions
@@ -286,27 +304,25 @@ const WorkTable: React.FC = () => {
           ) : (
             <div>
               <Flex gap="large" justify="space-between" align="center">
-                              <Typography.Text
-                                style={{
-                                  fontSize: "20px",
-                                  fontWeight: "700",
-                                  paddingBottom: "10px",
-                                  display: "block",
-                                }}
-                              >
-                                Report Output
-                              </Typography.Text>
-                              <Button
-                                onClick={handleExport}
-                                style={{
-                                  backgroundColor: "#008CBA",
-                                  color: "white",
-                                  marginBottom: "10px",
-                                }}
-                              >
-                                Export As Excel
-                              </Button>
-                            </Flex>
+                <Typography.Text
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    paddingBottom: "10px",
+                    display: "block",
+                  }}>
+                  Report Output
+                </Typography.Text>
+                <Button
+                  onClick={handleExport}
+                  style={{
+                    backgroundColor: "#008CBA",
+                    color: "white",
+                    marginBottom: "10px",
+                  }}>
+                  Export As Excel
+                </Button>
+              </Flex>
 
               <Table
                 columns={columns}
@@ -320,12 +336,13 @@ const WorkTable: React.FC = () => {
                   pageSize: pageSize,
                   showSizeChanger: false,
                   total: 0,
+                  current: currentPage,
                   onChange: (page, pageSize) => {
                     setCurrentPage(page);
                     setPageSize(pageSize);
                   },
                 }}
-                scroll={{ x: "100%", y: "100%" }}
+                // scroll={{ x: "100%", y: "100%" }}
                 bordered
               />
             </div>

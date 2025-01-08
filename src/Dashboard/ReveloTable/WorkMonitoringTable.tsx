@@ -46,13 +46,16 @@ const WorkTable: React.FC = () => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
   const handleDistrictClick = (district: string) => {
     setSelectedDistrict(selectedDistrict === district ? null : district);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
+    setCurrentPage(1);
   };
   const filteredFeatures = geoData.filter((feature) => {
     const { district, taluka } = feature.properties;
@@ -63,6 +66,8 @@ const WorkTable: React.FC = () => {
     const isInTaluka = !selectedTaluka || taluka === selectedTaluka;
     return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka;
   });
+
+  console.log(currentPage, "currentPage");
 
   const columns = [
     {
@@ -77,29 +82,31 @@ const WorkTable: React.FC = () => {
       title: "Division",
       dataIndex: "division",
       key: "division",
-      width: "10%",
+      width: "100",
+      ellipsis: true,
     },
     {
       title: "District",
       dataIndex: "district",
       key: "district",
-      width: "10%",
+      width: "100",
       sorter: (a, b) => a.district.localeCompare(b.district),
       defaultSortOrder: "ascend" as const,
+      ellipsis: true,
     },
     {
       title: "Taluka",
       dataIndex: "taluka",
       key: "taluka",
-      width: "10%",
-      sorter: (a, b) => a.district.localeCompare(b.taluka),
+      width: "100",
+      sorter: (a, b) => a.taluka.localeCompare(b.taluka),
     },
     {
       title: "Department",
       dataIndex: "deptName",
       key: "deptName",
-      width: "10%",
-      sorter: (a, b) => a.district.localeCompare(b.deptName),
+      width: "100",
+      sorter: (a, b) => a.deptName.localeCompare(b.deptName),
       ellipsis: true,
     },
 
@@ -107,36 +114,100 @@ const WorkTable: React.FC = () => {
       title: "Work Type",
       dataIndex: "worktype",
       key: "worktype",
-      width: "10%",
-      sorter: (a, b) => a.district.localeCompare(b.worktype),
+      width: "100",
+      sorter: (a, b) => a.worktype.localeCompare(b.worktype),
       ellipsis: true,
+    },
+    {
+      title: "Benerficiary Name",
+      dataIndex: "beneficiaryname",
+      key: "beneficiaryname",
+      width: "100",
+      sorter: (a, b) => a.benerficiaryname.localeCompare(b.benerficiaryname),
+      // ellipsis: true,
+    },
+    {
+      title: "Admin Approval",
+      dataIndex: "adminapprovaldate",
+      key: "adminapprovaldate",
+      width: "100",
+      sorter: (a, b) => a.adminapprovaldate.localeCompare(b.adminapprovaldate),
+      // ellipsis: true,
+    },
+    {
+      title: "Work Order",
+      dataIndex: "woorderno",
+      key: "woorderno",
+      width: "100",
+      sorter: (a, b) => a.woorderno - b.woorderno,
+      // ellipsis: true,
+    },
+    {
+      title: "Work Started ",
+      dataIndex: "workstartdate",
+      key: "workstartdate",
+      width: "100",
+      sorter: (a, b) => a.workstartdate.localeCompare(b.workstartdate),
+      // ellipsis: true,
+    },
+    {
+      title: "In Progress",
+      dataIndex: "inprogresslocation",
+      key: "inprogresslocation",
+      width: "100",
+      sorter: (a, b) =>
+        a.inprogresslocation.localeCompare(b.inprogresslocation),
+      // ellipsis: true,
+    },
+    {
+      title: "Work Completed",
+      dataIndex: "wocompletioncost",
+      key: "wocompletioncost",
+      width: "100",
+      sorter: (a, b) => a.wocompletioncost.localeCompare(b.wocompletioncost),
+      // ellipsis: true,
     },
     {
       title: "Estimated Cost",
       dataIndex: "estimatedcost",
       key: "estimatedcost",
-      width: "10%",
+      width: "100",
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
-      render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>,
+      render: (text) => (
+        <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
+      ),
+      ellipsis: true,
     },
     {
       title: "Physical Target Area",
       dataIndex: "physicaltargetarea",
       key: "physicaltargetarea",
-      width: "10%",
+      width: "100",
       sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
       render: (text) => <p title={text}>{text + " sq.m"}</p>,
+      ellipsis: true,
     },
     {
       title: "Expected Water Storage",
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
-      width: "10%",
+      width: "100",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
+      ellipsis: true,
+    },
+    {
+      title: "GeoTagged",
+      dataIndex: "geometry",
+      key: "geometry",
+      width: "100",
+      // sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
+      // render: (text) => <p title={text}>{text + " TCM"}</p>,
     },
   ];
 
+  console.log(filteredFeatures, "filteredFeatures5");
+  const date = new Date();
   const tableData =
     filteredFeatures.map((feature, index) => ({
       key: index + 1,
@@ -148,11 +219,20 @@ const WorkTable: React.FC = () => {
       estimatedcost: feature.properties.estimatedcost,
       physicaltargetarea: feature.properties.physicaltargetarea,
       expectedwaterstorage: feature.properties.expectedwaterstorage,
+      geometry: feature.geometry === null ? "No" : "Yes",
+      beneficiaryname: feature.properties.beneficiaryname,
+      adminapprovaldate:
+        feature.properties.adminapprovaldate === "" ? "No" : "Yes",
+      woorderno: feature.properties.woorderno === "" ? "No" : "Yes",
+      workstartdate: feature.properties.workstartdate < date ? "Yes" : "No",
+      inprogresslocation:
+        feature.properties.inprogresslocation === "" ? "No" : "Yes",
+      wocompletioncost: feature.properties.wocompletioncost > 0 ? "Yes" : "No",
     })) || [];
 
   const handleExport = () => {
     exportToExcel({
-      data: tableData,
+      data: selectedDivision ? tableData : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
       fileName: "WorkMonitoring.xlsx",
       sheetName: "Work Data",
@@ -161,12 +241,18 @@ const WorkTable: React.FC = () => {
   };
 
   return (
-    <Flex gap={50} wrap="nowrap">
+    <Flex style={{ width: "85vw" }}>
       <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
         <Col span={8.1}>
-        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
-                  Jurisdictions
-                </Typography.Text>
+          <Typography.Text
+            style={{
+              fontSize: "20px",
+              fontWeight: "700",
+              paddingBottom: "10px",
+              display: "block",
+            }}>
+            Jurisdictions
+          </Typography.Text>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
             <Col span={8}>
               <Jurisdictions
@@ -225,46 +311,53 @@ const WorkTable: React.FC = () => {
           ) : (
             <div>
               <Flex gap="large" justify="space-between" align="center">
-                              <Typography.Text
-                                style={{
-                                  fontSize: "20px",
-                                  fontWeight: "700",
-                                  paddingBottom: "10px",
-                                  display: "block",
-                                }}
-                              >
-                                Report Output
-                              </Typography.Text>
-                              <Button
-                                onClick={handleExport}
-                                style={{
-                                  backgroundColor: "#008CBA",
-                                  color: "white",
-                                  marginBottom: "10px",
-                                }}
-                              >
-                                Export As Excel
-                              </Button>
-                            </Flex>
+                <Typography.Text
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    paddingBottom: "10px",
+                    display: "block",
+                  }}>
+                  Report Output
+                </Typography.Text>
 
-              <Table
-                columns={columns}
-                style={{ alignItems: "top" }}
-                dataSource={selectedDivision ? tableData : []}
-                size="small"
-                tableLayout="fixed"
-                pagination={{
-                  pageSize: pageSize,
-                  showSizeChanger: false,
-                  total: 0,
-                  onChange: (page, pageSize) => {
-                    setCurrentPage(page);
-                    setPageSize(pageSize);
-                  },
-                }}
-                scroll={{ x: "100%" }}
-                bordered
-              />
+                <Button
+                  onClick={handleExport}
+                  style={{
+                    backgroundColor: "#008CBA",
+                    color: "white",
+                    marginBottom: "10px",
+                  }}>
+                  Export As Excel
+                </Button>
+              </Flex>
+
+              <div
+                style={{
+                  overflow: "hidden",
+                  width: "100%",
+                }}>
+                <Table
+                  columns={columns}
+                  scroll={{ x: 1600 }}
+                  style={{ alignItems: "top" }}
+                  dataSource={selectedDivision ? tableData : []}
+                  size="small"
+                  tableLayout="fixed"
+                  pagination={{
+                    pageSize: pageSize,
+                    showSizeChanger: false,
+                    total: 0,
+                    current: currentPage,
+                    onChange: (page, pageSize) => {
+                      setCurrentPage(page);
+                      setPageSize(pageSize);
+                    },
+                  }}
+                  // scroll={{ x: "100%" }}
+                  bordered
+                />
+              </div>
             </div>
           )}
         </Col>

@@ -30,7 +30,6 @@ function RepairWiseReport() {
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [index, setIndex] = useState<number>(0);
   const [pageSize, setPageSize] = useState<number>(12);
 
   useEffect(() => {
@@ -52,13 +51,16 @@ function RepairWiseReport() {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
   const handleDistrictClick = (district: string) => {
     setSelectedDistrict(selectedDistrict === district ? null : district);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
+    setCurrentPage(1);
   };
   const filteredFeatures = geoData.filter((feature) => {
     const { district, taluka } = feature.properties;
@@ -143,7 +145,7 @@ function RepairWiseReport() {
 
   const handleExport = () => {
     exportToExcel({
-      data: tableData,
+      data: selectedDivision ? tableData : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
       fileName: "RepairWorks.xlsx",
       sheetName: "Work Data",
@@ -155,9 +157,15 @@ function RepairWiseReport() {
     <Flex gap={50} wrap="nowrap">
       <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
         <Col span={8.1}>
-        <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
-          Jurisdictions
-        </Typography.Text>
+          <Typography.Text
+            style={{
+              fontSize: "20px",
+              fontWeight: "700",
+              paddingBottom: "10px",
+              display: "block",
+            }}>
+            Jurisdictions
+          </Typography.Text>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
             <Col span={8}>
               <Jurisdictions
@@ -216,25 +224,23 @@ function RepairWiseReport() {
             <div>
               <Flex gap="large" justify="space-between" align="center">
                 <Typography.Text
-                                  style={{
-                                    fontSize: "20px",
-                                    fontWeight: "700",
-                                    paddingBottom: "10px",
-                                    display: "block",
-                                  }}
-                                >
-                                  Report Output
-                                </Typography.Text>
-                  <Button
-                                    onClick={handleExport}
-                                    style={{
-                                      backgroundColor: "#008CBA",
-                                      color: "white",
-                                      marginBottom: "10px",
-                                    }}
-                                  >
-                                    Export As Excel
-                                  </Button>              
+                  style={{
+                    fontSize: "20px",
+                    fontWeight: "700",
+                    paddingBottom: "10px",
+                    display: "block",
+                  }}>
+                  Report Output
+                </Typography.Text>
+                <Button
+                  onClick={handleExport}
+                  style={{
+                    backgroundColor: "#008CBA",
+                    color: "white",
+                    marginBottom: "10px",
+                  }}>
+                  Export As Excel
+                </Button>
               </Flex>
 
               <Flex vertical>
@@ -250,6 +256,7 @@ function RepairWiseReport() {
                     pageSize: pageSize,
                     showSizeChanger: false,
                     total: 0,
+                    current: currentPage,
                     onChange: (page, pageSize) => {
                       setCurrentPage(page);
                       setPageSize(pageSize);
