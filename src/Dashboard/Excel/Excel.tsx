@@ -22,7 +22,6 @@ export const exportToExcel = ({
 
   // Add an index column
   const indexedData = data.map((row, index) => ({
-    // "#": index + 1, // Add the index column
     ...columns.reduce((acc, col) => {
       acc[col.title] = row[col.dataIndex];
       return acc;
@@ -37,8 +36,8 @@ export const exportToExcel = ({
 
   // Merge cells for the title
   const titleRange = XLSX.utils.encode_range({
-    s: { c: 0, r: 0 }, // Start cell (column 0, row 0)
-    e: { c: columns.length, r: 0 }, // End cell (last column + 1 for index, row 0)
+    s: { c: 0, r: 0 },
+    e: { c: columns.length, r: 0 },
   });
   worksheet["!merges"] = worksheet["!merges"] || [];
   worksheet["!merges"].push(XLSX.utils.decode_range(titleRange));
@@ -61,7 +60,7 @@ export const exportToExcel = ({
 
   // Style the column headers
   columnHeaders.forEach((_, index) => {
-    const cellAddress = XLSX.utils.encode_cell({ r: 1, c: index }); // Row 1 (second row in Excel) for headers
+    const cellAddress = XLSX.utils.encode_cell({ r: 1, c: index });
     if (worksheet[cellAddress]) {
       worksheet[cellAddress].s = {
         font: { bold: true },
@@ -88,6 +87,16 @@ export const exportToExcel = ({
   const workbook = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(workbook, worksheet, sheetName);
 
+  // Generate a filename with timestamp
+  const now = new Date();
+  const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
+    now.getDate()
+  ).padStart(2, "0")}T${String(now.getHours()).padStart(2, "0")}-${String(
+    now.getMinutes()
+  ).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}`;
+
+  const finalFileName = fileName.replace(".xlsx", `_${timestamp}.xlsx`);
+
   // Trigger download
-  XLSX.writeFile(workbook, fileName);
+  XLSX.writeFile(workbook, finalFileName);
 };

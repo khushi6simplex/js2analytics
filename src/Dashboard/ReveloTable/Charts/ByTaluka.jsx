@@ -58,38 +58,37 @@ const ByTaluka = ({ linkedData }) => {
       console.error("No data available to export");
       return;
     }
-  
-    // Aggregate talukas and calculate works count
+
     const talukaMap = filteredData.reduce((acc, feature) => {
       const taluka = feature.properties.taluka || "Unknown Taluka";
       acc[taluka] = (acc[taluka] || 0) + 1; // Count works for each taluka
       return acc;
     }, {});
-  
-    // Prepare export data with two columns: Taluka and Works Count
+
     const exportData = Object.entries(talukaMap).map(([taluka, count]) => ({
       Taluka: taluka,
       WorksCount: count,
     }));
-  
+
     const worksheet = XLSX.utils.json_to_sheet(exportData);
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, "Taluka Data");
-  
-    // Generate a readable filename with a timestamp
+
     const now = new Date();
-    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, "0")}-${String(
-      now.getDate()
-    ).padStart(2, "0")}T${String(now.getHours()).padStart(2, "0")}-${String(
-      now.getMinutes()
-    ).padStart(2, "0")}-${String(now.getSeconds()).padStart(2, "0")}`;
-  
+    const timestamp = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(
+      2,
+      "0"
+    )}-${String(now.getDate()).padStart(2, "0")}T${String(
+      now.getHours()
+    ).padStart(2, "0")}-${String(now.getMinutes()).padStart(
+      2,
+      "0"
+    )}-${String(now.getSeconds()).padStart(2, "0")}`;
+
     const fileName = `TalukaData_${timestamp}.xlsx`;
-  
-    // Download the Excel file
+
     XLSX.writeFile(workbook, fileName);
   };
-  
 
   useEffect(() => {
     const filteredData = getFilteredData();
@@ -116,7 +115,7 @@ const ByTaluka = ({ linkedData }) => {
           type: "category",
           data: talukas,
           axisLabel: {
-            rotate: 45, // Rotate labels for better readability
+            rotate: 45,
             interval: 0,
           },
         },
@@ -129,7 +128,7 @@ const ByTaluka = ({ linkedData }) => {
             type: "bar",
             data: counts,
             itemStyle: {
-              color: "#90EE90", // Light green color
+              color: "#90EE90",
             },
           },
         ],
@@ -148,6 +147,26 @@ const ByTaluka = ({ linkedData }) => {
       };
     }
   }, [geoData, linkedData]);
+
+  // Render UI based on whether a district is selected
+  if (!linkedData || !linkedData.taluka) {
+    return (
+      <div
+        style={{
+          width: "100%",
+          height: "40vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          fontSize: "18px",
+          color: "#666",
+          textAlign: "center",
+        }}
+      >
+        Select a District to View Taluka Stats
+      </div>
+    );
+  }
 
   return (
     <div style={{ width: "100%", height: "100%" }}>
@@ -168,10 +187,7 @@ const ByTaluka = ({ linkedData }) => {
       >
         Export As Excel
       </button>
-      <div
-        ref={barChartRef}
-        style={{ width: "100vw", height: "40vh" }}
-      ></div>
+      <div ref={barChartRef} style={{ width: "100vw", height: "40vh" }}></div>
     </div>
   );
 };

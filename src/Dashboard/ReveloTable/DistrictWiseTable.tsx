@@ -168,14 +168,34 @@ const DistrictWiseTable: React.FC = () => {
   ];
 
   const handleExport = () => {
+    const summarizedData = getSummarizedData();
+    const totals = calculateTotals(summarizedData);
+  
+    // Append totals as the last row
+    const dataWithTotals = [
+      ...summarizedData,
+      {
+        division: "Total",
+        district: "",
+        taluka: "",
+        worksCount: totals.worksCount,
+        worksGeotagged: totals.worksGeotagged,
+        worksStarted: totals.worksStarted,
+        worksCompleted: totals.worksCompleted,
+        totalWoAmount: `₹ ${totals.totalWoAmount}`,
+        physicalTargetArea: `${totals.physicalTargetArea} sq.m.`,
+      },
+    ];
+  
     exportToExcel({
-      data: getSummarizedData(),
+      data: dataWithTotals,
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
       fileName: "DistrictWiseWork.xlsx",
       sheetName: "District Wise Work Data",
       tableTitle: "District Wise Work Table",
     });
   };
+  
 
   return (
     <Flex gap={50} wrap="nowrap">

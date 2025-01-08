@@ -203,7 +203,7 @@ const WorkTable: React.FC = () => {
       data: Array.from(tableMap.values()),
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
       fileName: "RepairWorks.xlsx",
-      sheetName: "Work Data",
+      sheetName: "Repair Works Data",
       tableTitle: "Repair Works Table",
     });
   };
