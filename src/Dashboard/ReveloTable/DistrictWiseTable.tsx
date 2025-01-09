@@ -12,6 +12,8 @@ const DistrictWiseTable: React.FC = () => {
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedTaluka, setSelectedTaluka] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
+    const [currentPage, setCurrentPage] = useState<number>(1);
+    const [pageSize, setPageSize] = useState<number>(7);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -33,15 +35,18 @@ const DistrictWiseTable: React.FC = () => {
     setSelectedDivision(division === selectedDivision ? null : division);
     setSelectedDistrict(null);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
 
   const handleDistrictClick = (district: string) => {
     setSelectedDistrict(district === selectedDistrict ? null : district);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
 
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(taluka === selectedTaluka ? null : taluka);
+    setCurrentPage(1);
   };
 
   const calculateTotals = (data) => {
@@ -283,9 +288,14 @@ const DistrictWiseTable: React.FC = () => {
                 tableLayout="fixed"
                 dataSource={getSummarizedData()}
                 pagination={{
-                  pageSize: 6,
+                  pageSize: pageSize,
                   showSizeChanger: false,
                   total: getSummarizedData().length,
+                  current: currentPage,
+                  onChange: (page, pageSize) => {
+                    setCurrentPage(page);
+                    setPageSize(pageSize)
+                  }
                 }}
                 scroll={{ x: "100%" }}
                 bordered

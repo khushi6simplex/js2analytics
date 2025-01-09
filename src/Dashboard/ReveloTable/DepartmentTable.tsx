@@ -113,6 +113,7 @@ const WorkTable: React.FC = () => {
       key: "adminapprovalno",
       width: "10%",
       sorter: (a, b) => a.adminapprovalno - b.adminapprovalno,
+      className: "center",
     },
     {
       title: "Works Started",
@@ -120,6 +121,7 @@ const WorkTable: React.FC = () => {
       key: "workstarted",
       width: "10%",
       sorter: (a, b) => a.workstarted - b.workstarted,
+      className: "center",
     },
     {
       title: "Works Completed",
@@ -127,6 +129,7 @@ const WorkTable: React.FC = () => {
       key: "worksCompleted",
       width: "15%",
       sorter: (a, b) => a.worksCompleted - b.worksCompleted,
+      className: "center",
     },
     {
       title: "Expected Water Storage",
@@ -135,6 +138,7 @@ const WorkTable: React.FC = () => {
       width: "15%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
+      className: "center",
     },
     {
       title: "Estimated Cost",
@@ -145,6 +149,7 @@ const WorkTable: React.FC = () => {
       render: (text) => (
         <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
       ),
+      className: "center",
     },
     {
       title: "GeoTagged",
@@ -155,6 +160,7 @@ const WorkTable: React.FC = () => {
       // render: (text) => (
       //   <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
       // ),
+      className: "center",
     },
   ];
 
@@ -214,8 +220,8 @@ const WorkTable: React.FC = () => {
 
   return (
     <Flex gap={30} wrap="nowrap">
-      <Row gutter={[20, 20]} style={{ flexWrap: "nowrap" }}>
-        <Col span={10}>
+      <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
+        <Col span={8.1}>
           <Typography.Text
             style={{
               fontSize: "20px",

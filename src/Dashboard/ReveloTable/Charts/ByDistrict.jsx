@@ -138,6 +138,10 @@ const ByDistrict = ({ onBarClick }) => {
             itemStyle: {
               color: "#007bff",
             },
+            label: {
+              show: true,
+              position: 'top', 
+            }
           },
         ],
       };

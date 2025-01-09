@@ -130,6 +130,10 @@ const ByTaluka = ({ linkedData }) => {
             itemStyle: {
               color: "#90EE90",
             },
+            label: {
+              show: true,
+              position: 'top', 
+            }
           },
         ],
       };

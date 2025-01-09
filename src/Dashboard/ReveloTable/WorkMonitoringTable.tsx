@@ -82,7 +82,7 @@ const WorkTable: React.FC = () => {
       inprogresslocation: "",
       wocompletioncost: "",
       estimatedcost: data.reduce((sum, item) => sum + (item.estimatedcost || 0), 0),
-      physicalTargetArea: data.reduce((sum, item) => sum + (item.physicalTargetArea || 0), 0).toFixed(2),
+      physicaltargetarea: data.reduce((sum, item) => sum + (item.physicaltargetarea || 0), 0).toFixed(2),
       expectedwaterstorage: data.reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0).toFixed(2),
       geometry: ""
     };
@@ -266,8 +266,31 @@ const WorkTable: React.FC = () => {
     })) || [];
 
   const handleExport = () => {
+    const totals = calculateTotals(tableData);
+
+    const dataWithTotals = [
+      ...tableData,
+      {
+        key: "",
+      division: "Total",
+      district: "",
+      taluka: "",
+      deptName: "",
+      worktype: "",
+      beneficiaryname: "",
+      adminapproved: "",
+      workorderno: "",
+      workstartdate: "",
+      inprogresslocation: "",
+      wocompletioncost: "",
+      estimatedcost: `₹ ${totals.estimatedcost}`,
+      physicaltargetarea: `${totals.physicaltargetarea} sq.m.`,
+      expectedwaterstorage: `${totals.expectedwaterstorage} TCM`,
+      geometry: ""
+      }
+    ]
     exportToExcel({
-      data: selectedDivision ? tableData : [],
+      data: selectedDivision ? dataWithTotals : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
       fileName: "WorkMonitoring.xlsx",
       sheetName: "Work Data",
@@ -400,7 +423,7 @@ const WorkTable: React.FC = () => {
                           ₹{totals.estimatedcost}
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={11} className="center">
-                          {totals.physicalTargetArea} sq.m
+                          {totals.physicaltargetarea} sq.m
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={12} className="center">
                           {totals.expectedwaterstorage} TCM
