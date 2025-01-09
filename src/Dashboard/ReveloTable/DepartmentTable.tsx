@@ -48,13 +48,16 @@ const WorkTable: React.FC = () => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
   const handleDistrictClick = (district: string) => {
     setSelectedDistrict(selectedDistrict === district ? null : district);
     setSelectedTaluka(null);
+    setCurrentPage(1);
   };
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
+    setCurrentPage(1);
   };
 
   const handleDepartmentClick = (deptName: string) => {
@@ -86,14 +89,12 @@ const WorkTable: React.FC = () => {
       width: "3%",
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
-      className: "center"
     },
     {
       title: "Division",
       dataIndex: "division",
       key: "division",
       width: "10%",
-      className: "center"
     },
 
     {
@@ -104,7 +105,6 @@ const WorkTable: React.FC = () => {
       defaultSortOrder: "ascend" as const,
       sorter: (a, b) => a.deptName.localeCompare(b.deptName),
       ellipsis: true,
-      className: "center"
     },
 
     {
@@ -113,7 +113,6 @@ const WorkTable: React.FC = () => {
       key: "adminapprovalno",
       width: "10%",
       sorter: (a, b) => a.adminapprovalno - b.adminapprovalno,
-      className: "center"
     },
     {
       title: "Works Started",
@@ -121,7 +120,6 @@ const WorkTable: React.FC = () => {
       key: "workstarted",
       width: "10%",
       sorter: (a, b) => a.workstarted - b.workstarted,
-      className: "center"
     },
     {
       title: "Works Completed",
@@ -129,7 +127,6 @@ const WorkTable: React.FC = () => {
       key: "worksCompleted",
       width: "15%",
       sorter: (a, b) => a.worksCompleted - b.worksCompleted,
-      className: "center"
     },
     {
       title: "Expected Water Storage",
@@ -137,12 +134,7 @@ const WorkTable: React.FC = () => {
       key: "expectedwaterstorage",
       width: "15%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
-      render: (text) => (
-        <p title={text}>
-          {text + " TCM"}
-        </p>
-      ),
-      className: "center"
+      render: (text) => <p title={text}>{text + " TCM"}</p>,
     },
     {
       title: "Estimated Cost",
@@ -150,8 +142,19 @@ const WorkTable: React.FC = () => {
       key: "estimatedcost",
       width: "15%",
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
-      render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>,
-      className: "center"
+      render: (text) => (
+        <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
+      ),
+    },
+    {
+      title: "GeoTagged",
+      dataIndex: "geometry",
+      key: "geometry",
+      width: "15%",
+      // sorter: (a, b) => a.estimatedcost - b.estimatedcost,
+      // render: (text) => (
+      //   <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
+      // ),
     },
   ];
 
@@ -188,6 +191,7 @@ const WorkTable: React.FC = () => {
             sum + (feature.properties.expectedwaterstorage || 0),
           0,
         ),
+      geometry: feature.geometry === null ? "No" : "Yes",
     })) || [];
 
   const tableMap = new Map();
@@ -200,19 +204,25 @@ const WorkTable: React.FC = () => {
 
   const handleExport = () => {
     exportToExcel({
-      data: Array.from(tableMap.values()),
+      data: selectedDivision ? Array.from(tableMap.values()) : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
       fileName: "RepairWorks.xlsx",
-      sheetName: "Repair Works Data",
+      sheetName: "Work Data",
       tableTitle: "Repair Works Table",
     });
   };
 
   return (
-    <Flex gap={50} wrap="nowrap">
-      <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
-        <Col span={8.1}>
-          <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
+    <Flex gap={30} wrap="nowrap">
+      <Row gutter={[20, 20]} style={{ flexWrap: "nowrap" }}>
+        <Col span={10}>
+          <Typography.Text
+            style={{
+              fontSize: "20px",
+              fontWeight: "700",
+              paddingBottom: "10px",
+              display: "block",
+            }}>
             Jurisdictions
           </Typography.Text>
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
@@ -244,16 +254,16 @@ const WorkTable: React.FC = () => {
                 data={
                   selectedDistrict
                     ? Array.from(
-                      new Set(
-                        geoData
-                          .filter(
-                            (feature) =>
-                              feature.properties.district ===
-                              selectedDistrict,
-                          )
-                          .map((feature) => feature.properties.taluka),
-                      ),
-                    )
+                        new Set(
+                          geoData
+                            .filter(
+                              (feature) =>
+                                feature.properties.district ===
+                                selectedDistrict,
+                            )
+                            .map((feature) => feature.properties.taluka),
+                        ),
+                      )
                     : []
                 }
                 selectedItem={selectedTaluka}
@@ -267,15 +277,15 @@ const WorkTable: React.FC = () => {
                 data={
                   selectedTaluka
                     ? Array.from(
-                      new Set(
-                        geoData
-                          .filter(
-                            (feature) =>
-                              feature.properties.taluka === selectedTaluka,
-                          )
-                          .map((feature) => feature.properties.deptName),
-                      ),
-                    )
+                        new Set(
+                          geoData
+                            .filter(
+                              (feature) =>
+                                feature.properties.taluka === selectedTaluka,
+                            )
+                            .map((feature) => feature.properties.deptName),
+                        ),
+                      )
                     : []
                 }
                 selectedItem={selectedDepartment}
@@ -300,8 +310,7 @@ const WorkTable: React.FC = () => {
                     fontWeight: "700",
                     paddingBottom: "10px",
                     display: "block",
-                  }}
-                >
+                  }}>
                   Report Output
                 </Typography.Text>
                 <Button
@@ -310,8 +319,7 @@ const WorkTable: React.FC = () => {
                     backgroundColor: "#008CBA",
                     color: "white",
                     marginBottom: "10px",
-                  }}
-                >
+                  }}>
                   Export As Excel
                 </Button>
               </Flex>
@@ -328,12 +336,13 @@ const WorkTable: React.FC = () => {
                   pageSize: pageSize,
                   showSizeChanger: false,
                   total: 0,
+                  current: currentPage,
                   onChange: (page, pageSize) => {
                     setCurrentPage(page);
                     setPageSize(pageSize);
                   },
                 }}
-                scroll={{ x: "100%", y: "100%" }}
+                // scroll={{ x: "100%", y: "100%" }}
                 bordered
               />
             </div>
