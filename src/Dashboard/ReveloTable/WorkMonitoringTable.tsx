@@ -67,7 +67,27 @@ const WorkTable: React.FC = () => {
     return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka;
   });
 
-  console.log(currentPage, "currentPage");
+  const calculateTotals = (data) => {
+    const totals = {
+      key: "totals",
+      division: "Total",
+      district: "",
+      taluka: "",
+      deptName: "",
+      worktype: "",
+      beneficiaryname: "",
+      adminapproved: "",
+      workorderno: "",
+      workstartdate: "",
+      inprogresslocation: "",
+      wocompletioncost: "",
+      estimatedcost: data.reduce((sum, item) => sum + (item.estimatedcost || 0), 0),
+      physicalTargetArea: data.reduce((sum, item) => sum + (item.physicalTargetArea || 0), 0).toFixed(2),
+      expectedwaterstorage: data.reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0).toFixed(2),
+      geometry: ""
+    };
+    return totals;
+  };
 
   const columns = [
     {
@@ -77,6 +97,7 @@ const WorkTable: React.FC = () => {
       width: "3%",
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
+      className: "center"
     },
     {
       title: "Division",
@@ -84,6 +105,7 @@ const WorkTable: React.FC = () => {
       key: "division",
       width: "100",
       ellipsis: true,
+      className: "center"
     },
     {
       title: "District",
@@ -93,6 +115,7 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.district.localeCompare(b.district),
       defaultSortOrder: "ascend" as const,
       ellipsis: true,
+      className: "center"
     },
     {
       title: "Taluka",
@@ -100,6 +123,7 @@ const WorkTable: React.FC = () => {
       key: "taluka",
       width: "100",
       sorter: (a, b) => a.taluka.localeCompare(b.taluka),
+      className: "center"
     },
     {
       title: "Department",
@@ -108,6 +132,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.deptName.localeCompare(b.deptName),
       ellipsis: true,
+      className: "center"
     },
 
     {
@@ -117,6 +142,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.worktype.localeCompare(b.worktype),
       ellipsis: true,
+      className: "center"
     },
     {
       title: "Benerficiary Name",
@@ -125,14 +151,16 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.benerficiaryname.localeCompare(b.benerficiaryname),
       // ellipsis: true,
+      className: "center"
     },
     {
-      title: "Admin Approval",
+      title: "Admin Approved",
       dataIndex: "adminapprovaldate",
       key: "adminapprovaldate",
       width: "100",
       sorter: (a, b) => a.adminapprovaldate.localeCompare(b.adminapprovaldate),
       // ellipsis: true,
+      className: "center"
     },
     {
       title: "Work Order",
@@ -141,14 +169,16 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.woorderno - b.woorderno,
       // ellipsis: true,
+      className: "center"
     },
     {
-      title: "Work Started ",
+      title: "Work Started",
       dataIndex: "workstartdate",
       key: "workstartdate",
       width: "100",
       sorter: (a, b) => a.workstartdate.localeCompare(b.workstartdate),
       // ellipsis: true,
+      className: "center"
     },
     {
       title: "In Progress",
@@ -158,6 +188,7 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) =>
         a.inprogresslocation.localeCompare(b.inprogresslocation),
       // ellipsis: true,
+      className: "center"
     },
     {
       title: "Work Completed",
@@ -166,6 +197,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.wocompletioncost.localeCompare(b.wocompletioncost),
       // ellipsis: true,
+      className: "center"
     },
     {
       title: "Estimated Cost",
@@ -177,6 +209,7 @@ const WorkTable: React.FC = () => {
         <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
       ),
       ellipsis: true,
+      className: "center"
     },
     {
       title: "Physical Target Area",
@@ -186,6 +219,7 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
       render: (text) => <p title={text}>{text + " sq.m"}</p>,
       ellipsis: true,
+      className: "center"
     },
     {
       title: "Expected Water Storage",
@@ -195,6 +229,7 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
       ellipsis: true,
+      className: "center"
     },
     {
       title: "GeoTagged",
@@ -203,10 +238,10 @@ const WorkTable: React.FC = () => {
       width: "100",
       // sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       // render: (text) => <p title={text}>{text + " TCM"}</p>,
+      className: "center"
     },
   ];
 
-  console.log(filteredFeatures, "filteredFeatures5");
   const date = new Date();
   const tableData =
     filteredFeatures.map((feature, index) => ({
@@ -222,7 +257,7 @@ const WorkTable: React.FC = () => {
       geometry: feature.geometry === null ? "No" : "Yes",
       beneficiaryname: feature.properties.beneficiaryname,
       adminapprovaldate:
-        feature.properties.adminapprovaldate === "" ? "No" : "Yes",
+        feature.properties.adminapprovalno === "" ? "No" : "Yes",
       woorderno: feature.properties.woorderno === "" ? "No" : "Yes",
       workstartdate: feature.properties.workstartdate < date ? "Yes" : "No",
       inprogresslocation:
@@ -282,16 +317,16 @@ const WorkTable: React.FC = () => {
                 data={
                   selectedDistrict
                     ? Array.from(
-                        new Set(
-                          geoData
-                            .filter(
-                              (feature) =>
-                                feature.properties.district ===
-                                selectedDistrict,
-                            )
-                            .map((feature) => feature.properties.taluka),
-                        ),
-                      )
+                      new Set(
+                        geoData
+                          .filter(
+                            (feature) =>
+                              feature.properties.district ===
+                              selectedDistrict,
+                          )
+                          .map((feature) => feature.properties.taluka),
+                      ),
+                    )
                     : []
                 }
                 selectedItem={selectedTaluka}
@@ -353,6 +388,25 @@ const WorkTable: React.FC = () => {
                       setCurrentPage(page);
                       setPageSize(pageSize);
                     },
+                  }}
+                  summary={(pageData) => {
+                    const totals = calculateTotals(pageData);
+                    return (
+                      <Table.Summary.Row>
+                        <Table.Summary.Cell index={0} colSpan={12}>
+                          <div style={{ textAlign: "center", fontWeight: "bolder" }}>Total</div>
+                        </Table.Summary.Cell>
+                        <Table.Summary.Cell index={10} className="center">
+                          ₹{totals.estimatedcost}
+                        </Table.Summary.Cell>
+                        <Table.Summary.Cell index={11} className="center">
+                          {totals.physicalTargetArea} sq.m
+                        </Table.Summary.Cell>
+                        <Table.Summary.Cell index={12} className="center">
+                          {totals.expectedwaterstorage} TCM
+                        </Table.Summary.Cell>
+                      </Table.Summary.Row>
+                    )
                   }}
                   // scroll={{ x: "100%" }}
                   bordered
