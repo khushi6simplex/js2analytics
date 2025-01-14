@@ -8,40 +8,35 @@ import {
   Spin,
   Empty,
   Tooltip,
-  Tabs,
   Button,
   Typography,
   Divider,
 } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
-import "../../Dashboard/Dashboard.css";
 import { fetchGeoData } from "../Data/useGeoData";
-import type { TabsProps } from "antd";
-import WorkData from "../../Dashboard/work.json";
-import RepairWorks from "../../Dashboard/repairWorks.json";
+import "../../Dashboard/Dashboard.css";
 import { exportToExcel } from "../Excel/Excel";
 
-function RepairWiseReport() {
-  const [loading, setLoading] = useState<boolean>(true);
-  const [geoData, setGeoData] = useState<any[]>([]);
+const WorkColpletionReport = () => {
+  const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
+  const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selectedDivision, setSelectedDivision] = useState<any>();
-  const [reportValue, setReportsValue] = useState<any>();
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(12);
+  const [pageSize, setPageSize] = useState<number>(7);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true);
+        setLoading(true); // Set loading to true while fetching
         const data = await fetchGeoData();
-        setGeoData(data.features || []);
+        setGeoData(data.features || []); // Ensure it's always an array
       } catch (error) {
         console.error("Error fetching Geoserver data", error);
       } finally {
-        setLoading(false);
+        setLoading(false); // Set loading to false after fetching
       }
     };
     fetchData();
@@ -72,111 +67,166 @@ function RepairWiseReport() {
     return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka;
   });
 
+  const calculateTotals = (data) => {
+    const totals = {
+      key: "totals",
+      division: "Total",
+      district: "",
+      taluka: "",
+      deptName: "",
+      worktype: "",
+      beneficiaryname: "",
+      adminapproved: "",
+      workorderno: "",
+      workstartdate: "",
+      inprogresslocation: "",
+      wocompletioncost: "",
+      estimatedcost: data.reduce(
+        (sum, item) => sum + (item.estimatedcost || 0),
+        0,
+      ),
+      physicaltargetarea: data
+        .reduce((sum, item) => sum + (item.physicaltargetarea || 0), 0)
+        .toFixed(2),
+      expectedwaterstorage: data
+        .reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0)
+        .toFixed(2),
+      geometry: "",
+    };
+    return totals;
+  };
+
   const columns = [
     {
       title: "#",
       dataIndex: "key",
       key: "key",
-      width: "5%",
+      width: "3%",
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
-    },
-    {
-      title: "Work Type",
-      dataIndex: "worktype",
-      key: "worktype",
-      width: "30%",
-      sorter: (a, b) => a.worktype.localeCompare(b.worktype),
-    },
-    {
-      title: "Work Count",
-      dataIndex: "workcount",
-      key: "workcount",
-      width: "20%",
-      sorter: (a, b) => a.workcount - b.workcount,
       className: "center",
     },
     {
-      title: "Estimated Cost",
-      dataIndex: "workprice",
-      key: "workprice",
-      width: "20%",
-      sorter: (a, b) => a.workprice - b.workprice,
+      title: "Division",
+      dataIndex: "division",
+      key: "division",
+      width: "100",
+      ellipsis: true,
+      className: "center",
+    },
+    {
+      title: "District",
+      dataIndex: "district",
+      key: "district",
+      width: "100",
+      sorter: (a, b) => a.district.localeCompare(b.district),
+      defaultSortOrder: "ascend" as const,
+      ellipsis: true,
+      className: "center",
+    },
+    {
+      title: "Taluka",
+      dataIndex: "taluka",
+      key: "taluka",
+      width: "100",
+      sorter: (a, b) => a.taluka.localeCompare(b.taluka),
+      className: "center",
+    },
+
+    {
+      title: "Created Work",
+      dataIndex: "totalwork",
+      key: "totalwork",
+      width: "100",
+      sorter: (a, b) => a.totalwork - b.totalwork,
+      // ellipsis: true,
+      className: "center",
+    },
+    {
+      title: "Started Work",
+      dataIndex: "startedwork",
+      key: "startedwork",
+      width: "100",
+      sorter: (a, b) => a.startedwork.localeCompare(b.startedwork),
+      // ellipsis: true,
+      className: "center",
+    },
+    {
+      title: "Work Complete %",
+      dataIndex: "workcomplete",
+      key: "workcomplete",
+      width: "100",
+      sorter: (a, b) => a.workcomplete.localeCompare(b.workcomplete),
+      // ellipsis: true,
       className: "center",
     },
   ];
 
-  const workTypes =
-    reportValue && RepairWorks.values[reportValue]?.workType?.values
-      ? Object.keys(RepairWorks.values[reportValue].workType.values)
-      : [];
-
-  const tableData = workTypes.map((worktype, index) => {
-    const matchingFeatures = filteredFeatures.filter(
-      (feature) => feature.properties.worktype === worktype,
-    );
-    const workcount = matchingFeatures.length;
-    const workprice = matchingFeatures.reduce(
-      (sum, feature) => sum + (feature.properties.estimatedcost || 0),
-      0,
-    );
-
-    return {
+  //   console.log(filteredFeatures.subplanid,"filteredFeatures");
+  const date = new Date();
+  const tableData =
+    filteredFeatures.map((feature, index) => ({
       key: index + 1,
-      worktype,
-      workcount,
-      workprice,
-    };
+      division: selectedDivision,
+      district: feature.properties.district,
+      taluka: feature.properties.taluka,
+      //   totalwork: feature.properties.subplanid.length,
+      totalwork: geoData.filter(
+        (f) =>
+          f.properties.subplanid &&
+          f.properties.taluka === feature.properties.taluka,
+      ).length,
+      startedwork: geoData.filter(
+        (f) =>
+          f.properties.workstartdate &&
+          f.properties.taluka === feature.properties.taluka,
+      ).length,
+      workcomplete: feature.properties.worktype,
+    })) || [];
+
+  const tableMap = new Map();
+
+  tableData.forEach((item) => {
+    console.log(item.division, "item.depname");
+    tableMap.set(item.taluka, item);
+    console.log(Array.from(tableMap.values()), "tableMap1");
   });
-
-  const calculateTotals = (data) => {
-    const totals = {
-      key: "totals",
-      worktype: "Total",
-      workcount: data.reduce((sum, item) => sum + (item.workcount || 0), 0),
-      workprice: data.reduce((sum, item) => sum + (item.workprice || 0), 0),
-    };
-    return totals;
-  };
-
-  const items: TabsProps["items"] = Object.keys(RepairWorks.values).map(
-    (key) => ({
-      key,
-      label: key,
-    }),
-  );
-
-  const onChange = (item: string) => {
-    console.log(item, "keysitem");
-    setReportsValue(item === undefined ? "Drainage Line Treatment" : item);
-  };
-
-  useEffect(() => {
-    setReportsValue("Drainage Line Treatment");
-  }, []);
 
   const handleExport = () => {
     const totals = calculateTotals(tableData);
+
     const dataWithTotals = [
       ...tableData,
       {
-        key: "totals",
-        worktype: "Total",
-        workcount: `${totals.workcount}`,
-        workprice: `${totals.workprice}`,
+        key: "",
+        division: "Total",
+        district: "",
+        taluka: "",
+        deptName: "",
+        worktype: "",
+        beneficiaryname: "",
+        adminapproved: "",
+        workorderno: "",
+        workstartdate: "",
+        inprogresslocation: "",
+        wocompletioncost: "",
+        estimatedcost: `₹ ${totals.estimatedcost}`,
+        physicaltargetarea: `${totals.physicaltargetarea} sq.m.`,
+        expectedwaterstorage: `${totals.expectedwaterstorage} TCM`,
+        geometry: "",
       },
     ];
     exportToExcel({
       data: selectedDivision ? dataWithTotals : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
-      fileName: "RepairWorks.xlsx",
+      fileName: "WorkMonitoring.xlsx",
       sheetName: "Work Data",
-      tableTitle: "Repair Works Table",
+      tableTitle: "Work Monitoring Table",
     });
   };
 
   return (
-    <Flex gap={50} wrap="nowrap">
+    <Flex style={{ width: "85vw" }}>
       <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
         <Col span={8.1}>
           <Typography.Text
@@ -238,8 +288,9 @@ function RepairWiseReport() {
         </Col>
         <Divider type="vertical" style={{ height: "100%", borderColor: "" }} />
         <Col span={16}>
+          {/* Show loading spinner */}
           {loading ? (
-            <Spin size="large" /> // Show loading spinner
+            <Spin size="large" />
           ) : geoData.length === 0 ? (
             <Empty description="No data available" /> // Show empty state
           ) : (
@@ -254,6 +305,7 @@ function RepairWiseReport() {
                   }}>
                   Report Output
                 </Typography.Text>
+
                 <Button
                   onClick={handleExport}
                   style={{
@@ -265,13 +317,18 @@ function RepairWiseReport() {
                 </Button>
               </Flex>
 
-              <Flex vertical>
-                <Tabs defaultActiveKey="1" items={items} onChange={onChange} />
-
+              <div
+                style={{
+                  overflow: "hidden",
+                  width: "100%",
+                }}>
                 <Table
                   columns={columns}
+                  //   scroll={{ x: 1600 }}
                   style={{ alignItems: "top" }}
-                  dataSource={selectedDivision ? tableData : []}
+                  dataSource={
+                    selectedDivision ? Array.from(tableMap.values()) : []
+                  }
                   size="small"
                   tableLayout="fixed"
                   pagination={{
@@ -284,32 +341,40 @@ function RepairWiseReport() {
                       setPageSize(pageSize);
                     },
                   }}
-                  summary={(pageData) => {
-                    const totals = calculateTotals(pageData);
-                    return (
-                      <Table.Summary.Row style={{ backgroundColor: "#fafafa" }}>
-                        <Table.Summary.Cell index={0} colSpan={2}>
-                          <div>Total</div>
-                        </Table.Summary.Cell>
-                        <Table.Summary.Cell index={1} className="center">
-                          {totals.workcount}
-                        </Table.Summary.Cell>
-                        <Table.Summary.Cell index={2} className="center">
-                          ₹{totals.workprice}
-                        </Table.Summary.Cell>
-                      </Table.Summary.Row>
-                    );
-                  }}
-                  scroll={{ x: "100%" }}
+                  //   summary={(pageData) => {
+                  //     const totals = calculateTotals(pageData);
+                  //     return (
+                  //       <Table.Summary.Row>
+                  //         <Table.Summary.Cell index={0} colSpan={12}>
+                  //           <div
+                  //             style={{
+                  //               textAlign: "center",
+                  //               fontWeight: "bolder",
+                  //             }}>
+                  //             Total
+                  //           </div>
+                  //         </Table.Summary.Cell>
+                  //         <Table.Summary.Cell index={10} className="center">
+                  //           ₹{totals.estimatedcost}
+                  //         </Table.Summary.Cell>
+                  //         <Table.Summary.Cell index={11} className="center">
+                  //           {totals.physicaltargetarea} sq.m
+                  //         </Table.Summary.Cell>
+                  //         <Table.Summary.Cell index={12} className="center">
+                  //           {totals.expectedwaterstorage} TCM
+                  //         </Table.Summary.Cell>
+                  //       </Table.Summary.Row>
+                  //     );
+                  //   }}
+                  // scroll={{ x: "100%" }}
                   bordered
                 />
-              </Flex>
+              </div>
             </div>
           )}
         </Col>
       </Row>
     </Flex>
   );
-}
-
-export default RepairWiseReport;
+};
+export default WorkColpletionReport;
