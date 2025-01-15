@@ -5,6 +5,7 @@ import DistrictWiseTable from "./ReveloTable/DistrictWiseTable";
 import WorkMonitoringTable from "../Dashboard/ReveloTable/WorkMonitoringTable";
 import DepartmentTable from "../Dashboard/ReveloTable/DepartmentTable";
 import RepairWiseReport from "./ReveloTable/RepairWiseTable";
+import VillageWaterBudget from "./ReveloTable/VillageWaterBudget";
 import Header from "./header/Header";
 import Summary from "./ReveloTable/Summary";
 
@@ -30,7 +31,7 @@ const Dashboard = () => {
     {
       key: "4",
       label: "Village Wise Water Budgeting",
-      children: "Comming Soon ...",
+      children: <VillageWaterBudget />,
     },
     {
       key: "5",

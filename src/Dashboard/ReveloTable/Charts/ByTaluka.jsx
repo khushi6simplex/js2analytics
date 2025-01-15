@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import PropTypes from "prop-types";
 import * as echarts from "echarts";
 import * as XLSX from "xlsx";
 import { fetchGeoData } from "../../Data/useGeoData";
@@ -194,6 +195,11 @@ const ByTaluka = ({ linkedData }) => {
       <div ref={barChartRef} style={{ width: "100vw", height: "40vh" }}></div>
     </div>
   );
+};
+ByTaluka.propTypes = {
+  linkedData: PropTypes.shape({
+    taluka: PropTypes.string,
+  }),
 };
 
 export default ByTaluka;
