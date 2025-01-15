@@ -18,7 +18,7 @@ import { fetchGeoData } from "../Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
 import { exportToExcel } from "../Excel/Excel";
 
-const WorkColpletionReport = () => {
+const WorkCompletionReport = () => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selectedDivision, setSelectedDivision] = useState<any>();
@@ -377,4 +377,4 @@ const WorkColpletionReport = () => {
     </Flex>
   );
 };
-export default WorkColpletionReport;
+export default WorkCompletionReport;

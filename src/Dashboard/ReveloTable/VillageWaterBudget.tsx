@@ -22,6 +22,7 @@ const VillageWaterBudget: React.FC = () => {
     
                 const url = (window as any).__analytics__.wbUrl;
     
+                // Fetch project village and water budget data
                 const [projectVillageResponse, waterBudgetResponse] = await Promise.all([
                     axios.get(url, {
                         params: {
@@ -31,6 +32,7 @@ const VillageWaterBudget: React.FC = () => {
                             typeName: "js2surveydsws:projectvillage_js2project",
                             outputFormat: "json",
                             srsname: "EPSG:3857",
+                            CQL_FILTER: "isselected=true", // Server-side filter for 'isselected=true'
                         },
                     }),
                     axios.get(url, {
@@ -45,35 +47,30 @@ const VillageWaterBudget: React.FC = () => {
                     }),
                 ]);
     
+                // Extract features from the responses
                 const projectVillageData = projectVillageResponse.data.features || [];
                 const waterBudgetData = waterBudgetResponse.data.features || [];
     
-                // Step 1: Create a lookup map for villageid to villageName
-                const villageidToNameMap = projectVillageData.reduce((map, feature) => {
+                // Create a set of village IDs from the water budget data
+                const waterBudgetVillageIds = new Set(
+                    waterBudgetData.map((feature) => feature.properties.villageid)
+                );
+    
+                // Process project village data and check if water budget exists for each village
+                const processedData = projectVillageData.map((feature) => {
                     const villageid = feature.properties.villageid;
                     const villagename = feature.properties.villagename || "Unknown Village";
-                    if (villageid) {
-                        map[villageid] = villagename;
-                    }
-                    return map;
-                }, {} as Record<string, string>);
     
-                console.log("Village ID to Name Map:", villageidToNameMap); // Debugging
-    
-                // Step 2: Process waterBudgetData and map villageName
-                const processedData = waterBudgetData.map((feature) => {
-                    const villageid = feature.properties.villageid;
                     return {
                         division: feature.properties.division || "Unknown Division",
                         district: feature.properties.district || "Unknown District",
                         taluka: feature.properties.taluka || "Unknown Taluka",
-                        villagename: villageidToNameMap[villageid] || "Unknown Village",
-                        waterBudgetCount: 1, // Each feature represents one count
+                        villagename,
+                        waterBudgetPresent: waterBudgetVillageIds.has(villageid) ? "Yes" : "No", // Check if water budget exists
                     };
                 });
     
-                console.log("Processed Data:", processedData); // Debugging
-    
+                // Update state with processed data
                 setGeoData(processedData);
             } catch (error) {
                 console.error("Error fetching or processing data:", error);
@@ -83,8 +80,8 @@ const VillageWaterBudget: React.FC = () => {
         };
     
         fetchData();
-    }, []);
-
+    }, []);    
+      
     const handleDivisionClick = (division: string) => {
         setSelectedDivision(division === selectedDivision ? null : division);
         setSelectedDistrict(null);
@@ -145,22 +142,23 @@ const VillageWaterBudget: React.FC = () => {
         exportToExcel({
             data: dataWithTotals,
             columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })),
-            fileName: "VillageWaterBudget.xlsx",
-            sheetName: "Village Water Budget",
-            tableTitle: "Village Water Budget Data",
+            fileName: "VillageWiseWaterBudget.xlsx",
+            sheetName: "Village Wise Water Budget",
+            tableTitle: "Village Wise Water Budget Data",
         });
     };
 
     const columns = [
-        { title: "District", dataIndex: "district", key: "district", className: "center" },
-        { title: "Taluka", dataIndex: "taluka", key: "taluka", className: "center" },
-        { title: "Village Name", dataIndex: "villagename", key: "villagename", className: "center" },
+        { title: "District", dataIndex: "district", key: "district", className: "center", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const },
+        { title: "Taluka", dataIndex: "taluka", key: "taluka", className: "center", sorter: (a, b) => a.taluka.localeCompare(b.taluka), defaultSortOrder: "ascend" as const },
+        { title: "Village", dataIndex: "villagename", key: "villagename", className: "center", sorter: (a, b) => a.villagename.localeCompare(b.villagename), defaultSortOrder: "ascend" as const },
         {
-            title: "Water Budget Count",
-            dataIndex: "waterBudgetCount",
-            key: "waterBudgetCount",
+            title: "Water Budget Present",
+            dataIndex: "waterBudgetPresent",
+            key: "waterBudgetPresent",
             className: "center",
-        },
+            sorter: (a, b) => a.waterBudgetPresent.localeCompare(b.waterBudgetPresent),
+        }        
     ];
 
     return (

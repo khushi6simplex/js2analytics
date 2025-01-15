@@ -6,6 +6,7 @@ import WorkMonitoringTable from "../Dashboard/ReveloTable/WorkMonitoringTable";
 import DepartmentTable from "../Dashboard/ReveloTable/DepartmentTable";
 import RepairWiseReport from "./ReveloTable/RepairWiseTable";
 import VillageWaterBudget from "./ReveloTable/VillageWaterBudget";
+import WorkCompletionReport from "./ReveloTable/WorkCompletionReport";
 import Header from "./header/Header";
 import Summary from "./ReveloTable/Summary";
 
@@ -41,7 +42,7 @@ const Dashboard = () => {
     {
       key: "6",
       label: "Work Completion Report",
-      children: "Comming Soon ...",
+      children: <WorkCompletionReport />,
     },
     {
       key: "7",

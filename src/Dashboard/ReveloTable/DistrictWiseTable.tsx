@@ -200,7 +200,6 @@ const DistrictWiseTable: React.FC = () => {
       tableTitle: "District Wise Work Table",
     });
   };
-  
 
   return (
     <Flex gap={50} wrap="nowrap">
