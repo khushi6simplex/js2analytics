@@ -158,12 +158,39 @@ const WorkCompletionReport = () => {
       width: "100",
       sorter: (a, b) => a.workcomplete.localeCompare(b.workcomplete),
       // ellipsis: true,
+      render: (text) => <p title={text}>{text + "%"}</p>,
       className: "center",
     },
   ];
 
-  //   console.log(filteredFeatures.subplanid,"filteredFeatures");
-  const date = new Date();
+  function calculateWorkComplete(feature, geoData) {
+    let percentage = 0;
+    geoData.map((item) => {
+      if (item.properties.workid === feature.properties.workid) {
+        if (feature.properties.workname !== "") {
+          percentage = 20;
+        }
+
+        if (feature.properties.adminapprovalno !== "") {
+          percentage = 40;
+        }
+
+        if (feature.properties.woorderno !== "") {
+          percentage = 60;
+        }
+
+        if (feature.properties.startedlocation !== "") {
+          percentage = 80;
+        }
+
+        if (feature.properties.completionlocation !== "") {
+          percentage = 100;
+        }
+      }
+    });
+    return percentage;
+  }
+
   const tableData =
     filteredFeatures.map((feature, index) => ({
       key: index + 1,
@@ -181,7 +208,7 @@ const WorkCompletionReport = () => {
           f.properties.workstartdate &&
           f.properties.taluka === feature.properties.taluka,
       ).length,
-      workcomplete: feature.properties.worktype,
+      workcomplete: calculateWorkComplete(feature, geoData),
     })) || [];
 
   const tableMap = new Map();
