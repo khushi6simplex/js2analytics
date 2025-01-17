@@ -18,8 +18,6 @@
     border-radius: 0 0 8px 8px;
 } */
 
-
-
 .ant-empty-normal {
   display: flex !important;
   min-height: 55vh !important;
@@ -31,7 +29,7 @@
   display: inline-block !important;
   max-width: 50% !important;
   /* white-space: nowrap !important; */
-  /* overflow: hidden !important;
+/* overflow: hidden !important;
   text-overflow: ellipsis !important; 
 } */
 
