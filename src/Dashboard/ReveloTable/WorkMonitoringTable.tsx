@@ -17,6 +17,7 @@ import divisionData from "../division.json";
 import { fetchGeoData } from "../Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
 import { exportToExcel } from "../Excel/Excel";
+import { fontWeight } from "html2canvas/dist/types/css/property-descriptors/font-weight";
 
 const WorkTable: React.FC = () => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
@@ -69,7 +70,7 @@ const WorkTable: React.FC = () => {
 
   const calculateTotals = (data) => {
     const totals = {
-      key: "totals",
+      key: "",
       division: "Total",
       district: "",
       taluka: "",
@@ -81,10 +82,17 @@ const WorkTable: React.FC = () => {
       workstartdate: "",
       inprogresslocation: "",
       wocompletioncost: "",
-      estimatedcost: data.reduce((sum, item) => sum + (item.estimatedcost || 0), 0),
-      physicaltargetarea: data.reduce((sum, item) => sum + (item.physicaltargetarea || 0), 0).toFixed(2),
-      expectedwaterstorage: data.reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0).toFixed(2),
-      geometry: ""
+      estimatedcost: data.reduce(
+        (sum, item) => sum + (item.estimatedcost || 0),
+        0,
+      ),
+      physicaltargetarea: data
+        .reduce((sum, item) => sum + (item.physicaltargetarea || 0), 0)
+        .toFixed(2),
+      expectedwaterstorage: data
+        .reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0)
+        .toFixed(2),
+      geometry: "",
     };
     return totals;
   };
@@ -97,7 +105,7 @@ const WorkTable: React.FC = () => {
       width: "3%",
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
-      className: "center"
+      className: "center",
     },
     {
       title: "Division",
@@ -105,7 +113,7 @@ const WorkTable: React.FC = () => {
       key: "division",
       width: "100",
       ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "District",
@@ -115,7 +123,7 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.district.localeCompare(b.district),
       defaultSortOrder: "ascend" as const,
       ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Taluka",
@@ -123,7 +131,7 @@ const WorkTable: React.FC = () => {
       key: "taluka",
       width: "100",
       sorter: (a, b) => a.taluka.localeCompare(b.taluka),
-      className: "center"
+      className: "center",
     },
     {
       title: "Department",
@@ -132,7 +140,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.deptName.localeCompare(b.deptName),
       ellipsis: true,
-      className: "center"
+      className: "center",
     },
 
     {
@@ -142,7 +150,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.worktype.localeCompare(b.worktype),
       ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Benerficiary Name",
@@ -151,7 +159,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.benerficiaryname.localeCompare(b.benerficiaryname),
       // ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Admin Approved",
@@ -160,7 +168,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.adminapprovaldate.localeCompare(b.adminapprovaldate),
       // ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Work Order",
@@ -169,7 +177,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.woorderno - b.woorderno,
       // ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Work Started",
@@ -178,7 +186,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.workstartdate.localeCompare(b.workstartdate),
       // ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "In Progress",
@@ -188,7 +196,7 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) =>
         a.inprogresslocation.localeCompare(b.inprogresslocation),
       // ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Work Completed",
@@ -197,39 +205,44 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.wocompletioncost.localeCompare(b.wocompletioncost),
       // ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Estimated Cost",
       dataIndex: "estimatedcost",
       key: "estimatedcost",
-      width: "100",
+      width: "8vw",
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
       render: (text) => (
-        <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
+        <p title={text}>
+          {"₹ " +
+            parseFloat(text)
+              .toFixed(2)
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </p>
       ),
       ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Physical Target Area",
       dataIndex: "physicaltargetarea",
       key: "physicaltargetarea",
-      width: "100",
+      width: "8vw",
       sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
       render: (text) => <p title={text}>{text + " sq.m"}</p>,
       ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "Expected Water Storage",
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
-      width: "100",
+      width: "8vw",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
       ellipsis: true,
-      className: "center"
+      className: "center",
     },
     {
       title: "GeoTagged",
@@ -238,7 +251,7 @@ const WorkTable: React.FC = () => {
       width: "100",
       // sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       // render: (text) => <p title={text}>{text + " TCM"}</p>,
-      className: "center"
+      className: "center",
     },
   ];
 
@@ -272,23 +285,23 @@ const WorkTable: React.FC = () => {
       ...tableData,
       {
         key: "",
-      division: "Total",
-      district: "",
-      taluka: "",
-      deptName: "",
-      worktype: "",
-      beneficiaryname: "",
-      adminapproved: "",
-      workorderno: "",
-      workstartdate: "",
-      inprogresslocation: "",
-      wocompletioncost: "",
-      estimatedcost: `₹ ${totals.estimatedcost}`,
-      physicaltargetarea: `${totals.physicaltargetarea} sq.m.`,
-      expectedwaterstorage: `${totals.expectedwaterstorage} TCM`,
-      geometry: ""
-      }
-    ]
+        division: "Total",
+        district: "",
+        taluka: "",
+        deptName: "",
+        worktype: "",
+        beneficiaryname: "",
+        adminapproved: "",
+        workorderno: "",
+        workstartdate: "",
+        inprogresslocation: "",
+        wocompletioncost: "",
+        estimatedcost: `₹ ${totals.estimatedcost}`,
+        physicaltargetarea: `${totals.physicaltargetarea} sq.m.`,
+        expectedwaterstorage: `${totals.expectedwaterstorage} TCM`,
+        geometry: "",
+      },
+    ];
     exportToExcel({
       data: selectedDivision ? dataWithTotals : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
@@ -340,16 +353,16 @@ const WorkTable: React.FC = () => {
                 data={
                   selectedDistrict
                     ? Array.from(
-                      new Set(
-                        geoData
-                          .filter(
-                            (feature) =>
-                              feature.properties.district ===
-                              selectedDistrict,
-                          )
-                          .map((feature) => feature.properties.taluka),
-                      ),
-                    )
+                        new Set(
+                          geoData
+                            .filter(
+                              (feature) =>
+                                feature.properties.district ===
+                                selectedDistrict,
+                            )
+                            .map((feature) => feature.properties.taluka),
+                        ),
+                      )
                     : []
                 }
                 selectedItem={selectedTaluka}
@@ -417,19 +430,34 @@ const WorkTable: React.FC = () => {
                     return (
                       <Table.Summary.Row>
                         <Table.Summary.Cell index={0} colSpan={12}>
-                          <div style={{ textAlign: "center", fontWeight: "bolder" }}>Total</div>
+                          <div
+                            style={{
+                              textAlign: "center",
+                              fontWeight: "bolder",
+                            }}>
+                            Total
+                          </div>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={10} className="center">
-                          ₹{totals.estimatedcost}
+                          <p style={{ fontWeight: "bold" }}>
+                            ₹
+                            {parseFloat(totals.estimatedcost)
+                              .toFixed(2)
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          </p>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={11} className="center">
-                          {totals.physicaltargetarea} sq.m
+                          <p style={{ fontWeight: "bold" }}>
+                            {totals.physicaltargetarea} sq.m
+                          </p>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={12} className="center">
-                          {totals.expectedwaterstorage} TCM
+                          <p style={{ fontWeight: "bold" }}>
+                            {totals.expectedwaterstorage} TCM
+                          </p>
                         </Table.Summary.Cell>
                       </Table.Summary.Row>
-                    )
+                    );
                   }}
                   // scroll={{ x: "100%" }}
                   bordered

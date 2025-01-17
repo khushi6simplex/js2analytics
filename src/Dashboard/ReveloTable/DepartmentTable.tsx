@@ -137,7 +137,9 @@ const WorkTable: React.FC = () => {
       key: "expectedwaterstorage",
       width: "15%",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
-      render: (text) => <p title={text}>{text + " TCM"}</p>,
+      render: (text) => (
+        <p title={text}>{parseFloat(text).toFixed(2) + " TCM"}</p>
+      ),
       className: "center",
     },
     {
@@ -147,7 +149,12 @@ const WorkTable: React.FC = () => {
       width: "15%",
       sorter: (a, b) => a.estimatedcost - b.estimatedcost,
       render: (text) => (
-        <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
+        <p title={text}>
+          {"₹ " +
+            parseFloat(text)
+              .toFixed(2)
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </p>
       ),
       className: "center",
     },
