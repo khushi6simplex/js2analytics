@@ -12,13 +12,13 @@ import {
   Typography,
   Divider,
 } from "antd";
-import Jurisdictions from "../Jurisdiction/Jurisdiction";
-import divisionData from "../division.json";
-import { fetchGeoData } from "../Data/useGeoData";
+import Jurisdictions from "./src/Dashboard/Jurisdiction/Jurisdiction";
+import divisionData from "./src/Dashboard/division.json";
+import { fetchGeoData } from "./src/Dashboard/Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
-import { exportToExcel } from "../Excel/Excel";
+import { exportToExcel } from "./src/Dashboard/Excel/Excel";
 
-const WorkTable: React.FC = () => {
+const WorkCompletionReport = () => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selectedDivision, setSelectedDivision] = useState<any>();
@@ -78,13 +78,20 @@ const WorkTable: React.FC = () => {
       beneficiaryname: "",
       adminapproved: "",
       workorderno: "",
-      workstarted: "",
-      workinprogress: "",
-      workcompleted: "",
-      estimatedcost: data.reduce((sum, item) => sum + (item.estimatedcost || 0), 0),
-      physicaltargetarea: data.reduce((sum, item) => sum + (item.physicaltargetarea || 0), 0).toFixed(2),
-      expectedwaterstorage: data.reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0).toFixed(2),
-      geometry: ""
+      workstartdate: "",
+      inprogresslocation: "",
+      wocompletioncost: "",
+      estimatedcost: data.reduce(
+        (sum, item) => sum + (item.estimatedcost || 0),
+        0,
+      ),
+      physicaltargetarea: data
+        .reduce((sum, item) => sum + (item.physicaltargetarea || 0), 0)
+        .toFixed(2),
+      expectedwaterstorage: data
+        .reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0)
+        .toFixed(2),
+      geometry: "",
     };
     return totals;
   };
@@ -129,157 +136,95 @@ const WorkTable: React.FC = () => {
       className: "center",
       align: "center" as "center",
     },
-    {
-      title: "Department",
-      dataIndex: "deptName",
-      key: "deptName",
-      width: "100",
-      sorter: (a, b) => a.deptName.localeCompare(b.deptName),
-      ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
 
     {
-      title: "Work Type",
-      dataIndex: "worktype",
-      key: "worktype",
+      title: "Created Work",
+      dataIndex: "totalwork",
+      key: "totalwork",
       width: "100",
-      sorter: (a, b) => a.worktype.localeCompare(b.worktype),
-      ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
-    {
-      title: "Beneficiary Name",
-      dataIndex: "beneficiaryname",
-      key: "beneficiaryname",
-      width: "100",
-      sorter: (a, b) => a.beneficiaryname.localeCompare(b.beneficiaryname),
+      sorter: (a, b) => a.totalwork - b.totalwork,
       // ellipsis: true,
       className: "center",
       align: "center" as "center",
     },
     {
-      title: "Admin Approved",
-      dataIndex: "adminapproved",
-      key: "adminapproved",
+      title: "Started Work",
+      dataIndex: "startedwork",
+      key: "startedwork",
       width: "100",
-      sorter: (a, b) => a.adminapproved.localeCompare(b.adminapproved),
+      sorter: (a, b) => a.startedwork.localeCompare(b.startedwork),
       // ellipsis: true,
       className: "center",
       align: "center" as "center",
     },
     {
-      title: "Work Order",
-      dataIndex: "woorderno",
-      key: "woorderno",
+      title: "Work Complete %",
+      dataIndex: "workcomplete",
+      key: "workcomplete",
       width: "100",
-      sorter: (a, b) => a.woorderno - b.woorderno,
+      sorter: (a, b) => a.workcomplete.localeCompare(b.workcomplete),
       // ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
-    {
-      title: "Work Started",
-      dataIndex: "workstarted",
-      key: "workstarted",
-      width: "100",
-      sorter: (a, b) => a.workstarted.localeCompare(b.workstarted),
-      // ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
-    {
-      title: "In Progress",
-      dataIndex: "workinprogress",
-      key: "workinprogress",
-      width: "100",
-      sorter: (a, b) =>
-        a.workinprogress.localeCompare(b.workinprogress),
-      // ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
-    {
-      title: "Work Completed",
-      dataIndex: "workcompleted",
-      key: "workcompleted",
-      width: "100",
-      sorter: (a, b) => a.workcompleted.localeCompare(b.workcompleted),
-      // ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
-    {
-      title: "Estimated Cost",
-      dataIndex: "estimatedcost",
-      key: "estimatedcost",
-      width: "100",
-      sorter: (a, b) => a.estimatedcost.localeCompare(b.estimatedcost),
-      render: (text) => (
-        <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
-      ),
-      ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
-    {
-      title: "Physical Target Area",
-      dataIndex: "physicaltargetarea",
-      key: "physicaltargetarea",
-      width: "100",
-      sorter: (a, b) => a.physicaltargetarea.localeCompare(b.physicaltargetarea),
-      render: (text) => <p title={text}>{text + " sq.m"}</p>,
-      ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
-    {
-      title: "Expected Water Storage",
-      dataIndex: "expectedwaterstorage",
-      key: "expectedwaterstorage",
-      width: "100",
-      sorter: (a, b) => a.expectedwaterstorage.localeCompare(b.expectedwaterstorage),
-      render: (text) => <p title={text}>{text + " TCM"}</p>,
-      ellipsis: true,
-      className: "center",
-      align: "center" as "center",
-    },
-    {
-      title: "GeoTagged",
-      dataIndex: "geometry",
-      key: "geometry",
-      width: "100",
-      sorter: (a, b) => a.geometry.localeCompare(b.geometry),
-      // render: (text) => <p title={text}>{text + " TCM"}</p>,
+      render: (text) => <p title={text}>{text + "%"}</p>,
       className: "center",
       align: "center" as "center",
     },
   ];
 
-  const date = new Date();
+  function calculateWorkComplete(feature, geoData) {
+    let percentage = 0;
+    geoData.map((item) => {
+      if (item.properties.workid === feature.properties.workid) {
+        if (feature.properties.workname !== "") {
+          percentage = 20;
+        }
+
+        if (feature.properties.adminapprovalno !== "") {
+          percentage = 40;
+        }
+
+        if (feature.properties.woorderno !== "") {
+          percentage = 60;
+        }
+
+        if (feature.properties.startedlocation !== "") {
+          percentage = 80;
+        }
+
+        if (feature.properties.completionlocation !== "") {
+          percentage = 100;
+        }
+      }
+    });
+    return percentage;
+  }
+
   const tableData =
     filteredFeatures.map((feature, index) => ({
       key: index + 1,
       division: selectedDivision,
       district: feature.properties.district,
       taluka: feature.properties.taluka,
-      deptName: feature.properties.deptName,
-      worktype: feature.properties.worktype,
-      estimatedcost: feature.properties.estimatedcost,
-      physicaltargetarea: feature.properties.physicaltargetarea,
-      expectedwaterstorage: feature.properties.expectedwaterstorage,
-      geometry: feature.geometry === null ? "No" : "Yes",
-      beneficiaryname: feature.properties.beneficiaryname,
-      adminapproved:
-        feature.properties.adminapprovalno === "" ? "No" : "Yes",
-      woorderno: feature.properties.woorderno === "" ? "No" : "Yes",
-      workstarted: feature.properties.startedlocation ? "Yes" : "No",
-      workinprogress:
-        feature.properties.inprogresslocation === "" ? "No" : "Yes",
-      workcompleted: feature.properties.completionlocation > 0 ? "Yes" : "No",
+      //   totalwork: feature.properties.subplanid.length,
+      totalwork: geoData.filter(
+        (f) =>
+          f.properties.subplanid &&
+          f.properties.taluka === feature.properties.taluka,
+      ).length,
+      startedwork: geoData.filter(
+        (f) =>
+          f.properties.workstartdate < "2049-01-13T18:30:00Z" &&
+          f.properties.taluka === feature.properties.taluka,
+      ).length,
+      workcomplete: calculateWorkComplete(feature, geoData),
     })) || [];
+
+  const tableMap = new Map();
+
+  tableData.forEach((item) => {
+    console.log(item.division, "item.depname");
+    tableMap.set(item.taluka, item);
+    console.log(Array.from(tableMap.values()), "tableMap1");
+  });
 
   const handleExport = () => {
     const totals = calculateTotals(tableData);
@@ -288,23 +233,23 @@ const WorkTable: React.FC = () => {
       ...tableData,
       {
         key: "",
-      division: "Total",
-      district: "",
-      taluka: "",
-      deptName: "",
-      worktype: "",
-      beneficiaryname: "",
-      adminapproved: "",
-      workorderno: "",
-      workstarted: "",
-      workinprogress: "",
-      workcompleted: "",
-      estimatedcost: `₹ ${totals.estimatedcost}`,
-      physicaltargetarea: `${totals.physicaltargetarea} sq.m.`,
-      expectedwaterstorage: `${totals.expectedwaterstorage} TCM`,
-      geometry: ""
-      }
-    ]
+        division: "Total",
+        district: "",
+        taluka: "",
+        deptName: "",
+        worktype: "",
+        beneficiaryname: "",
+        adminapproved: "",
+        workorderno: "",
+        workstartdate: "",
+        inprogresslocation: "",
+        wocompletioncost: "",
+        estimatedcost: `₹ ${totals.estimatedcost}`,
+        physicaltargetarea: `${totals.physicaltargetarea} sq.m.`,
+        expectedwaterstorage: `${totals.expectedwaterstorage} TCM`,
+        geometry: "",
+      },
+    ];
     exportToExcel({
       data: selectedDivision ? dataWithTotals : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
@@ -356,16 +301,16 @@ const WorkTable: React.FC = () => {
                 data={
                   selectedDistrict
                     ? Array.from(
-                      new Set(
-                        geoData
-                          .filter(
-                            (feature) =>
-                              feature.properties.district ===
-                              selectedDistrict,
-                          )
-                          .map((feature) => feature.properties.taluka),
-                      ),
-                    )
+                        new Set(
+                          geoData
+                            .filter(
+                              (feature) =>
+                                feature.properties.district ===
+                                selectedDistrict,
+                            )
+                            .map((feature) => feature.properties.taluka),
+                        ),
+                      )
                     : []
                 }
                 selectedItem={selectedTaluka}
@@ -392,7 +337,7 @@ const WorkTable: React.FC = () => {
                     paddingBottom: "10px",
                     display: "block",
                   }}>
-                  Report Output {(selectedDivision ? tableData : []).length} 
+                  Report Output
                 </Typography.Text>
 
                 <Button
@@ -413,9 +358,11 @@ const WorkTable: React.FC = () => {
                 }}>
                 <Table
                   columns={columns}
-                  scroll={{ x: 1600 }}
+                  //   scroll={{ x: 1600 }}
                   style={{ alignItems: "top" }}
-                  dataSource={selectedDivision ? tableData : []}
+                  dataSource={
+                    selectedDivision ? Array.from(tableMap.values()) : []
+                  }
                   size="small"
                   tableLayout="fixed"
                   pagination={{
@@ -428,25 +375,31 @@ const WorkTable: React.FC = () => {
                       setPageSize(pageSize);
                     },
                   }}
-                  summary={(pageData) => {
-                    const totals = calculateTotals(pageData);
-                    return (
-                      <Table.Summary.Row>
-                        <Table.Summary.Cell index={0} colSpan={12}>
-                          <div style={{ textAlign: "center", fontWeight: "bolder" }}>Total</div>
-                        </Table.Summary.Cell>
-                        <Table.Summary.Cell index={10} className="center">
-                          ₹{totals.estimatedcost}
-                        </Table.Summary.Cell>
-                        <Table.Summary.Cell index={11} className="center">
-                          {totals.physicaltargetarea} sq.m
-                        </Table.Summary.Cell>
-                        <Table.Summary.Cell index={12} className="center">
-                          {totals.expectedwaterstorage} TCM
-                        </Table.Summary.Cell>
-                      </Table.Summary.Row>
-                    )
-                  }}
+                  //   summary={(pageData) => {
+                  //     const totals = calculateTotals(pageData);
+                  //     return (
+                  //       <Table.Summary.Row>
+                  //         <Table.Summary.Cell index={0} colSpan={12}>
+                  //           <div
+                  //             style={{
+                  //               textAlign: "center",
+                  //               fontWeight: "bolder",
+                  //             }}>
+                  //             Total
+                  //           </div>
+                  //         </Table.Summary.Cell>
+                  //         <Table.Summary.Cell index={10} className="center">
+                  //           ₹{totals.estimatedcost}
+                  //         </Table.Summary.Cell>
+                  //         <Table.Summary.Cell index={11} className="center">
+                  //           {totals.physicaltargetarea} sq.m
+                  //         </Table.Summary.Cell>
+                  //         <Table.Summary.Cell index={12} className="center">
+                  //           {totals.expectedwaterstorage} TCM
+                  //         </Table.Summary.Cell>
+                  //       </Table.Summary.Row>
+                  //     );
+                  //   }}
                   // scroll={{ x: "100%" }}
                   bordered
                 />
@@ -458,4 +411,4 @@ const WorkTable: React.FC = () => {
     </Flex>
   );
 };
-export default WorkTable;
+export default WorkCompletionReport;

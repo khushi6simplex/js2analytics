@@ -12,11 +12,11 @@ import {
   Typography,
   Divider,
 } from "antd";
-import Jurisdictions from "../Jurisdiction/Jurisdiction";
-import divisionData from "../division.json";
-import { fetchGeoData } from "../Data/useGeoData";
+import Jurisdictions from "./src/Dashboard/Jurisdiction/Jurisdiction";
+import divisionData from "./src/Dashboard/division.json";
+import { fetchGeoData } from "./src/Dashboard/Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
-import { exportToExcel } from "../Excel/Excel";
+import { exportToExcel } from "./src/Dashboard/Excel/Excel";
 
 const WorkTable: React.FC = () => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
