@@ -18,7 +18,6 @@ import divisionData from "../division.json";
 import "../../Dashboard/Dashboard.css";
 import { fetchGeoData } from "../Data/useGeoData";
 import type { TabsProps } from "antd";
-import WorkData from "../../Dashboard/work.json";
 import RepairWorks from "../../Dashboard/repairWorks.json";
 import { exportToExcel } from "../Excel/Excel";
 
@@ -30,7 +29,7 @@ function RepairWiseReport() {
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
-  const [pageSize, setPageSize] = useState<number>(12);
+  const [pageSize, setPageSize] = useState<number>(7);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -98,9 +97,19 @@ function RepairWiseReport() {
     },
     {
       title: "Estimated Cost",
-      dataIndex: "workprice",
-      key: "workprice",
+      dataIndex: "estimatedcost",
+      key: "estimatedcost",
       width: "20%",
+
+      render: (text) => (
+        <p title={text}>
+          {" "}
+          ₹
+          {parseFloat(text)
+            .toFixed(2)
+            .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </p>
+      ),
       sorter: (a, b) => a.workprice - b.workprice,
       className: "center",
     },
@@ -116,7 +125,7 @@ function RepairWiseReport() {
       (feature) => feature.properties.worktype === worktype,
     );
     const workcount = matchingFeatures.length;
-    const workprice = matchingFeatures.reduce(
+    const estimatedcost = matchingFeatures.reduce(
       (sum, feature) => sum + (feature.properties.estimatedcost || 0),
       0,
     );
@@ -125,7 +134,7 @@ function RepairWiseReport() {
       key: index + 1,
       worktype,
       workcount,
-      workprice,
+      estimatedcost,
     };
   });
 
@@ -134,7 +143,10 @@ function RepairWiseReport() {
       key: "totals",
       worktype: "Total",
       workcount: data.reduce((sum, item) => sum + (item.workcount || 0), 0),
-      workprice: data.reduce((sum, item) => sum + (item.workprice || 0), 0),
+      estimatedcost: data.reduce(
+        (sum, item) => sum + (item.estimatedcost || 0),
+        0,
+      ),
     };
     return totals;
   };
@@ -160,10 +172,10 @@ function RepairWiseReport() {
     const dataWithTotals = [
       ...tableData,
       {
-        key: "totals",
+        key: "",
         worktype: "Total",
         workcount: `${totals.workcount}`,
-        workprice: `${totals.workprice}`,
+        estimatedcost: `${totals.estimatedcost}`,
       },
     ];
     exportToExcel({
@@ -289,13 +301,20 @@ function RepairWiseReport() {
                     return (
                       <Table.Summary.Row style={{ backgroundColor: "#fafafa" }}>
                         <Table.Summary.Cell index={0} colSpan={2}>
-                          <div>Total</div>
+                          <div style={{ fontWeight: "bold" }}>Total</div>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={1} className="center">
-                          {totals.workcount}
+                          <p style={{ fontWeight: "bold" }}>
+                            {totals.workcount}
+                          </p>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={2} className="center">
-                          ₹{totals.workprice}
+                          <p style={{ fontWeight: "bold" }}>
+                            ₹{" "}
+                            {parseFloat(totals.estimatedcost)
+                              .toFixed(2)
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          </p>
                         </Table.Summary.Cell>
                       </Table.Summary.Row>
                     );

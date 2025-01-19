@@ -69,7 +69,7 @@ const WorkTable: React.FC = () => {
 
   const calculateTotals = (data) => {
     const totals = {
-      key: "totals",
+      key: "",
       division: "Total",
       district: "",
       taluka: "",
@@ -215,10 +215,15 @@ const WorkTable: React.FC = () => {
       title: "Estimated Cost",
       dataIndex: "estimatedcost",
       key: "estimatedcost",
-      width: "100",
+      width: "8vw",
       sorter: (a, b) => a.estimatedcost.localeCompare(b.estimatedcost),
       render: (text) => (
-        <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
+        <p title={text}>
+          {"₹ " +
+            parseFloat(text)
+              .toFixed(2)
+              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+        </p>
       ),
       ellipsis: true,
       className: "center",
@@ -228,7 +233,7 @@ const WorkTable: React.FC = () => {
       title: "Physical Target Area",
       dataIndex: "physicaltargetarea",
       key: "physicaltargetarea",
-      width: "100",
+      width: "8vw",
       sorter: (a, b) => a.physicaltargetarea.localeCompare(b.physicaltargetarea),
       render: (text) => <p title={text}>{text + " sq.m"}</p>,
       ellipsis: true,
@@ -239,7 +244,7 @@ const WorkTable: React.FC = () => {
       title: "Expected Water Storage",
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
-      width: "100",
+      width: "8vw",
       sorter: (a, b) => a.expectedwaterstorage.localeCompare(b.expectedwaterstorage),
       render: (text) => <p title={text}>{text + " TCM"}</p>,
       ellipsis: true,
@@ -356,16 +361,16 @@ const WorkTable: React.FC = () => {
                 data={
                   selectedDistrict
                     ? Array.from(
-                      new Set(
-                        geoData
-                          .filter(
-                            (feature) =>
-                              feature.properties.district ===
-                              selectedDistrict,
-                          )
-                          .map((feature) => feature.properties.taluka),
-                      ),
-                    )
+                        new Set(
+                          geoData
+                            .filter(
+                              (feature) =>
+                                feature.properties.district ===
+                                selectedDistrict,
+                            )
+                            .map((feature) => feature.properties.taluka),
+                        ),
+                      )
                     : []
                 }
                 selectedItem={selectedTaluka}
@@ -433,19 +438,34 @@ const WorkTable: React.FC = () => {
                     return (
                       <Table.Summary.Row>
                         <Table.Summary.Cell index={0} colSpan={12}>
-                          <div style={{ textAlign: "center", fontWeight: "bolder" }}>Total</div>
+                          <div
+                            style={{
+                              textAlign: "center",
+                              fontWeight: "bolder",
+                            }}>
+                            Total
+                          </div>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={10} className="center">
-                          ₹{totals.estimatedcost}
+                          <p style={{ fontWeight: "bold" }}>
+                            ₹
+                            {parseFloat(totals.estimatedcost)
+                              .toFixed(2)
+                              .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                          </p>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={11} className="center">
-                          {totals.physicaltargetarea} sq.m
+                          <p style={{ fontWeight: "bold" }}>
+                            {totals.physicaltargetarea} sq.m
+                          </p>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={12} className="center">
-                          {totals.expectedwaterstorage} TCM
+                          <p style={{ fontWeight: "bold" }}>
+                            {totals.expectedwaterstorage} TCM
+                          </p>
                         </Table.Summary.Cell>
                       </Table.Summary.Row>
-                    )
+                    );
                   }}
                   // scroll={{ x: "100%" }}
                   bordered
