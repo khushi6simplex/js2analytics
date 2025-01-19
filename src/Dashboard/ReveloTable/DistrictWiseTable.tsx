@@ -19,7 +19,6 @@ const DistrictWiseTable: React.FC = () => {
     const fetchData = async () => {
       try {
         setLoading(true); // Set loading to true while fetching
-        const filter = `state='Maharashtra'`; // Your CQL filter for state
         const data = await fetchGeoData();
         setGeoData(data.features || []); // Ensure it's always an array
       } catch (error) {
@@ -87,7 +86,7 @@ const DistrictWiseTable: React.FC = () => {
           worksCount: talukaFeatures.length,
           worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
           worksStarted: talukaFeatures.filter((feature) => feature.properties.startedlocation).length,
-          worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation > feature.properties.workstartdate).length,
+          worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation).length,
           totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
           physicalTargetArea: talukaFeatures.reduce(
             (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
@@ -118,8 +117,8 @@ const DistrictWiseTable: React.FC = () => {
           division: selectedDivision,
           worksCount: talukaFeatures.length,
           worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
-          worksStarted: talukaFeatures.filter((feature) => feature.properties.workstartdate).length,
-          worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate > feature.properties.workstartdate).length,
+          worksStarted: talukaFeatures.filter((feature) => feature.properties.startedlocation).length,
+          worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation).length,
           totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
           physicalTargetArea: talukaFeatures.reduce(
             (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),

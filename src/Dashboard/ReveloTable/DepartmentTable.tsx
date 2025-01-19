@@ -14,7 +14,6 @@ import {
 } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
-import WorkData from "../work.json";
 import { fetchGeoData } from "../Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
 import { exportToExcel } from "../Excel/Excel";
@@ -89,12 +88,14 @@ const WorkTable: React.FC = () => {
       width: "3%",
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
+      align: "center" as "center",
     },
     {
       title: "Division",
       dataIndex: "division",
       key: "division",
       width: "10%",
+      align: "center" as "center",
     },
 
     {
@@ -105,6 +106,7 @@ const WorkTable: React.FC = () => {
       defaultSortOrder: "ascend" as const,
       sorter: (a, b) => a.deptName.localeCompare(b.deptName),
       ellipsis: true,
+      align: "center" as "center",
     },
 
     {
@@ -114,6 +116,7 @@ const WorkTable: React.FC = () => {
       width: "10%",
       sorter: (a, b) => a.adminapprovalno - b.adminapprovalno,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "Works Started",
@@ -122,6 +125,7 @@ const WorkTable: React.FC = () => {
       width: "10%",
       sorter: (a, b) => a.workstarted - b.workstarted,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "Works Completed",
@@ -130,6 +134,7 @@ const WorkTable: React.FC = () => {
       width: "15%",
       sorter: (a, b) => a.worksCompleted - b.worksCompleted,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "Expected Water Storage",
@@ -139,6 +144,7 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "Estimated Cost",
@@ -150,6 +156,7 @@ const WorkTable: React.FC = () => {
         <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
       ),
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "GeoTagged",
@@ -161,6 +168,7 @@ const WorkTable: React.FC = () => {
       //   <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
       // ),
       className: "center",
+      align: "center" as "center",
     },
   ];
 
@@ -176,7 +184,7 @@ const WorkTable: React.FC = () => {
       ).length,
       workstarted: geoData.filter(
         (f) =>
-          f.properties.workstartdate &&
+          f.properties.startedlocation &&
           f.properties.deptName === feature.properties.deptName,
       ).length,
       estimatedcost: geoData
@@ -187,7 +195,7 @@ const WorkTable: React.FC = () => {
         ),
       worksCompleted: geoData.filter(
         (f) =>
-          f.properties.wocompletiondate > f.properties.workstartdate &&
+          f.properties.completionlocation &&
           f.properties.deptName === feature.properties.deptName,
       ).length,
       expectedwaterstorage: geoData

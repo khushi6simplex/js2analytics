@@ -18,10 +18,11 @@ const Summary = () => {
     const fetchData = async () => {
       try {
         setLoading(true);
-
+  
         const url = window.__analytics__.wbUrl;
-
-        const [projectVillageResponse, waterBudgetResponse, villagePlanResponse, workResponse] = await Promise.all([
+  
+        // Fetch data from multiple URLs for workData
+        const [projectVillageResponse, waterBudgetResponse, villagePlanResponse, shadowWorks, originalWorks] = await Promise.all([
           axios.get(url, {
             params: {
               service: "WFS",
@@ -58,24 +59,40 @@ const Summary = () => {
               service: "WFS",
               version: "1.0.0",
               request: "GetFeature",
-              typeName: "js2surveydsws:work_js2project_shadow",
+              typeName: "js2surveydsws:work_js2project", // First URL for works
+              outputFormat: "json",
+              srsname: "EPSG:3857",
+            },
+          }),
+          axios.get(url, {
+            params: {
+              service: "WFS",
+              version: "1.0.0",
+              request: "GetFeature",
+              typeName: "js2surveydsws:work_js2project_shadow", // Second URL for works
               outputFormat: "json",
               srsname: "EPSG:3857",
             },
           }),
         ]);
-
+  
         const projectVillageData = projectVillageResponse.data.features || [];
         const waterBudgetData = waterBudgetResponse.data.features || [];
         const villagePlanData = villagePlanResponse.data.features || [];
-        const workData = workResponse.data.features || [];
-
+  
+        // Combine features from both work URLs
+        const workData = [
+          ...(shadowWorks.data.features || []),
+          ...(originalWorks.data.features || []),
+        ];
+  
+        // Process data as before
         const districtVillageCounts = {};
         const districtWaterBudgetCounts = {};
         const districtVillagePlanCounts = {};
         const districtWorkCounts = {};
         const districtGeotaggingCounts = {};
-
+  
         projectVillageData.forEach((feature) => {
           const district = feature.properties.district || "Unknown District";
           if (!districtVillageCounts[district]) {
@@ -83,7 +100,7 @@ const Summary = () => {
           }
           districtVillageCounts[district] += 1;
         });
-
+  
         waterBudgetData.forEach((feature) => {
           const district = feature.properties.district || "Unknown District";
           if (!districtWaterBudgetCounts[district]) {
@@ -91,7 +108,7 @@ const Summary = () => {
           }
           districtWaterBudgetCounts[district] += 1;
         });
-
+  
         villagePlanData.forEach((feature) => {
           const district = feature.properties.district || "Unknown District";
           if (!districtVillagePlanCounts[district]) {
@@ -99,38 +116,36 @@ const Summary = () => {
           }
           districtVillagePlanCounts[district] += 1;
         });
-
+  
         workData.forEach((feature) => {
           const district = feature.properties.district || "Unknown District";
-          const workStartDate = new Date(feature.properties.workstartdate);
-          const cutoffDate = new Date("2049-01-01");
-
+          const completionlocation = feature.properties.completionlocation || "";
           if (!districtWorkCounts[district]) {
             districtWorkCounts[district] = { completed: 0, incomplete: 0 };
           }
-
-          if (workStartDate < cutoffDate) {
+  
+          if (completionlocation) {
             districtWorkCounts[district].completed += 1;
           } else {
             districtWorkCounts[district].incomplete += 1;
           }
-
-          const startedLocation = feature.properties.startedlocation || "";
+  
+          const geometry = feature.properties.startedlocation || "";
           if (!districtGeotaggingCounts[district]) {
             districtGeotaggingCounts[district] = { completed: 0, incomplete: 0 };
           }
-
-          if (startedLocation) {
+  
+          if (geometry) {
             districtGeotaggingCounts[district].completed += 1;
           } else {
             districtGeotaggingCounts[district].incomplete += 1;
           }
         });
-
+  
         const processedData = Object.keys(districtVillageCounts).map((district) => {
           const division = Object.keys(divisionData).find((div) =>
-          divisionData[div].districts.includes(district)
-        ) || "Unknown Division"
+            divisionData[div].districts.includes(district)
+          ) || "Unknown Division";
           const totalVillages = districtVillageCounts[district] || 0;
           const completedWaterBudget = districtWaterBudgetCounts[district] || 0;
           const incompleteWaterBudget = totalVillages - completedWaterBudget;
@@ -140,7 +155,7 @@ const Summary = () => {
           const incompleteWork = districtWorkCounts[district]?.incomplete || 0;
           const geotaggingComplete = districtGeotaggingCounts[district]?.completed || 0;
           const geotaggingIncomplete = districtGeotaggingCounts[district]?.incomplete || 0;
-
+  
           return {
             division,
             district,
@@ -155,7 +170,7 @@ const Summary = () => {
             geotaggingIncomplete: geotaggingIncomplete,
           };
         });
-
+  
         setGeoData(processedData);
       } catch (error) {
         console.error("Error fetching or processing data:", error);
@@ -163,10 +178,10 @@ const Summary = () => {
         setLoading(false);
       }
     };
-
+  
     fetchData();
   }, []);
-
+  
   const handleDivisionClick = ( division ) => {
     setSelectedDivision( division === selectedDivision ? null : division );
     setSelectedDistrict( null );
@@ -482,7 +497,6 @@ const Summary = () => {
                     </Table.Summary.Row>
                   );
                 }}
-                
               />
             </div>
           )}
