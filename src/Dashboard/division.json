@@ -11,12 +11,12 @@
     "Chhatrapati Sambhaji Nagar": {
         "districts": [
             "Chhatrapati Sambhaji Nagar",
-            "Beed",
+            "Bid",
             "Hingoli",
             "Jalna",
             "Latur",
             "Nanded",
-            "Osmanabad",
+            "Dharashiv",
             "Parbhani"
         ]
     },
@@ -25,7 +25,7 @@
             "Mumbai",
             "Mumbai Suburban",
             "Palghar",
-            "Raigad",
+            "Raigarh",
             "Ratnagiri",
             "Thane",
             "Sindhudurg"
@@ -43,7 +43,7 @@
     },
     "Nashik": {
         "districts": [
-            "Ahmednagar",
+            "Ahmadnagar",
             "Dhule",
             "Jalgaon",
             "Nandurbar",

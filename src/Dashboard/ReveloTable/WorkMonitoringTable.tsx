@@ -97,7 +97,8 @@ const WorkTable: React.FC = () => {
       width: "3%",
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Division",
@@ -105,7 +106,8 @@ const WorkTable: React.FC = () => {
       key: "division",
       width: "100",
       ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "District",
@@ -115,7 +117,8 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.district.localeCompare(b.district),
       defaultSortOrder: "ascend" as const,
       ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Taluka",
@@ -123,7 +126,8 @@ const WorkTable: React.FC = () => {
       key: "taluka",
       width: "100",
       sorter: (a, b) => a.taluka.localeCompare(b.taluka),
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Department",
@@ -132,7 +136,8 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.deptName.localeCompare(b.deptName),
       ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
 
     {
@@ -142,16 +147,18 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.worktype.localeCompare(b.worktype),
       ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
-      title: "Benerficiary Name",
+      title: "Beneficiary Name",
       dataIndex: "beneficiaryname",
       key: "beneficiaryname",
       width: "100",
-      sorter: (a, b) => a.benerficiaryname.localeCompare(b.benerficiaryname),
+      sorter: (a, b) => a.beneficiaryname.localeCompare(b.beneficiaryname),
       // ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Admin Approved",
@@ -160,7 +167,8 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.adminapprovaldate.localeCompare(b.adminapprovaldate),
       // ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Work Order",
@@ -169,7 +177,8 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.woorderno - b.woorderno,
       // ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Work Started",
@@ -178,7 +187,8 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.workstartdate.localeCompare(b.workstartdate),
       // ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "In Progress",
@@ -188,7 +198,8 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) =>
         a.inprogresslocation.localeCompare(b.inprogresslocation),
       // ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Work Completed",
@@ -197,7 +208,8 @@ const WorkTable: React.FC = () => {
       width: "100",
       sorter: (a, b) => a.wocompletioncost.localeCompare(b.wocompletioncost),
       // ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Estimated Cost",
@@ -209,7 +221,8 @@ const WorkTable: React.FC = () => {
         <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>
       ),
       ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Physical Target Area",
@@ -219,7 +232,8 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
       render: (text) => <p title={text}>{text + " sq.m"}</p>,
       ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "Expected Water Storage",
@@ -229,7 +243,8 @@ const WorkTable: React.FC = () => {
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
       ellipsis: true,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
     {
       title: "GeoTagged",
@@ -238,7 +253,8 @@ const WorkTable: React.FC = () => {
       width: "100",
       // sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       // render: (text) => <p title={text}>{text + " TCM"}</p>,
-      className: "center"
+      className: "center",
+      align: "center" as "center",
     },
   ];
 
@@ -376,7 +392,7 @@ const WorkTable: React.FC = () => {
                     paddingBottom: "10px",
                     display: "block",
                   }}>
-                  Report Output
+                  Report Output {(selectedDivision ? tableData : []).length} 
                 </Typography.Text>
 
                 <Button

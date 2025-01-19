@@ -105,6 +105,7 @@ const WorkCompletionReport = () => {
       render: (_: any, __: any, index: number) =>
         (currentPage - 1) * pageSize + index + 1,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "Division",
@@ -113,6 +114,7 @@ const WorkCompletionReport = () => {
       width: "100",
       ellipsis: true,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "District",
@@ -123,6 +125,7 @@ const WorkCompletionReport = () => {
       defaultSortOrder: "ascend" as const,
       ellipsis: true,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "Taluka",
@@ -131,6 +134,7 @@ const WorkCompletionReport = () => {
       width: "100",
       sorter: (a, b) => a.taluka.localeCompare(b.taluka),
       className: "center",
+      align: "center" as "center",
     },
 
     {
@@ -141,6 +145,7 @@ const WorkCompletionReport = () => {
       sorter: (a, b) => a.totalwork - b.totalwork,
       // ellipsis: true,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "Started Work",
@@ -150,6 +155,7 @@ const WorkCompletionReport = () => {
       sorter: (a, b) => a.startedwork.localeCompare(b.startedwork),
       // ellipsis: true,
       className: "center",
+      align: "center" as "center",
     },
     {
       title: "Work Complete %",
@@ -160,6 +166,7 @@ const WorkCompletionReport = () => {
       // ellipsis: true,
       render: (text) => <p title={text}>{text + "%"}</p>,
       className: "center",
+      align: "center" as "center",
     },
   ];
 
@@ -205,7 +212,7 @@ const WorkCompletionReport = () => {
       ).length,
       startedwork: geoData.filter(
         (f) =>
-          f.properties.workstartdate &&
+          f.properties.workstartdate < "2049-01-13T18:30:00Z" &&
           f.properties.taluka === feature.properties.taluka,
       ).length,
       workcomplete: calculateWorkComplete(feature, geoData),

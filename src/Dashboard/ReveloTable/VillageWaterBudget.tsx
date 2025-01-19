@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, version } from "react";
 import { Table, Row, Col, Spin, Empty, Button, Typography, Divider, Flex } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction"; // Importing Jurisdictions
 import divisionData from "../division.json";
@@ -23,7 +23,7 @@ const VillageWaterBudget: React.FC = () => {
                 const url = (window as any).__analytics__.wbUrl;
     
                 // Fetch project village and water budget data
-                const [projectVillageResponse, waterBudgetResponse] = await Promise.all([
+                const [projectVillageResponse, waterBudgetResponse, villagePlanResponse] = await Promise.all([
                     axios.get(url, {
                         params: {
                             service: "WFS",
@@ -45,18 +45,33 @@ const VillageWaterBudget: React.FC = () => {
                             srsname: "EPSG:3857",
                         },
                     }),
+                    axios.get(url, {
+                        params: {
+                            service: "WFS",
+                            version: "1.0.0",
+                            request: "GetFeature",
+                            typeName: "js2surveydsws:subplan_js2project",
+                            outputFormat: "json",
+                            srsname: "EPSG:3857",
+                        },
+                    })
                 ]);
     
                 // Extract features from the responses
                 const projectVillageData = projectVillageResponse.data.features || [];
                 const waterBudgetData = waterBudgetResponse.data.features || [];
+                const villagePlanData = villagePlanResponse.data.features || [];
     
                 // Create a set of village IDs from the water budget data
                 const waterBudgetVillageIds = new Set(
                     waterBudgetData.map((feature) => feature.properties.villageid)
                 );
+
+                const villagePlanVillageIds = new Set(
+                    villagePlanData.map((feature) => feature.properties.villageid)
+                );
     
-                // Process project village data and check if water budget exists for each village
+                // Process project village data and check if water budget and sub plan exists for each village
                 const processedData = projectVillageData.map((feature) => {
                     const villageid = feature.properties.villageid;
                     const villagename = feature.properties.villagename || "Unknown Village";
@@ -67,6 +82,7 @@ const VillageWaterBudget: React.FC = () => {
                         taluka: feature.properties.taluka || "Unknown Taluka",
                         villagename,
                         waterBudgetPresent: waterBudgetVillageIds.has(villageid) ? "Yes" : "No", // Check if water budget exists
+                        villagePlanPresent: villagePlanVillageIds.has(villageid) ? "Yes" : "No", // Check if sub plan exists
                     };
                 });
     
@@ -100,8 +116,6 @@ const VillageWaterBudget: React.FC = () => {
         setCurrentPage(1);
     };
 
-    const normalize = (str: string | null) => str?.trim().toLowerCase();
-
     const filteredData = geoData.filter((feature) => {
         const { district, taluka } = feature;
         const isInDivision =
@@ -113,18 +127,8 @@ const VillageWaterBudget: React.FC = () => {
         return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka;
     });    
 
-    const calculateTotals = (data: any[]) => {
-        return data.reduce(
-            (totals, row) => {
-                totals.waterBudgetCount += row.waterBudgetCount || 0;
-                return totals;
-            },
-            { waterBudgetCount: 0 }
-        );
-    };
-
     const handleExport = () => {
-        const summarizedData = geoData;
+        const summarizedData = filteredData;
         const totals = calculateTotals(summarizedData);
 
         // Append totals as the last row
@@ -135,7 +139,8 @@ const VillageWaterBudget: React.FC = () => {
                 district: "",
                 taluka: "",
                 villagename: "",
-                waterBudgetCount: totals.waterBudgetCount,
+                waterBudgetCount: totals.waterBudgetYesCount,
+                villagePlanCount: totals.villagePlanYesCount,
             },
         ];
 
@@ -158,8 +163,35 @@ const VillageWaterBudget: React.FC = () => {
             key: "waterBudgetPresent",
             className: "center",
             sorter: (a, b) => a.waterBudgetPresent.localeCompare(b.waterBudgetPresent),
-        }        
+        },
+        {
+            title: "Village Plans Present",
+            dataIndex: "villagePlanPresent",
+            key: "villagePlanPresent",
+            className: "center",
+            sorter: (a, b) => a.villagePlanPresent.localeCompare(b.villagePlanPresent),
+        }       
     ];
+
+    const calculateTotals = (data) => {
+        const waterBudgetYesCount = data.filter((item) => item.waterBudgetPresent === "Yes").length;
+        const villagePlanYesCount = data.filter((item) => item.villagePlanPresent === "Yes").length;
+
+        // const totals = {
+        //     district: "",
+        //     taluka: "",
+        //     villagename: "",
+        //     waterBudgetPresent: `${waterBudgetYesCount}`,
+        //     villagePlanPresent: `${villagePlanYesCount}`,
+        // }
+        return {
+            waterBudgetYesCount,
+            villagePlanYesCount,
+        };
+    };
+
+    // Calculate totals for the complete dataset
+    const { waterBudgetYesCount, villagePlanYesCount } = calculateTotals(filteredData);
 
     return (
         <Flex gap={50} wrap="nowrap">
@@ -237,7 +269,7 @@ const VillageWaterBudget: React.FC = () => {
                                         display: "block",
                                     }}
                                 >
-                                    Report Output
+                                    Report Output {filteredData.length}
                                 </Typography.Text>
                                 <Button
                                     onClick={handleExport}
@@ -267,6 +299,22 @@ const VillageWaterBudget: React.FC = () => {
                                 }}
                                 scroll={{ x: "100%" }}
                                 bordered
+                                summary={() => {
+                                    const totals = calculateTotals(filteredData);
+                                    return (
+                                        <Table.Summary.Row>
+                                            <Table.Summary.Cell index={0} colSpan={3}>
+                                            <div style={{ textAlign: "center", fontWeight: "bolder"}}>Total</div>
+                                            </Table.Summary.Cell>
+                                            <Table.Summary.Cell index={1}>
+                                                <div style={{ textAlign: "center", fontWeight: "bolder"}}>{totals.waterBudgetYesCount}</div>
+                                            </Table.Summary.Cell>
+                                            <Table.Summary.Cell index={2}>
+                                                <div style={{ textAlign: "center", fontWeight: "bolder"}}>{totals.villagePlanYesCount}</div>
+                                            </Table.Summary.Cell>
+                                        </Table.Summary.Row>
+                                    );
+                                }}
                             />
                         </div>
                     )}

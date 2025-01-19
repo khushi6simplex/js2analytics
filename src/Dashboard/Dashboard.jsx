@@ -1,4 +1,4 @@
-import { Typography, Tabs, Flex, Card, Divider } from "antd";
+import { Typography, Tabs, Flex, Card, Divider, Tooltip } from "antd";
 import { useState } from "react";
 import "./DashBoard.css";
 import DistrictWiseTable from "./ReveloTable/DistrictWiseTable";
@@ -31,8 +31,21 @@ const Dashboard = () => {
     },
     {
       key: "4",
-      label: "Village Wise Water Budgeting",
-      children: <VillageWaterBudget />,
+      label: (
+        <Tooltip title="Village Wise Water Budgeting and Village Plans">
+          <p
+            style={{
+              width: "200px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              margin: 0, // To remove margin from <p> tag if needed
+            }}
+          >
+            Village Wise Water Budgeting and Village Plans
+          </p>
+        </Tooltip>
+      ),children: <VillageWaterBudget />,
     },
     {
       key: "5",
@@ -92,7 +105,7 @@ const Dashboard = () => {
           <Divider />
 
           <Tabs
-            tabBarStyle={{ height: "70vh", marginLeft: "-2vw" }}
+            tabBarStyle={{ height: "70vh", marginLeft: "-2vw", width: "230px" }}
             items={items}
             onChange={onChange}
             tabBarGutter={4}

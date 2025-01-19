@@ -86,8 +86,8 @@ const DistrictWiseTable: React.FC = () => {
           division: selectedDivision,
           worksCount: talukaFeatures.length,
           worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
-          worksStarted: talukaFeatures.filter((feature) => feature.properties.workstartdate).length,
-          worksCompleted: talukaFeatures.filter((feature) => feature.properties.wocompletiondate > feature.properties.workstartdate).length,
+          worksStarted: talukaFeatures.filter((feature) => feature.properties.startedlocation).length,
+          worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation > feature.properties.workstartdate).length,
           totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
           physicalTargetArea: talukaFeatures.reduce(
             (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
@@ -161,15 +161,15 @@ const DistrictWiseTable: React.FC = () => {
   };
 
   const columns = [
-    { title: "Division", dataIndex: "division", key: "division", className: "center" },
-    { title: "District", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const, className: "center" },
-    { title: "Taluka", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.district.localeCompare(b.taluka), className: "center" },
-    { title: "Works Count", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount, className: "center" },
-    { title: "Works Geotagged", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged, className: "center" },
-    { title: "Works Started", dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted, className: "center" },
-    { title: "Works Completed", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted, className: "center" },
-    { title: "Total Work Order Amount", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount, render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>, className: "center" },
-    { title: "Physical Target Area", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p>, className: "center" },
+    { title: "Division", align: "center" as "center", dataIndex: "division", key: "division", className: "center" },
+    { title: "District", align: "center" as "center", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const, className: "center" },
+    { title: "Taluka", align: "center" as "center", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.district.localeCompare(b.taluka), className: "center" },
+    { title: "Works Count", align: "center" as "center", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount, className: "center" },
+    { title: "Works Geotagged", align: "center" as "center", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged, className: "center" },
+    { title: "Works Started",align: "center" as "center",  dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted, className: "center" },
+    { title: "Works Completed", align: "center" as "center", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted, className: "center" },
+    { title: "Total Work Order Amount", align: "center" as "center", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount, render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>, className: "center" },
+    { title: "Physical Target Area", align: "center" as "center", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p>, className: "center" },
   ];
 
   const handleExport = () => {
@@ -215,7 +215,7 @@ const DistrictWiseTable: React.FC = () => {
                 data={Object.keys(divisionData)}
                 selectedItem={selectedDivision}
                 onItemClick={handleDivisionClick}
-                placeholder="No divisions available"
+                placeholder=""
               />
             </Col>
             <Col span={8}>
@@ -266,7 +266,7 @@ const DistrictWiseTable: React.FC = () => {
                     display: "block",
                   }}
                 >
-                  Report Output
+                  Report Output {getSummarizedData().length}
                 </Typography.Text>
                 <Button
                   onClick={handleExport}
@@ -306,22 +306,22 @@ const DistrictWiseTable: React.FC = () => {
                         <div style={{ textAlign: "center", fontWeight: "bolder"}}>Total</div>
                       </Table.Summary.Cell>
                       <Table.Summary.Cell index={1} className="center">
-                        {totals.worksCount}
+                        <strong>{totals.worksCount}</strong>
                       </Table.Summary.Cell>
                       <Table.Summary.Cell index={2} className="center">
-                        {totals.worksGeotagged}
+                        <strong>{totals.worksGeotagged}</strong>
                       </Table.Summary.Cell>
                       <Table.Summary.Cell index={3} className="center">
-                        {totals.worksStarted}
+                        <strong>{totals.worksStarted}</strong>
                       </Table.Summary.Cell>
                       <Table.Summary.Cell index={4} className="center">
-                        {totals.worksCompleted}
+                        <strong>{totals.worksCompleted}</strong>
                       </Table.Summary.Cell>
                       <Table.Summary.Cell index={5} className="center">
-                        ₹{totals.totalWoAmount}
+                        <strong>₹ {totals.totalWoAmount}</strong>
                       </Table.Summary.Cell>
                       <Table.Summary.Cell index={6} className="center">
-                        {totals.physicalTargetArea} sq.m.
+                        <strong>{totals.physicalTargetArea} sq.m.</strong>
                       </Table.Summary.Cell>
                     </Table.Summary.Row>
                   );
