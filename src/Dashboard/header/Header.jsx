@@ -23,7 +23,7 @@ const Header = () => {
   const doLogout = () => {
     const logoutUrl = window.__analytics__.logoutUrl;
     axios.post(logoutUrl, "").finally(() => {
-      axios.post(window.__analytics__ + "/logout").finally(() => {
+      axios.post(window.__analytics__.logoutUrl).finally(() => {
         const newLocation = window.__analytics__;
         window.location.href = newLocation;
         window.location.reload()

@@ -1,7 +1,7 @@
 {
     "serverUrl": "/reveloadmin35/revelo",
     "securityUrl": "http://180.149.240.169:8081/auth",
-    "logoutUrl": "/reveloadmin35/revelo/access/logout",
+    "logoutUrl": "/reveloadmin35/revelo/users/jsstateuser/logout",
     "baseUrl": "/analytics",
     "dataUrl": "http://180.149.240.169:8080/geoserver/js2surveydsws/wfs",
     "wbUrl": "http://180.149.240.169:8080/geoserver/js2surveydsws/ows",
