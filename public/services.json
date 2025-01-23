@@ -5,7 +5,5 @@
     "baseUrl": "/analytics",
     "dataUrl": "http://180.149.240.169:8080/geoserver/js2surveydsws/wfs",
     "wbUrl": "http://180.149.240.169:8080/geoserver/js2surveydsws/ows",
-    "elasticSearchURL": "http://150.129.243.147:8085/report_js2project_waterbudget/_search",
-    "waterBudget":"http://150.129.243.147:8085/report_js2project_waterbudget/_search",
-    "works": "http://150.129.243.147:8085/report_js2project_totalworks/_search"
+    "talukasMap": "http://180.149.240.169:8080/geoserver/obdsws/ows"
 }

@@ -1,4 +1,4 @@
-import { Typography, Tabs, Flex, Card, Divider, Tooltip } from "antd";
+import { Typography, Tabs, Flex, Card, Divider } from "antd";
 import { useState } from "react";
 import "./DashBoard.css";
 import DistrictWiseTable from "./ReveloTable/DistrictWiseTable";
@@ -9,20 +9,31 @@ import VillageWaterBudget from "./ReveloTable/VillageWaterBudget";
 import WorkCompletionReport from "./ReveloTable/WorkCompletionReport";
 import Header from "./header/Header";
 import Summary from "./ReveloTable/Summary";
+import VillageWiseWork from "./ReveloTable/VillageWiseWork";
+import Geotagging from "./ReveloTable/Geotagging";
 
 const Dashboard = () => {
-  const [setSelectedTabLabel] = useState("Summary"); // Set the default tab label
+  const [selectedTab, setSelectedTab] = useState("Summary");
+  const [isMapVisible, setIsMapVisible] = useState(false); // State for map visibility
+
+  const handleTabChange = (key) => {
+    setSelectedTab(key);
+  };
+
+  const handleMapToggle = () => {
+    setIsMapVisible((prev) => !prev);
+  };
 
   const items = [
     {
       key: "1",
       label: "Summary",
-      children: <Summary />,
+      children: <Summary resetTrigger={selectedTab === "1"} />,
     },
     {
       key: "2",
       label: "District Wise Work",
-      children: <DistrictWiseTable />,
+      children: <DistrictWiseTable isMapVisible={isMapVisible} />, // Pass isMapVisible
     },
     {
       key: "3",
@@ -31,26 +42,13 @@ const Dashboard = () => {
     },
     {
       key: "4",
-      label: (
-        <Tooltip title="Village Wise Water Budgeting and Village Plans">
-          <p
-            style={{
-              width: "200px",
-              whiteSpace: "nowrap",
-              overflow: "hidden",
-              textOverflow: "ellipsis",
-              margin: 0, // To remove margin from <p> tag if needed
-            }}
-          >
-            Village Wise Water Budgeting and Village Plans
-          </p>
-        </Tooltip>
-      ),children: <VillageWaterBudget />,
+      label: "Village Wise Water Budgeting and Village Plans",
+      children: <VillageWaterBudget />,
     },
     {
       key: "5",
       label: "Village Wise Work",
-      children: "Comming Soon ...",
+      children: <VillageWiseWork />,
     },
     {
       key: "6",
@@ -70,34 +68,29 @@ const Dashboard = () => {
     {
       key: "9",
       label: "User Defined Query",
-      children: "Comming Soon ...",
+      children: "Coming Soon ...",
     },
     {
       key: "10",
       label: "Geotagging",
-      children: "Comming Soon ...",
+      children: <Geotagging />,
     },
   ];
-
-  const onChange = (key) => {
-    const selectedTab = items.find((item) => item.key === key);
-    setSelectedTabLabel(selectedTab?.label || ""); // Update the label when tab is changed
-  };
 
   return (
     <>
       <Card bordered={false}>
-        <Header />
+        <Header onMapToggle={handleMapToggle} /> {/* Pass toggle function to Header */}
         <Flex vertical justify="center">
-          {/* "Reports" Text on Left */}
           <Flex style={{ marginTop: "0px", marginBottom: "-10px" }}>
             <Typography.Text
               style={{
                 fontSize: "20px",
                 fontWeight: "600",
                 marginLeft: "-20px",
-                alignContent: "start"
-              }}>
+                alignContent: "start",
+              }}
+            >
               Reports
             </Typography.Text>
           </Flex>
@@ -107,7 +100,7 @@ const Dashboard = () => {
           <Tabs
             tabBarStyle={{ height: "70vh", marginLeft: "-2vw", width: "230px" }}
             items={items}
-            onChange={onChange}
+            onChange={handleTabChange}
             tabBarGutter={4}
             tabPosition="left"
             size="small"
