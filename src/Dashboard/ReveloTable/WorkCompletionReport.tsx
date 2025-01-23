@@ -152,7 +152,7 @@ const WorkCompletionReport = () => {
       dataIndex: "startedwork",
       key: "startedwork",
       width: "100",
-      sorter: (a, b) => a.startedwork.localeCompare(b.startedwork),
+      sorter: (a, b) => a.startedwork - b.startedwork,
       // ellipsis: true,
       className: "center",
       align: "center" as "center",
@@ -162,7 +162,7 @@ const WorkCompletionReport = () => {
       dataIndex: "workcomplete",
       key: "workcomplete",
       width: "100",
-      sorter: (a, b) => a.workcomplete.localeCompare(b.workcomplete),
+      sorter: (a, b) => a.workcomplete - b.workcomplete,
       // ellipsis: true,
       render: (text) => <p title={text}>{text + "%"}</p>,
       className: "center",
@@ -221,9 +221,7 @@ const WorkCompletionReport = () => {
   const tableMap = new Map();
 
   tableData.forEach((item) => {
-    console.log(item.division, "item.depname");
     tableMap.set(item.taluka, item);
-    console.log(Array.from(tableMap.values()), "tableMap1");
   });
 
   const handleExport = () => {
@@ -337,7 +335,7 @@ const WorkCompletionReport = () => {
                     paddingBottom: "10px",
                     display: "block",
                   }}>
-                  Report Output
+                  Total Records 
                 </Typography.Text>
 
                 <Button

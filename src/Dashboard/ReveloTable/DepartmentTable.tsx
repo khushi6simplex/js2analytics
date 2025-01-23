@@ -58,7 +58,6 @@ const WorkTable: React.FC = () => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
     setCurrentPage(1);
   };
-
   const handleDepartmentClick = (deptName: string) => {
     setSelectedDepartment(selectedDepartment === deptName ? null : deptName);
   };
@@ -90,14 +89,6 @@ const WorkTable: React.FC = () => {
         (currentPage - 1) * pageSize + index + 1,
       align: "center" as "center",
     },
-    {
-      title: "Division",
-      dataIndex: "division",
-      key: "division",
-      width: "10%",
-      align: "center" as "center",
-    },
-
     {
       title: "Department",
       dataIndex: "deptName",
@@ -218,9 +209,7 @@ const WorkTable: React.FC = () => {
   const tableMap = new Map();
 
   tableData.forEach((item) => {
-    console.log(item.division, "item.depname");
     tableMap.set(item.deptName, item);
-    console.log(Array.from(tableMap.values()), "tableMap1");
   });
 
   const handleExport = () => {

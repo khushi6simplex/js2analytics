@@ -159,7 +159,6 @@ function RepairWiseReport() {
   );
 
   const onChange = (item: string) => {
-    console.log(item, "keysitem");
     setReportsValue(item === undefined ? "Drainage Line Treatment" : item);
   };
 

@@ -1,19 +1,28 @@
-import React, { useState, useEffect } from "react";
-import { Table, Row, Col, Spin, Empty, Flex, Button, Typography, Divider } from "antd";
+import React, { useState, useEffect, useRef } from "react";
+import { Table, Row, Col, Spin, Empty, Flex, Button, Typography, Divider, Input } from "antd";
 import { fetchGeoData } from "../Data/useGeoData";
 import Jurisdictions from "../Jurisdiction/Jurisdiction"; // Importing Jurisdictions
 import divisionData from "../division.json";
 import { exportToExcel } from "../Excel/Excel";
 import '../Dashboard.css';
+import FloatingMap from "../Map/Map";
+import { panToLocation } from '../utils/mapUtils';
+import axios from "axios";
 
-const DistrictWiseTable: React.FC = () => {
+interface DistrictWiseTableProps {
+  isMapVisible: boolean;
+}
+
+const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedTaluka, setSelectedTaluka] = useState<string | null>(null);
   const [loading, setLoading] = useState<boolean>(true); // Loading state
-    const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(7);
+  const [currentPage, setCurrentPage] = useState<number>(1);
+  const [pageSize, setPageSize] = useState<number>(7);
+  const mapRef = useRef(null);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -46,6 +55,27 @@ const DistrictWiseTable: React.FC = () => {
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(taluka === selectedTaluka ? null : taluka);
     setCurrentPage(1);
+    // const talukaMap = (window as any).__analytics__.talukasMap;
+    // axios.get(talukaMap, {
+    //   params: {
+    //     service: 'WFS',
+    //     version: '1.0.0',
+    //     request: 'GetFeature', 
+    //     typeName: 'obdsws:talukadataset',
+    //     outputFormat: 'application/json',
+    //     cql_filter: `taluka='${taluka}'`
+    //   },
+    // })
+    // .then(response => {
+    //   const feature = response.data.features[0];
+    //   if(feature) {
+    //     const coordinates = feature.geometry.coordinates;
+    //     panToLocation(mapRef.current, coordinates);
+    //   }
+    // })
+    // .catch(error => {
+    //   console.error('Error fetching taluka data: ', error)
+    // })
   };
 
   const calculateTotals = (data) => {
@@ -160,21 +190,25 @@ const DistrictWiseTable: React.FC = () => {
   };
 
   const columns = [
-    { title: "Division", align: "center" as "center", dataIndex: "division", key: "division", className: "center" },
-    { title: "District", align: "center" as "center", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const, className: "center" },
-    { title: "Taluka", align: "center" as "center", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.district.localeCompare(b.taluka), className: "center" },
-    { title: "Works Count", align: "center" as "center", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount, className: "center" },
-    { title: "Works Geotagged", align: "center" as "center", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged, className: "center" },
-    { title: "Works Started",align: "center" as "center",  dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted, className: "center" },
-    { title: "Works Completed", align: "center" as "center", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted, className: "center" },
-    { title: "Total Work Order Amount", align: "center" as "center", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount, render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>, className: "center" },
-    { title: "Physical Target Area", align: "center" as "center", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p>, className: "center" },
+    { title: "Division", align: "center" as "center", dataIndex: "division", key: "division", className: "center", width: "5vw" },
+    { title: "District", align: "center" as "center", dataIndex: "district", key: "district", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const, className: "center", width: "5vw" },
+    { title: "Taluka", align: "center" as "center", dataIndex: "taluka", key: "taluka", sorter: (a, b) => a.district.localeCompare(b.taluka), className: "center", width: "5vw" },
+    { title: "Works Count", align: "center" as "center", dataIndex: "worksCount", key: "worksCount", sorter: (a, b) => a.worksCount - b.worksCount, className: "center", width: "5vw" },
+    { title: "Works Geotagged", align: "center" as "center", dataIndex: "worksGeotagged", key: "worksGeotagged", sorter: (a, b) => a.worksGeotagged - b.worksGeotagged, className: "center", width: "5vw" },
+    { title: "Works Started", align: "center" as "center", dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted, className: "center", width: "5vw" },
+    { title: "Works Completed", align: "center" as "center", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted, className: "center", width: "5vw" },
+    { title: "Total Work Order Amount", align: "center" as "center", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount, render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>, className: "center", width: "5vw" },
+    { title: "Physical Target Area", align: "center" as "center", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p>, className: "center", width: "5vw" },
   ];
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value); // Update the search term state
+  };
 
   const handleExport = () => {
     const summarizedData = getSummarizedData();
     const totals = calculateTotals(summarizedData);
-  
+
     // Append totals as the last row
     const dataWithTotals = [
       ...summarizedData,
@@ -190,15 +224,39 @@ const DistrictWiseTable: React.FC = () => {
         physicalTargetArea: `${totals.physicalTargetArea} sq.m.`,
       },
     ];
-  
+
+    // Determine the file name based on selection
+    let fileName = "All Divisions"; // Default
+
+    if (selectedDivision) {
+      fileName = selectedDivision; // Use division name if selected
+    }
+
+    if (selectedDistrict) {
+      fileName = selectedDistrict; // Override with district name if selected
+    }
+
+    if (selectedTaluka) {
+      fileName = selectedTaluka; // Override with taluka name if selected
+    }
+
+    // Add the date suffix only once
+    fileName = `${fileName}.xlsx`;
+
     exportToExcel({
       data: dataWithTotals,
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
-      fileName: "DistrictWiseWork.xlsx",
+      fileName,
       sheetName: "District Wise Work Data",
       tableTitle: "District Wise Work Table",
     });
   };
+
+  const filteredDistricts = selectedDivision
+    ? (divisionData[selectedDivision]?.districts || []).filter((district) =>
+      district.toLowerCase().includes(searchTerm)
+    )
+    : [];
 
   return (
     <Flex gap={50} wrap="nowrap">
@@ -248,7 +306,7 @@ const DistrictWiseTable: React.FC = () => {
           </Row>
         </Col>
         <Divider type="vertical" style={{ height: "100%", borderColor: "" }} />
-        <Col span={16}>
+        <Col span={isMapVisible ? 10 : 16} style={{ overflow: "auto" }}>
           {loading ? (
             <Spin size="large" /> // Show loading spinner
           ) : geoData.length === 0 ? (
@@ -265,8 +323,15 @@ const DistrictWiseTable: React.FC = () => {
                     display: "block",
                   }}
                 >
-                  Report Output {getSummarizedData().length}
+                  Total Records {`${Math.min(currentPage * pageSize, getSummarizedData().length)} / ${getSummarizedData().length}`}
                 </Typography.Text>
+                {/* Add a search input */}
+                <Input
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  style={{ width: 200, marginBottom: "10px", marginRight: "-550px" }}
+                />
                 <Button
                   onClick={handleExport}
                   style={{
@@ -302,7 +367,7 @@ const DistrictWiseTable: React.FC = () => {
                   return (
                     <Table.Summary.Row>
                       <Table.Summary.Cell index={0} colSpan={3}>
-                        <div style={{ textAlign: "center", fontWeight: "bolder"}}>Total</div>
+                        <div style={{ textAlign: "center", fontWeight: "bolder" }}>Total</div>
                       </Table.Summary.Cell>
                       <Table.Summary.Cell index={1} className="center">
                         <strong>{totals.worksCount}</strong>
@@ -330,6 +395,12 @@ const DistrictWiseTable: React.FC = () => {
             </div>
           )}
         </Col>
+
+        {/* {isMapVisible && (
+          <Col span={8}>
+            <FloatingMap ref={mapRef}/>
+          </Col>
+        )} */}
       </Row>
     </Flex>
   );

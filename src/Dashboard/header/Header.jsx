@@ -1,4 +1,6 @@
+// Header.jsx
 import { useState } from "react";
+import PropTypes from "prop-types";
 import axios from "axios";
 
 import logo from "../../assets/gov.png";
@@ -7,8 +9,9 @@ import user from "../../assets/user.png";
 import mrsacLogo from "../../assets/mrsacLogo.png";
 import toolsgrid from "../../assets/toolsgrid.png";
 import userManager from "../../assets/userManager.png";
+import mapIcon from "../../assets/map.png";
 
-const Header = () => {
+const Header = ({ onMapToggle }) => {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isGridOpen, setIsGridOpen] = useState(false);
 
@@ -18,26 +21,12 @@ const Header = () => {
 
   const gridMenu = () => {
     setIsGridOpen((prev) => !prev);
-  }
+  };
 
   const doLogout = () => {
     const logoutUrl = window.__analytics__.logoutUrl;
     axios.post(logoutUrl, "").finally(() => {
-      axios.post(window.__analytics__.logoutUrl).finally(() => {
-        const newLocation = window.__analytics__;
-        window.location.href = newLocation;
-        window.location.reload()
-      });
-    });
-  };
-
-  const openJS2 = () => {
-    const js2Url = window.__analytics__.js2Url;
-    axios.post("http://180.149.240.169:8080/js2/").finally(() => {
-      axios.post("http://180.149.240.169:8080/js2/").finally(() => {
-        const newLocation = "http://180.149.240.169:8080/js2/"
-        window.location.href = newLocation;
-      });
+      window.location.reload();
     });
   };
 
@@ -60,28 +49,30 @@ const Header = () => {
         zIndex: 1000,
       }}
     >
-      {/* Logo */}
-      <div style={{display: "flex"}}>
-        <img
-          src={logo}
-          alt="Logo"
-          style={{ height: "60px", marginTop: "10px"}}
-        />
-        <h1 style={{fontSize: "20px", color: "white", padding: "10px"}}>जलयुक्त शिवार अभियान २.० अहवाल</h1>
+      <div style={{ display: "flex" }}>
+        <img src={logo} alt="Logo" style={{ height: "60px", marginTop: "10px" }} />
+        <h1 style={{ fontSize: "20px", color: "white", padding: "10px" }}>
+          जलयुक्त शिवार अभियान २.० अहवाल
+        </h1>
       </div>
 
-      {/* Profile */}
-      <div style={{justifyContent: "space-between" }}>
-      <img
+      <div style={{ justifyContent: "space-between" }}>
+        {/* <img
+          src={mapIcon}
+          alt="Toggle Map"
+          style={{
+            height: "45px",
+            width: "45px",
+            marginRight: "10px",
+            cursor: "pointer",
+          }}
+          onClick={onMapToggle}
+        /> */}
+
+        <img
           src={toolsgrid}
           alt="logo"
-          style={{
-            height: "50px",
-            width: "50px",
-            objectFit: "cover",
-            cursor: "pointer",
-            marginRight: "10px",
-          }}
+          style={{ height: "50px", width: "50px", cursor: "pointer", marginRight: "10px" }}
           onClick={gridMenu}
         />
 
@@ -93,7 +84,6 @@ const Header = () => {
             width: "40px",
             marginBottom: "10px",
             borderRadius: "50%",
-            objectFit: "cover",
             cursor: "pointer",
           }}
           onClick={toggleMenu}
@@ -102,15 +92,9 @@ const Header = () => {
         <img
           src={mrsacLogo}
           alt="logo"
-          style={{
-            height: "70px",
-            width: "70px",
-            objectFit: "cover",
-            cursor: "pointer",
-          }}
+          style={{ height: "70px", width: "70px", cursor: "pointer" }}
         />
 
-        {/* Toggle Menu */} 
         {isMenuOpen && (
           <div
             style={{
@@ -120,17 +104,10 @@ const Header = () => {
               background: "white",
               border: "1px solid #ccc",
               borderRadius: "4px",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
               width: "120px",
             }}
           >
-            <ul
-              style={{
-                listStyleType: "none",
-                margin: 0,
-                padding: "10px",
-              }}
-            >
+            <ul style={{ listStyleType: "none", margin: 0, padding: "10px" }}>
               <li
                 style={{
                   padding: "8px 12px",
@@ -141,13 +118,8 @@ const Header = () => {
                 About
               </li>
               <li
-                style={{
-                  padding: "8px 12px",
-                  cursor: "pointer",
-                }}
-                onClick={() => {
-                  doLogout()
-                }}
+                style={{ padding: "8px 12px", cursor: "pointer" }}
+                onClick={doLogout}
               >
                 Logout
               </li>
@@ -163,51 +135,16 @@ const Header = () => {
               right: "70px",
               background: "white",
               borderRadius: "4px",
-              boxShadow: "0 2px 5px rgba(0, 0, 0, 0.2)",
               width: "200px",
             }}
           >
-            <ul
-              style={{
-                display: "flex",
-                listStyleType: "none",
-                margin: 0,
-                padding: "10px",
-              }}
-            >
+            <ul style={{ listStyleType: "none", margin: 0, padding: "10px" }}>
               <div>
-              <img src={userManager} style={{
-                height: "70px",
-                width: "70px",
-                padding: "8px 12px",
-                  cursor: "pointer"
-                }}/>
-              <li
-                style={{
-                  padding: "0px 12px",
-                  cursor: "pointer"
-                }}
-              >
-                User Manager
-              </li>
-              </div>
-              <div>
-              <img src={logo} style={{
-                height: "70px",
-                width: "70px",
-                padding: "8px 12px",
-                  cursor: "pointer"
-                }}
-                onClick={openJS2}/>
-              <li
-                style={{
-                  padding: "0px 12px",
-                  cursor: "pointer",
-                }}
-                 onClick={openJS2}
-              >
-                Jalyukta Shivar 2.0
-              </li>
+                <img
+                  src={userManager}
+                  style={{ height: "70px", width: "70px", cursor: "pointer" }}
+                />
+                <li>User Manager</li>
               </div>
             </ul>
           </div>
@@ -215,6 +152,10 @@ const Header = () => {
       </div>
     </header>
   );
+};
+
+Header.propTypes = {
+  onMapToggle: PropTypes.func.isRequired,
 };
 
 export default Header;

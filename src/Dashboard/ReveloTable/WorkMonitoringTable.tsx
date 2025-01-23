@@ -216,7 +216,7 @@ const WorkTable: React.FC = () => {
       dataIndex: "estimatedcost",
       key: "estimatedcost",
       width: "8vw",
-      sorter: (a, b) => a.estimatedcost.localeCompare(b.estimatedcost),
+      sorter: (a, b) => a.estimatedcost - b.estimatedcost,
       render: (text) => (
         <p title={text}>
           {"₹ " +
@@ -234,7 +234,7 @@ const WorkTable: React.FC = () => {
       dataIndex: "physicaltargetarea",
       key: "physicaltargetarea",
       width: "8vw",
-      sorter: (a, b) => a.physicaltargetarea.localeCompare(b.physicaltargetarea),
+      sorter: (a, b) => a.physicaltargetarea - b.physicaltargetarea,
       render: (text) => <p title={text}>{text + " sq.m"}</p>,
       ellipsis: true,
       className: "center",
@@ -245,7 +245,7 @@ const WorkTable: React.FC = () => {
       dataIndex: "expectedwaterstorage",
       key: "expectedwaterstorage",
       width: "8vw",
-      sorter: (a, b) => a.expectedwaterstorage.localeCompare(b.expectedwaterstorage),
+      sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
       ellipsis: true,
       className: "center",
@@ -397,7 +397,8 @@ const WorkTable: React.FC = () => {
                     paddingBottom: "10px",
                     display: "block",
                   }}>
-                  Report Output {(selectedDivision ? tableData : []).length} 
+                    Total Records {`${Math.min(currentPage * pageSize, (selectedDivision ? tableData : []).length)} / ${(selectedDivision ? tableData : []).length}`}
+            
                 </Typography.Text>
 
                 <Button

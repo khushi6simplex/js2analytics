@@ -36,3 +36,32 @@
 .center {
   text-align: center;
 }
+
+/* For the header and data cell dividers */
+.ant-table th, 
+.ant-table td {
+  border-right: 2px solid #4CAF50; /* Replace #4CAF50 with your desired color */
+}
+
+/* Remove the border for the last column (optional) */
+.ant-table-cell:last-child {
+  border-right: none;
+}
+
+/* For the table itself to ensure the overall look matches */
+.ant-table {
+  border-color: #4CAF50; /* Table outer border color */
+}
+
+/* Custom Table Styling */
+.custom-table .ant-table-cell {
+  border-color: #ff5722; /* Set the desired color */
+}
+
+.custom-table .ant-table-header {
+  border-color: #ff5722;
+}
+
+.custom-table .ant-table-body td {
+  border-color: #ff5722;
+}
