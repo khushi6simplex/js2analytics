@@ -110,7 +110,7 @@ function RepairWiseReport() {
             .replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
         </p>
       ),
-      sorter: (a, b) => a.workprice - b.workprice,
+      sorter: (a, b) => a.estimatedcost - b.estimatedcost,
       className: "center",
     },
   ];

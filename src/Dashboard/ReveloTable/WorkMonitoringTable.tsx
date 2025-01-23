@@ -81,10 +81,17 @@ const WorkTable: React.FC = () => {
       workstarted: "",
       workinprogress: "",
       workcompleted: "",
-      estimatedcost: data.reduce((sum, item) => sum + (item.estimatedcost || 0), 0),
-      physicaltargetarea: data.reduce((sum, item) => sum + (item.physicaltargetarea || 0), 0).toFixed(2),
-      expectedwaterstorage: data.reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0).toFixed(2),
-      geometry: ""
+      estimatedcost: data.reduce(
+        (sum, item) => sum + (item.estimatedcost || 0),
+        0,
+      ),
+      physicaltargetarea: data
+        .reduce((sum, item) => sum + (item.physicaltargetarea || 0), 0)
+        .toFixed(2),
+      expectedwaterstorage: data
+        .reduce((sum, item) => sum + (item.expectedwaterstorage || 0), 0)
+        .toFixed(2),
+      geometry: "",
     };
     return totals;
   };
@@ -195,8 +202,7 @@ const WorkTable: React.FC = () => {
       dataIndex: "workinprogress",
       key: "workinprogress",
       width: "100",
-      sorter: (a, b) =>
-        a.workinprogress.localeCompare(b.workinprogress),
+      sorter: (a, b) => a.workinprogress.localeCompare(b.workinprogress),
       // ellipsis: true,
       className: "center",
       align: "center" as "center",
@@ -246,6 +252,7 @@ const WorkTable: React.FC = () => {
       key: "expectedwaterstorage",
       width: "8vw",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
+      sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
       ellipsis: true,
       className: "center",
@@ -277,8 +284,7 @@ const WorkTable: React.FC = () => {
       expectedwaterstorage: feature.properties.expectedwaterstorage,
       geometry: feature.geometry === null ? "No" : "Yes",
       beneficiaryname: feature.properties.beneficiaryname,
-      adminapproved:
-        feature.properties.adminapprovalno === "" ? "No" : "Yes",
+      adminapproved: feature.properties.adminapprovalno === "" ? "No" : "Yes",
       woorderno: feature.properties.woorderno === "" ? "No" : "Yes",
       workstarted: feature.properties.startedlocation ? "Yes" : "No",
       workinprogress:
@@ -293,23 +299,23 @@ const WorkTable: React.FC = () => {
       ...tableData,
       {
         key: "",
-      division: "Total",
-      district: "",
-      taluka: "",
-      deptName: "",
-      worktype: "",
-      beneficiaryname: "",
-      adminapproved: "",
-      workorderno: "",
-      workstarted: "",
-      workinprogress: "",
-      workcompleted: "",
-      estimatedcost: `₹ ${totals.estimatedcost}`,
-      physicaltargetarea: `${totals.physicaltargetarea} sq.m.`,
-      expectedwaterstorage: `${totals.expectedwaterstorage} TCM`,
-      geometry: ""
-      }
-    ]
+        division: "Total",
+        district: "",
+        taluka: "",
+        deptName: "",
+        worktype: "",
+        beneficiaryname: "",
+        adminapproved: "",
+        workorderno: "",
+        workstarted: "",
+        workinprogress: "",
+        workcompleted: "",
+        estimatedcost: `₹ ${totals.estimatedcost}`,
+        physicaltargetarea: `${totals.physicaltargetarea} sq.m.`,
+        expectedwaterstorage: `${totals.expectedwaterstorage} TCM`,
+        geometry: "",
+      },
+    ];
     exportToExcel({
       data: selectedDivision ? dataWithTotals : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
@@ -397,8 +403,7 @@ const WorkTable: React.FC = () => {
                     paddingBottom: "10px",
                     display: "block",
                   }}>
-                    Total Records {`${Math.min(currentPage * pageSize, (selectedDivision ? tableData : []).length)} / ${(selectedDivision ? tableData : []).length}`}
-            
+                  Report Output {(selectedDivision ? tableData : []).length} 
                 </Typography.Text>
 
                 <Button
