@@ -11,6 +11,7 @@ import {
   Button,
   Typography,
   Divider,
+  Input,
 } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
@@ -26,6 +27,7 @@ const WorkTable: React.FC = () => {
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,7 +66,15 @@ const WorkTable: React.FC = () => {
       divisionData[selectedDivision]?.districts.includes(district);
     const isInDistrict = !selectedDistrict || district === selectedDistrict;
     const isInTaluka = !selectedTaluka || taluka === selectedTaluka;
-    return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka;
+    const matchesSearch = Object.values(feature.properties).some((value) =>
+      String(value).toLowerCase().toString().includes(searchTerm),
+    );
+    return (
+      (!selectedDivision || isInDivision) &&
+      isInDistrict &&
+      isInTaluka &&
+      matchesSearch
+    );
   });
 
   const calculateTotals = (data) => {
@@ -252,7 +262,6 @@ const WorkTable: React.FC = () => {
       key: "expectedwaterstorage",
       width: "8vw",
       sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
-      sorter: (a, b) => a.expectedwaterstorage - b.expectedwaterstorage,
       render: (text) => <p title={text}>{text + " TCM"}</p>,
       ellipsis: true,
       className: "center",
@@ -323,6 +332,11 @@ const WorkTable: React.FC = () => {
       sheetName: "Work Data",
       tableTitle: "Work Monitoring Table",
     });
+  };
+
+  const handleSearchChange = (e) => {
+    const search = e.target.value.toLowerCase();
+    setSearchTerm(search);
   };
 
   return (
@@ -403,18 +417,28 @@ const WorkTable: React.FC = () => {
                     paddingBottom: "10px",
                     display: "block",
                   }}>
-                  Report Output {(selectedDivision ? tableData : []).length} 
+                  Report Output {(selectedDivision ? tableData : []).length}
                 </Typography.Text>
 
-                <Button
-                  onClick={handleExport}
-                  style={{
-                    backgroundColor: "#008CBA",
-                    color: "white",
-                    marginBottom: "10px",
-                  }}>
-                  Export As Excel
-                </Button>
+                <Flex gap="small">
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    style={{
+                      marginBottom: "10px",
+                    }}
+                  />
+                  <Button
+                    onClick={handleExport}
+                    style={{
+                      backgroundColor: "#008CBA",
+                      color: "white",
+                      marginBottom: "10px",
+                    }}>
+                    Export As Excel
+                  </Button>
+                </Flex>
               </Flex>
 
               <div
