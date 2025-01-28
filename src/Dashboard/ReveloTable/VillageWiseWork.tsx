@@ -23,7 +23,7 @@ const VillageWiseWork: React.FC = () => {
                 const url = (window as any).__analytics__.wbUrl;
     
                 // Fetch project village and water budget data
-                const [projectVillageResponse, waterBudgetResponse, villagePlanResponse] = await Promise.all([
+                const [projectVillageResponse, originalWorks, shadowWorks] = await Promise.all([
                     axios.get(url, {
                         params: {
                             service: "WFS",
@@ -40,7 +40,7 @@ const VillageWiseWork: React.FC = () => {
                             service: "WFS",
                             version: "1.0.0",
                             request: "GetFeature",
-                            typeName: "js2surveydsws:waterbudget_js2project",
+                            typeName: "js2surveydsws:work_js2project",
                             outputFormat: "json",
                             srsname: "EPSG:3857",
                         },
@@ -50,7 +50,7 @@ const VillageWiseWork: React.FC = () => {
                             service: "WFS",
                             version: "1.0.0",
                             request: "GetFeature",
-                            typeName: "js2surveydsws:subplan_js2project",
+                            typeName: "js2surveydsws:work_js2project_shadow",
                             outputFormat: "json",
                             srsname: "EPSG:3857",
                         },
@@ -59,17 +59,11 @@ const VillageWiseWork: React.FC = () => {
     
                 // Extract features from the responses
                 const projectVillageData = projectVillageResponse.data.features || [];
-                const waterBudgetData = waterBudgetResponse.data.features || [];
-                const villagePlanData = villagePlanResponse.data.features || [];
-    
-                // Create a set of village IDs from the water budget data
-                const waterBudgetVillageIds = new Set(
-                    waterBudgetData.map((feature) => feature.properties.villageid)
-                );
 
-                const villagePlanVillageIds = new Set(
-                    villagePlanData.map((feature) => feature.properties.villageid)
-                );
+                const workData = [
+                    ...( shadowWorks.data.features || [] ),
+                    ...( originalWorks.data.features || [] ),
+                  ];
     
                 // Process project village data and check if water budget and sub plan exists for each village
                 const processedData = projectVillageData.map((feature) => {
@@ -81,9 +75,8 @@ const VillageWiseWork: React.FC = () => {
                         district: feature.properties.district || "Unknown District",
                         taluka: feature.properties.taluka || "Unknown Taluka",
                         villagename,
-                        waterBudgetPresent: waterBudgetVillageIds.has(villageid) ? "Yes" : "No", // Check if water budget exists
-                        villagePlanPresent: villagePlanVillageIds.has(villageid) ? "Yes" : "No", // Check if sub plan exists
-                    };
+                        
+                    }
                 });
     
                 // Update state with processed data

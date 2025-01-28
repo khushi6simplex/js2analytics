@@ -22,13 +22,15 @@
     "cytoscape": "^3.30.4",
     "echarts": "^5.6.0",
     "echarts-for-react": "^3.0.2",
+    "exceljs": "^4.4.0",
     "keycloak-js": "^26.0.7",
     "ol": "^10.3.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "react-redux": "^9.2.0",
     "react-router-dom": "^7.0.2",
-    "xlsx": "^0.18.5"
+    "xlsx": "^0.18.5",
+    "xlsx-style": "^0.8.13"
   },
   "devDependencies": {
     "@eslint/js": "^9.15.0",

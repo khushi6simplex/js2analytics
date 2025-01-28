@@ -135,6 +135,7 @@ const WorkCompletionReport = () => {
       sorter: (a, b) => a.taluka.localeCompare(b.taluka),
       className: "center",
       align: "center" as "center",
+      ellipsis: true, // Enable ellipsis
     },
 
     {
@@ -146,6 +147,7 @@ const WorkCompletionReport = () => {
       // ellipsis: true,
       className: "center",
       align: "center" as "center",
+      ellipsis: true, // Enable ellipsis
     },
     {
       title: "Started Work",
@@ -156,6 +158,7 @@ const WorkCompletionReport = () => {
       // ellipsis: true,
       className: "center",
       align: "center" as "center",
+      ellipsis: true, // Enable ellipsis
     },
     {
       title: "Work Complete %",
@@ -167,6 +170,7 @@ const WorkCompletionReport = () => {
       render: (text) => <p title={text}>{text + "%"}</p>,
       className: "center",
       align: "center" as "center",
+      ellipsis: true, // Enable ellipsis
     },
   ];
 
@@ -248,10 +252,28 @@ const WorkCompletionReport = () => {
         geometry: "",
       },
     ];
+    // Determine the file name based on selection
+    let fileName = "All Divisions"; // Default
+
+    if (selectedDivision) {
+      fileName = selectedDivision; // Use division name if selected
+    }
+
+    if (selectedDistrict) {
+      fileName = selectedDistrict; // Override with district name if selected
+    }
+
+    if (selectedTaluka) {
+      fileName = selectedTaluka; // Override with taluka name if selected
+    }
+
+    // Add the date suffix only once
+    fileName = `${fileName}.xlsx`;
+
     exportToExcel({
       data: selectedDivision ? dataWithTotals : [],
       columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
-      fileName: "WorkMonitoring.xlsx",
+      fileName,
       sheetName: "Work Data",
       tableTitle: "Work Monitoring Table",
     });

@@ -15,3 +15,8 @@
     border-color: #c4c4c4 !important; /* Body cell border color */
   }
   
+  .ant-table-cell {
+    overflow: hidden; /* Ensures content does not overflow */
+    text-overflow: ellipsis; /* Enables ellipsis */
+    white-space: nowrap; /* Prevents text wrapping */
+}

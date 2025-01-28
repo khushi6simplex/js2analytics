@@ -58,6 +58,7 @@ const WorkTable: React.FC = () => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
     setCurrentPage(1);
   };
+
   const handleDepartmentClick = (deptName: string) => {
     setSelectedDepartment(selectedDepartment === deptName ? null : deptName);
   };

@@ -8,12 +8,14 @@ import '../Dashboard.css';
 import FloatingMap from "../Map/Map";
 import { panToLocation } from '../utils/mapUtils';
 import axios from "axios";
+import PropTypes from "prop-types";
 
 interface DistrictWiseTableProps {
   isMapVisible: boolean;
+  resetTrigger: boolean;
 }
 
-const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) => {
+const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isMapVisible }) => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
@@ -21,8 +23,8 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) =
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
+  const [searchTerm, setSearchTerm] = useState<string>(""); // New state for search
   const mapRef = useRef(null);
-  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -38,6 +40,31 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) =
     };
     fetchData();
   }, []);
+
+  useEffect( () => {
+    if ( resetTrigger ) {
+      setSelectedDivision( null );
+      setSelectedDistrict( null );
+    }
+  }, [ resetTrigger ] );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setSearchTerm(e.target.value); // Update search term
+    setCurrentPage(1); // Reset to first page on search
+  };
+
+  const getFilteredData = () => {
+    const summarizedData = getSummarizedData();
+
+    if (!searchTerm.trim()) return summarizedData;
+
+    return summarizedData.filter((item) =>
+      Object.values(item)
+        .join(" ")
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase())
+    );
+  };
 
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(division === selectedDivision ? null : division);
@@ -201,10 +228,6 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) =
     { title: "Physical Target Area", align: "center" as "center", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p>, className: "center", width: "5vw" },
   ];
 
-  const handleSearchChange = (e) => {
-    setSearchTerm(e.target.value); // Update the search term state
-  };
-
   const handleExport = () => {
     const summarizedData = getSummarizedData();
     const totals = calculateTotals(summarizedData);
@@ -251,12 +274,6 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) =
       tableTitle: "District Wise Work Table",
     });
   };
-
-  const filteredDistricts = selectedDivision
-    ? (divisionData[selectedDivision]?.districts || []).filter((district) =>
-      district.toLowerCase().includes(searchTerm)
-    )
-    : [];
 
   return (
     <Flex gap={50} wrap="nowrap">
@@ -325,13 +342,12 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) =
                 >
                   Total Records {`${Math.min(currentPage * pageSize, getSummarizedData().length)} / ${getSummarizedData().length}`}
                 </Typography.Text>
-                {/* Add a search input */}
                 <Input
-                  placeholder="Search..."
-                  value={searchTerm}
-                  onChange={handleSearchChange}
-                  style={{ width: 200, marginBottom: "10px", marginRight: "-550px" }}
-                />
+              placeholder="Search..."
+              value={searchTerm}
+              onChange={handleSearchChange}
+              style={{ width: 200, marginBottom: "10px", marginRight: "-500px" }}
+            />
                 <Button
                   onClick={handleExport}
                   style={{
@@ -343,17 +359,16 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) =
                   Export As Excel
                 </Button>
               </Flex>
-
               <Table
                 columns={columns}
                 style={{ alignItems: "top" }}
                 size="small"
                 tableLayout="fixed"
-                dataSource={getSummarizedData()}
+                dataSource={getFilteredData()}
                 pagination={{
                   pageSize: pageSize,
                   showSizeChanger: false,
-                  total: getSummarizedData().length,
+                  total: getFilteredData().length,
                   current: currentPage,
                   onChange: (page, pageSize) => {
                     setCurrentPage(page);
@@ -404,6 +419,10 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ isMapVisible }) =
       </Row>
     </Flex>
   );
+};
+
+DistrictWiseTable.propTypes = {
+  resetTrigger: PropTypes.bool.isRequired,
 };
 
 export default DistrictWiseTable;

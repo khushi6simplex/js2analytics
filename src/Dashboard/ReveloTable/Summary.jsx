@@ -6,9 +6,9 @@ import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import "../Dashboard.css";
 import axios from "axios";
-import * as XLSX from "xlsx";
 import { Input } from "antd";
 import ReactECharts from "echarts-for-react";
+import ExcelJS from "exceljs";
 
 const Summary = ( { resetTrigger } ) => {
   const [ geoData, setGeoData ] = useState( [] );
@@ -227,7 +227,7 @@ const Summary = ( { resetTrigger } ) => {
     setSearchTerm( e.target.value ); // Update the search term state
   };
 
-  const handleExport = () => {
+  const handleExport = async () => {
     if ( filteredData.length === 0 ) {
       alert( "No data available to export." );
       return;
@@ -252,7 +252,6 @@ const Summary = ( { resetTrigger } ) => {
 
     // Add totals row
     const totals = calculateTotals( sortedData );
-
     dataToExport.push( [
       "Total",
       totals.villageCount,
@@ -266,44 +265,75 @@ const Summary = ( { resetTrigger } ) => {
       totals.geotaggingIncomplete,
     ] );
 
+    // Create a new workbook and worksheet
+    const workbook = new ExcelJS.Workbook();
+    const worksheet = workbook.addWorksheet( "Summary Data" );
+
+    // Define header rows
     const headerRow1 = [
-      "District",
-      "Total Villages",
-      "Water Budget",
-      "Water Budget",
-      "Village Plan",
-      "Works",
-      "Works",
-      "Works",
-      "Geotagging",
-      "Geotagging",
+      "District", "Total Villages", "Water Budget", "Water Budget", "Village Plan",
+      "Works", "Works", "Works", "Geotagging", "Geotagging",
     ];
     const headerRow2 = [
-      "",
-      "",
-      "Completed",
-      "Incompleted",
-      "",
-      "Total",
-      "Completed",
-      "Incompleted",
-      "Completed",
-      "Incompleted",
+      "", "", "Completed", "Incompleted", "", "Total", "Completed", "Incompleted", "Completed", "Incompleted",
     ];
 
-    const worksheetData = [ headerRow1, headerRow2, ...dataToExport ];
+    // Add header rows to the worksheet
+    worksheet.addRow( headerRow1 );
+    worksheet.addRow( headerRow2 );
 
-    const worksheet = XLSX.utils.aoa_to_sheet( worksheetData );
-    worksheet[ "!merges" ] = [
-      { s: { r: 0, c: 2 }, e: { r: 0, c: 3 } }, // Merge Water Budget header
-      { s: { r: 0, c: 4 }, e: { r: 0, c: 4 } }, // Village Plan single header row
-      { s: { r: 0, c: 5 }, e: { r: 0, c: 7 } }, // Merge Works header
-      { s: { r: 0, c: 8 }, e: { r: 0, c: 9 } }, // Merge Geotagging header
-    ];
+    // Apply style to header rows (custom color background and borders)
+    const headerStyle = {
+      fill: { type: "pattern", pattern: "solid", fgColor: { argb: "FFC000" } }, // Orange background
+      font: { bold: true },
+      alignment: { horizontal: "center", vertical: "middle" },
+      border: {
+        top: { style: "thin" },
+        left: { style: "thin" },
+        bottom: { style: "thin" },
+        right: { style: "thin" },
+      },
+    };
 
-    const workbook = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet( workbook, worksheet, "Summary Data" );
+    worksheet.getRow( 1 ).eachCell( ( cell ) => {
+      cell.style = headerStyle;
+    } );
 
+    worksheet.getRow( 2 ).eachCell( ( cell ) => {
+      cell.style = headerStyle;
+    } );
+
+    // Add data rows with borders
+    dataToExport.forEach( ( row, rowIndex ) => {
+      const excelRow = worksheet.addRow( row );
+
+      excelRow.eachCell( ( cell ) => {
+        cell.border = {
+          top: { style: "thin" },
+          left: { style: "thin" },
+          bottom: { style: "thin" },
+          right: { style: "thin" },
+        };
+      } );
+
+      // Optional: Apply a different background color for the totals row
+      if ( rowIndex === dataToExport.length - 1 ) {
+        excelRow.eachCell( ( cell ) => {
+          cell.fill = {
+            type: "pattern",
+            pattern: "solid",
+            fgColor: { argb: "FFFF99" }, // Light yellow for totals
+          };
+        } );
+      }
+    } );
+
+    // Merge cells for headers
+    worksheet.mergeCells( "C1:D1" ); // Merge Water Budget header
+    worksheet.mergeCells( "F1:H1" ); // Merge Works header
+    worksheet.mergeCells( "I1:J1" ); // Merge Geotagging header
+
+    // Generate the file name
     let fileName = "All Divisions";
     if ( selectedDivision ) {
       fileName = selectedDivision;
@@ -312,12 +342,20 @@ const Summary = ( { resetTrigger } ) => {
     if ( selectedDistrict ) {
       fileName = selectedDistrict;
     }
-    XLSX.writeFile( workbook, `${ fileName }_${ new Date().toISOString().slice( 0, 10 ) }.xlsx` );
+
+    // Write the Excel file and trigger download
+    workbook.xlsx.writeBuffer().then( ( buffer ) => {
+      const blob = new Blob( [ buffer ], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" } );
+      const link = document.createElement( "a" );
+      link.href = URL.createObjectURL( blob );
+      link.download = `${ fileName }_${ new Date().toISOString().slice( 0, 10 ) }.xlsx`;
+      link.click();
+    } );
   };
 
   const columns = [
     {
-      title: "District", dataIndex: "district", key: "district", align: "center", className: "center", sorter: ( a, b ) => a.district.localeCompare( b.district ), defaultSortOrder: "ascend", 
+      title: "District", dataIndex: "district", key: "district", align: "center", className: "center", sorter: ( a, b ) => a.division.localeCompare( b.division ), defaultSortOrder: "ascend",
     },
     { title: "Village Count", dataIndex: "villageCount", key: "villageCount", align: "center", className: "center", sorter: ( a, b ) => a.villageCount - b.villageCount },
     {
@@ -425,54 +463,53 @@ const Summary = ( { resetTrigger } ) => {
   };
 
   // Process `geoData` for the bar chart
-  // Sort `geoData` alphabetically by district name
-const sortedGeoData = geoData.sort((a, b) => a.district.localeCompare(b.district));
-  const xAxisData = sortedGeoData.map((item) => item.district); // District names for x-axis
+  const sortedGeoData = geoData.sort( ( a, b ) => a.district.localeCompare( b.district ) );
+  const xAxisData = sortedGeoData.map( ( item ) => item.district ); // District names for x-axis
   const rawData = [
-    geoData.map((item) => item.villageCount),
-    geoData.map((item) => item.waterBudgetCompleted),
-    geoData.map((item) => item.waterBudgetIncomplete),
-    geoData.map((item) => item.villagePlanCount),
-    geoData.map((item) => item.totalWorks),
-    geoData.map((item) => item.workCompleted),
-    geoData.map((item) => item.workIncomplete),
-    geoData.map((item) => item.geotaggingCompleted),
-    geoData.map((item) => item.geotaggingIncomplete),
+    geoData.map( ( item ) => item.villageCount ),
+    geoData.map( ( item ) => item.waterBudgetCompleted ),
+    geoData.map( ( item ) => item.waterBudgetIncomplete ),
+    geoData.map( ( item ) => item.villagePlanCount ),
+    geoData.map( ( item ) => item.totalWorks ),
+    geoData.map( ( item ) => item.workCompleted ),
+    geoData.map( ( item ) => item.workIncomplete ),
+    geoData.map( ( item ) => item.geotaggingCompleted ),
+    geoData.map( ( item ) => item.geotaggingIncomplete ),
   ];
-  
+
   const series = [
     "Village Count",
     "Water Budget Completed",
-    "Water Budget Incomplete",
+    "Water Budget Incompleted",
     "Village Plan",
     "Total Works",
     "Work Completed",
     "Work Incompleted",
     "Geotagging Completed",
     "Geotagging Incompleted",
-  ].map((name, sid) => ({
+  ].map( ( name, sid ) => ( {
     name,
     type: "bar",
     stack: "total",
     barWidth: "80%",
     label: {
       show: true,
-      formatter: (params) => `${params.value}`, // Display direct counts
+      formatter: ( params ) => `${ params.value }`, // Display direct counts
     },
-    data: rawData[sid], // Use direct counts
-  }));
-  
+    data: rawData[ sid ], // Use direct counts
+  } ) );
+
   const option = {
     tooltip: {
       trigger: 'axis', // Trigger tooltip on axis (hover over any point on the line)
       axisPointer: {
         type: 'shadow' // You can change this to 'line' or 'cross' if you prefer a different pointer type
       },
-      formatter: function (params) {
-        let tooltipContent = `<strong>${params[0].name}</strong><br/>`; // Display the x-axis value (district name)
-        params.forEach(param => {
-          tooltipContent += `${param.marker} <strong>${param.seriesName}:</strong> ${param.value}<br/>`; // Show series name and value
-        });
+      formatter: function ( params ) {
+        let tooltipContent = `<strong>${ params[ 0 ].name }</strong><br/>`; // Display the x-axis value (district name)
+        params.forEach( param => {
+          tooltipContent += `${ param.marker } <strong>${ param.seriesName }:</strong> ${ param.value }<br/>`; // Show series name and value
+        } );
         return tooltipContent;
       }
     },
@@ -497,7 +534,7 @@ const sortedGeoData = geoData.sort((a, b) => a.district.localeCompare(b.district
     yAxis: {
       type: "value",
       axisLabel: {
-        formatter: (value) => value, // Show all tick labels as-is
+        formatter: ( value ) => value, // Show all tick labels as-is
       },
     },
     series,
@@ -554,7 +591,7 @@ const sortedGeoData = geoData.sort((a, b) => a.district.localeCompare(b.district
                     placeholder="Enter District Name"
                     value={searchTerm}
                     onChange={handleSearchChange}
-                    style={{ width: 200, marginBottom: "10px" , marginRight: "-650px"}}
+                    style={{ width: 200, marginBottom: "10px", marginRight: "-650px" }}
                   />
                   <Button
                     onClick={handleExport}
@@ -574,16 +611,7 @@ const sortedGeoData = geoData.sort((a, b) => a.district.localeCompare(b.district
                   size="small"
                   tableLayout="fixed"
                   dataSource={filteredData}
-                  pagination={{
-                    pageSize: pageSize,
-                    showSizeChanger: false,
-                    total: filteredData.length,
-                    current: currentPage,
-                    onChange: ( page, pageSize ) => {
-                      setCurrentPage( page );
-                      setPageSize( pageSize );
-                    },
-                  }}
+                  pagination={false}
                   scroll={{ x: "100%" }}
                   bordered
                   summary={( pageData ) => {
@@ -630,7 +658,7 @@ const sortedGeoData = geoData.sort((a, b) => a.district.localeCompare(b.district
           </Col>
         </Row>
       </Flex>
-      <Flex gap={20} wrap="nowrap" style={{ height: "600px" }}>
+      <Flex gap={20} wrap="nowrap" style={{ height: "600px", marginTop: "100px" }}>
         <ReactECharts option={option} style={{ width: "85vw", height: "100%" }} />
       </Flex>
 

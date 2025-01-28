@@ -1,5 +1,5 @@
 import React, { useState, useEffect, version } from "react";
-import { Table, Row, Col, Spin, Empty, Button, Typography, Divider, Flex } from "antd";
+import { Table, Row, Col, Spin, Empty, Button, Typography, Divider, Flex, Input } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction"; // Importing Jurisdictions
 import divisionData from "../division.json";
 import { exportToExcel } from "../Excel/Excel";
@@ -13,15 +13,16 @@ const VillageWaterBudget: React.FC = () => {
     const [selectedTaluka, setSelectedTaluka] = useState<string | null>(null);
     const [loading, setLoading] = useState<boolean>(true); // Loading state
     const [currentPage, setCurrentPage] = useState<number>(1);
-    const [pageSize, setPageSize] = useState<number>(7);
+    const [pageSize, setPageSize] = useState<number>(12);
+    const [searchTerm, setSearchTerm] = useState("");
 
     useEffect(() => {
         const fetchData = async () => {
             try {
                 setLoading(true);
-    
+
                 const url = (window as any).__analytics__.wbUrl;
-    
+
                 // Fetch project village and water budget data
                 const [projectVillageResponse, waterBudgetResponse, villagePlanResponse] = await Promise.all([
                     axios.get(url, {
@@ -56,12 +57,12 @@ const VillageWaterBudget: React.FC = () => {
                         },
                     })
                 ]);
-    
+
                 // Extract features from the responses
                 const projectVillageData = projectVillageResponse.data.features || [];
                 const waterBudgetData = waterBudgetResponse.data.features || [];
                 const villagePlanData = villagePlanResponse.data.features || [];
-    
+
                 // Create a set of village IDs from the water budget data
                 const waterBudgetVillageIds = new Set(
                     waterBudgetData.map((feature) => feature.properties.villageid)
@@ -70,12 +71,12 @@ const VillageWaterBudget: React.FC = () => {
                 const villagePlanVillageIds = new Set(
                     villagePlanData.map((feature) => feature.properties.villageid)
                 );
-    
+
                 // Process project village data and check if water budget and sub plan exists for each village
                 const processedData = projectVillageData.map((feature) => {
                     const villageid = feature.properties.villageid;
                     const villagename = feature.properties.villagename || "Unknown Village";
-    
+
                     return {
                         division: feature.properties.division || "Unknown Division",
                         district: feature.properties.district || "Unknown District",
@@ -85,7 +86,7 @@ const VillageWaterBudget: React.FC = () => {
                         villagePlanPresent: villagePlanVillageIds.has(villageid) ? "Yes" : "No", // Check if sub plan exists
                     };
                 });
-    
+
                 // Update state with processed data
                 setGeoData(processedData);
             } catch (error) {
@@ -94,10 +95,10 @@ const VillageWaterBudget: React.FC = () => {
                 setLoading(false);
             }
         };
-    
+
         fetchData();
-    }, []);    
-      
+    }, []);
+
     const handleDivisionClick = (division: string) => {
         setSelectedDivision(division === selectedDivision ? null : division);
         setSelectedDistrict(null);
@@ -123,9 +124,15 @@ const VillageWaterBudget: React.FC = () => {
             divisionData[selectedDivision]?.districts.includes(district);
         const isInDistrict = !selectedDistrict || district === selectedDistrict;
         const isInTaluka = !selectedTaluka || taluka === selectedTaluka;
-    
-        return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka;
-    });    
+
+        const matchesSearch = feature.district.toLowerCase().includes(searchTerm.toLowerCase()) || feature.taluka.toLowerCase().includes(searchTerm.toLowerCase()) || feature.villagename.toLowerCase().includes(searchTerm.toLowerCase());
+
+        return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka && matchesSearch;
+    });
+
+    const handleSearchChange = (e) => {
+        setSearchTerm(e.target.value);
+    }
 
     const handleExport = () => {
         const summarizedData = filteredData;
@@ -144,25 +151,45 @@ const VillageWaterBudget: React.FC = () => {
             },
         ];
 
+        // Determine the file name based on selection
+        let fileName = "All Divisions"; // Default
+
+        if (selectedDivision) {
+            fileName = selectedDivision; // Use division name if selected
+        }
+
+        if (selectedDistrict) {
+            fileName = selectedDistrict; // Override with district name if selected
+        }
+
+        if (selectedTaluka) {
+            fileName = selectedTaluka; // Override with taluka name if selected
+        }
+
+        // Add the date suffix only once
+        fileName = `${fileName}.xlsx`;
+
         exportToExcel({
             data: dataWithTotals,
             columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })),
-            fileName: "VillageWiseWaterBudget.xlsx",
+            fileName,
             sheetName: "Village Wise Water Budget",
             tableTitle: "Village Wise Water Budget Data",
         });
     };
 
     const columns = [
-        { title: "District", dataIndex: "district", key: "district", className: "center", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const },
-        { title: "Taluka", dataIndex: "taluka", key: "taluka", className: "center", sorter: (a, b) => a.taluka.localeCompare(b.taluka), defaultSortOrder: "ascend" as const },
-        { title: "Village", dataIndex: "villagename", key: "villagename", className: "center", sorter: (a, b) => a.villagename.localeCompare(b.villagename), defaultSortOrder: "ascend" as const },
+        { title: "District", dataIndex: "district", key: "district", className: "center", sorter: (a, b) => a.district.localeCompare(b.district), defaultSortOrder: "ascend" as const, ellipsis: true, width: "11vw", align: "center" as "center" },
+        { title: "Taluka", dataIndex: "taluka", key: "taluka", className: "center", sorter: (a, b) => a.taluka.localeCompare(b.taluka), defaultSortOrder: "ascend" as const, width: "11vw", align: "center" as "center" },
+        { title: "Village", dataIndex: "villagename", key: "villagename", className: "center", sorter: (a, b) => a.villagename.localeCompare(b.villagename), defaultSortOrder: "ascend" as const, width: "11vw", align: "center" as "center" },
         {
             title: "Water Budget Present",
             dataIndex: "waterBudgetPresent",
             key: "waterBudgetPresent",
             className: "center",
             sorter: (a, b) => a.waterBudgetPresent.localeCompare(b.waterBudgetPresent),
+            width: "11vw",
+            align: "center" as "center"
         },
         {
             title: "Village Plans Present",
@@ -170,7 +197,9 @@ const VillageWaterBudget: React.FC = () => {
             key: "villagePlanPresent",
             className: "center",
             sorter: (a, b) => a.villagePlanPresent.localeCompare(b.villagePlanPresent),
-        }       
+            width: "11vw",
+            align: "center" as "center"
+        }
     ];
 
     const calculateTotals = (data) => {
@@ -269,8 +298,15 @@ const VillageWaterBudget: React.FC = () => {
                                         display: "block",
                                     }}
                                 >
-                                    Report Output {filteredData.length}
+                                    Total Records {`${Math.min(currentPage * pageSize, filteredData.length)} / ${filteredData.length}`}
                                 </Typography.Text>
+                                {/* Add a search input */}
+                                <Input
+                                    placeholder="Enter District Name"
+                                    value={searchTerm}
+                                    onChange={handleSearchChange}
+                                    style={{ width: 200, marginBottom: "10px", marginRight: "-500px" }}
+                                />
                                 <Button
                                     onClick={handleExport}
                                     style={{
@@ -304,13 +340,13 @@ const VillageWaterBudget: React.FC = () => {
                                     return (
                                         <Table.Summary.Row>
                                             <Table.Summary.Cell index={0} colSpan={3}>
-                                            <div style={{ textAlign: "center", fontWeight: "bolder"}}>Total</div>
+                                                <div style={{ textAlign: "center", fontWeight: "bolder" }}>Total</div>
                                             </Table.Summary.Cell>
                                             <Table.Summary.Cell index={1}>
-                                                <div style={{ textAlign: "center", fontWeight: "bolder"}}>{totals.waterBudgetYesCount}</div>
+                                                <div style={{ textAlign: "center", fontWeight: "bolder" }}>{totals.waterBudgetYesCount}</div>
                                             </Table.Summary.Cell>
                                             <Table.Summary.Cell index={2}>
-                                                <div style={{ textAlign: "center", fontWeight: "bolder"}}>{totals.villagePlanYesCount}</div>
+                                                <div style={{ textAlign: "center", fontWeight: "bolder" }}>{totals.villagePlanYesCount}</div>
                                             </Table.Summary.Cell>
                                         </Table.Summary.Row>
                                     );

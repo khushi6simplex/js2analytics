@@ -5,5 +5,6 @@
     "baseUrl": "/analytics",
     "dataUrl": "http://180.149.240.169:8080/geoserver/js2surveydsws/wfs",
     "wbUrl": "http://180.149.240.169:8080/geoserver/js2surveydsws/ows",
-    "talukasMap": "http://180.149.240.169:8080/geoserver/obdsws/ows"
+    "talukasMap": "http://180.149.240.169:8080/geoserver/obdsws/ows",
+    "attachmentsInfoUrl": "http://180.149.240.169:8080/reveloadmin35/revelo/conceptmodels/js2surveycm/entities/work/{{workid}}/attachments/info?includeThumbnail=true"
 }

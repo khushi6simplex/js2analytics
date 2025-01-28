@@ -1,4 +1,5 @@
-import { Typography, Tabs, Flex, Card, Divider } from "antd";
+// Dashboard.jsx
+import { Typography, Tabs, Flex, Card, Divider, Tooltip } from "antd";
 import { useState } from "react";
 import "./DashBoard.css";
 import DistrictWiseTable from "./ReveloTable/DistrictWiseTable";
@@ -14,13 +15,13 @@ import Geotagging from "./ReveloTable/Geotagging";
 
 const Dashboard = () => {
   const [selectedTab, setSelectedTab] = useState("Summary");
-  const [isMapVisible, setIsMapVisible] = useState(false); // State for map visibility
+  const [isMapVisible, setIsMapVisible] = useState(false);
 
   const handleTabChange = (key) => {
     setSelectedTab(key);
   };
 
-  const handleMapToggle = () => {
+  const toggleMapVisibility = () => {
     setIsMapVisible((prev) => !prev);
   };
 
@@ -28,12 +29,12 @@ const Dashboard = () => {
     {
       key: "1",
       label: "Summary",
-      children: <Summary resetTrigger={selectedTab === "1"} />,
+      children: <Summary resetTrigger={selectedTab === "1"} isMapVisible={isMapVisible} />,
     },
     {
       key: "2",
       label: "District Wise Work",
-      children: <DistrictWiseTable isMapVisible={isMapVisible} />, // Pass isMapVisible
+      children: <DistrictWiseTable resetTrigger={selectedTab === "1"}/>,
     },
     {
       key: "3",
@@ -42,13 +43,27 @@ const Dashboard = () => {
     },
     {
       key: "4",
-      label: "Village Wise Water Budgeting and Village Plans",
+      label: (
+        <Tooltip title="Village Wise Water Budgeting and Village Plans">
+          <p
+            style={{
+              width: "200px",
+              whiteSpace: "nowrap",
+              overflow: "hidden",
+              textOverflow: "ellipsis",
+              margin: 0,
+            }}
+          >
+            Village Wise Water Budgeting and Village Plans
+          </p>
+        </Tooltip>
+      ),
       children: <VillageWaterBudget />,
     },
     {
       key: "5",
       label: "Village Wise Work",
-      children: <VillageWiseWork />,
+      children: "Comming Soon ...",
     },
     {
       key: "6",
@@ -68,7 +83,7 @@ const Dashboard = () => {
     {
       key: "9",
       label: "User Defined Query",
-      children: "Coming Soon ...",
+      children: "Comming Soon ...",
     },
     {
       key: "10",
@@ -80,7 +95,7 @@ const Dashboard = () => {
   return (
     <>
       <Card bordered={false}>
-        <Header onMapToggle={handleMapToggle} /> {/* Pass toggle function to Header */}
+        <Header onMapToggle={toggleMapVisibility} />
         <Flex vertical justify="center">
           <Flex style={{ marginTop: "0px", marginBottom: "-10px" }}>
             <Typography.Text
