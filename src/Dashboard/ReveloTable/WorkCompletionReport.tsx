@@ -11,6 +11,7 @@ import {
   Button,
   Typography,
   Divider,
+  Input,
 } from "antd";
 import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
@@ -26,6 +27,7 @@ const WorkCompletionReport = () => {
   const [selectedTaluka, setSelectedTaluka] = useState<any>();
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
+  const [searchTerm, setSearchTerm] = useState("");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -64,7 +66,16 @@ const WorkCompletionReport = () => {
       divisionData[selectedDivision]?.districts.includes(district);
     const isInDistrict = !selectedDistrict || district === selectedDistrict;
     const isInTaluka = !selectedTaluka || taluka === selectedTaluka;
-    return (!selectedDivision || isInDivision) && isInDistrict && isInTaluka;
+    const matchesSearch = Object.values(feature.properties).some((value) =>
+      String(value).toLowerCase().toString().includes(searchTerm),
+    );
+
+    return (
+      (!selectedDivision || isInDivision) &&
+      isInDistrict &&
+      isInTaluka &&
+      matchesSearch
+    );
   });
 
   const calculateTotals = (data) => {
@@ -173,6 +184,18 @@ const WorkCompletionReport = () => {
       ellipsis: true, // Enable ellipsis
     },
   ];
+
+  const handleSearchChange = (e) => {
+    const search = e.target.value.toLowerCase();
+    setSearchTerm(search);
+
+    // const searchFilterData = tableData.filter((item) => {
+    //   return Object.values(item).some((value) =>
+    //     String(value).toLowerCase().includes(search),
+    //   );
+    // });
+    // console.log(searchFilterData, "searchFilterData");
+  };
 
   function calculateWorkComplete(feature, geoData) {
     let percentage = 0;
@@ -357,18 +380,28 @@ const WorkCompletionReport = () => {
                     paddingBottom: "10px",
                     display: "block",
                   }}>
-                  Total Records 
+                  Total Records
                 </Typography.Text>
 
-                <Button
-                  onClick={handleExport}
-                  style={{
-                    backgroundColor: "#008CBA",
-                    color: "white",
-                    marginBottom: "10px",
-                  }}>
-                  Export As Excel
-                </Button>
+                <Flex gap="small">
+                  <Input
+                    placeholder="Search..."
+                    value={searchTerm}
+                    onChange={handleSearchChange}
+                    style={{
+                      marginBottom: "10px",
+                    }}
+                  />
+                  <Button
+                    onClick={handleExport}
+                    style={{
+                      backgroundColor: "#008CBA",
+                      color: "white",
+                      marginBottom: "10px",
+                    }}>
+                    Export As Excel
+                  </Button>
+                </Flex>
               </Flex>
 
               <div
