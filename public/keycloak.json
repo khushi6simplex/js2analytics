@@ -1,7 +1,7 @@
 {
     "realm": "jalyuktashivar",
     "auth-server-url": "http://180.149.240.169:8081/auth",
-    "ssl-required": "external",
+    "ssl-required": "none",
     "resource": "revelo35",
     "public-client": true,
     "confidential-port": 0

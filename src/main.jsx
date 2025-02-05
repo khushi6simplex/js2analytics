@@ -5,6 +5,7 @@ import { BrowserRouter, Route, Routes } from "react-router-dom";
 import { Provider } from "react-redux";
 import { store } from "./Redux/store/store";
 import { MainRoutes } from "./Routes/Route";
+import { UserProvider } from './contexts/UserContext';
 
 const AppWrapper = () => {
   return (
@@ -38,5 +39,7 @@ const root = ReactDOM.createRoot(document.getElementById("root"));
 
 (async () => {
   await init();
-  root.render(<AppWrapper />);
+  root.render(
+      <AppWrapper />
+  );
 })();

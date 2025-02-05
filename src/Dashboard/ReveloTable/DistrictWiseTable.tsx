@@ -116,7 +116,7 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
       worksStarted: data.reduce((sum, item) => sum + (item.worksStarted || 0), 0),
       worksCompleted: data.reduce((sum, item) => sum + (item.worksCompleted || 0), 0),
       totalWoAmount: data.reduce((sum, item) => sum + (item.totalWoAmount || 0), 0).toFixed(2),
-      physicalTargetArea: data.reduce((sum, item) => sum + (item.physicalTargetArea || 0), 0).toFixed(2),
+      physicalTargetArea: data.reduce((sum, item) => sum + (item.physicalTargetArea || 0), 0).toFixed(1),
     };
     return totals;
   };
@@ -146,9 +146,7 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
           worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation).length,
           totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
           physicalTargetArea: talukaFeatures.reduce(
-            (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
-            0
-          ),
+            (sum, feature) => sum + (feature.properties.physicaltargetarea || 0), 0),
         },
       ];
     }
@@ -225,7 +223,7 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
     { title: "Works Started", align: "center" as "center", dataIndex: "worksStarted", key: "worksStarted", sorter: (a, b) => a.worksStarted - b.worksStarted, className: "center", width: "5vw" },
     { title: "Works Completed", align: "center" as "center", dataIndex: "worksCompleted", key: "worksCompleted", sorter: (a, b) => a.worksCompleted - b.worksCompleted, className: "center", width: "5vw" },
     { title: "Total Work Order Amount", align: "center" as "center", dataIndex: "totalWoAmount", key: "totalWoAmount", sorter: (a, b) => a.totalWoAmount - b.totalWoAmount, render: (text) => <p title={text}>{"₹ " + parseFloat(text).toFixed(2)}</p>, className: "center", width: "5vw" },
-    { title: "Physical Target Area", align: "center" as "center", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{text + " sq.m."}</p>, className: "center", width: "5vw" },
+    { title: "Physical Target Area", align: "center" as "center", dataIndex: "physicalTargetArea", key: "physicalTargetArea", sorter: (a, b) => a.physicalTargetArea - b.physicalTargetArea, render: (text) => <p title={text}>{parseFloat(text).toFixed(2) + " sq.m."}</p>, className: "center", width: "5vw" },
   ];
 
   const handleExport = () => {

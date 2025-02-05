@@ -7,31 +7,23 @@ const keycloak = new Keycloak({
 });
 
 export const initKeycloak = () => {
-  if (keycloak.authenticated) {
-    console.log("Keycloak is already initialized and authenticated.");
-    return Promise.resolve(true); // Skip initialization
-  }
-
   return new Promise((resolve, reject) => {
     keycloak
-      .init({ onLoad: "check-sso", silentCheckSsoRedirectrUi: `${window.location.origin}/silent-check-sso.html` })
+      .init({ 
+        onLoad: "login-required", 
+        checkLoginIframe: false 
+      })
       .then((authenticated) => {
         if (authenticated) {
-          console.log("Authenticated via check-sso");
-          resolve(true); // User is authenticated
+          console.log("Keycloak authenticated successfully.");
+          resolve(keycloak.token || null);
         } else {
-          console.log("Silent check failed, triggering login-required...");
-          keycloak
-            .login()
-            .then(() => resolve(true)) // Login successful
-            .catch((error) => {
-              console.error("Keycloak login failed", error);
-              reject(error);
-            });
+          console.log("User not authenticated.");
+          resolve(null);
         }
       })
       .catch((error) => {
-        console.error("Keycloak initialization failed during check-sso", error);
+        console.error("Keycloak initialization failed", error);
         reject(error);
       });
   });

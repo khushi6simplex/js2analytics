@@ -10,24 +10,23 @@ import { Input } from "antd";
 import ReactECharts from "echarts-for-react";
 import ExcelJS from "exceljs";
 
-const Summary = ( { resetTrigger } ) => {
-  const [ geoData, setGeoData ] = useState( [] );
-  const [ selectedDivision, setSelectedDivision ] = useState( null );
-  const [ selectedDistrict, setSelectedDistrict ] = useState( null );
-  const [ loading, setLoading ] = useState( true );
-  const [ currentPage, setCurrentPage ] = useState( 1 );
-  const [ pageSize, setPageSize ] = useState( 7 );
-  const [ searchTerm, setSearchTerm ] = useState( "" );
+const Summary = ({ resetTrigger }) => {
+  const [geoData, setGeoData] = useState([]);
+  const [selectedDivision, setSelectedDivision] = useState(null);
+  const [selectedDistrict, setSelectedDistrict] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [searchTerm, setSearchTerm] = useState("");
 
-  useEffect( () => {
+  useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading( true );
+        setLoading(true);
 
         const url = window.__analytics__.wbUrl;
 
-        const [ projectVillageResponse, waterBudgetResponse, villagePlanResponse, shadowWorks, originalWorks ] = await Promise.all( [
-          axios.get( url, {
+        const [projectVillageResponse, waterBudgetResponse, villagePlanResponse, shadowWorks, originalWorks] = await Promise.all([
+          axios.get(url, {
             params: {
               service: "WFS",
               version: "1.0.0",
@@ -37,8 +36,8 @@ const Summary = ( { resetTrigger } ) => {
               srsname: "EPSG:3857",
               CQL_FILTER: "isselected=true",
             },
-          } ),
-          axios.get( url, {
+          }),
+          axios.get(url, {
             params: {
               service: "WFS",
               version: "1.0.0",
@@ -47,8 +46,8 @@ const Summary = ( { resetTrigger } ) => {
               outputFormat: "json",
               srsname: "EPSG:3857",
             },
-          } ),
-          axios.get( url, {
+          }),
+          axios.get(url, {
             params: {
               service: "WFS",
               version: "1.0.0",
@@ -57,8 +56,8 @@ const Summary = ( { resetTrigger } ) => {
               outputFormat: "json",
               srsname: "EPSG:3857",
             },
-          } ),
-          axios.get( url, {
+          }),
+          axios.get(url, {
             params: {
               service: "WFS",
               version: "1.0.0",
@@ -67,8 +66,8 @@ const Summary = ( { resetTrigger } ) => {
               outputFormat: "json",
               srsname: "EPSG:3857",
             },
-          } ),
-          axios.get( url, {
+          }),
+          axios.get(url, {
             params: {
               service: "WFS",
               version: "1.0.0",
@@ -77,16 +76,16 @@ const Summary = ( { resetTrigger } ) => {
               outputFormat: "json",
               srsname: "EPSG:3857",
             },
-          } ),
-        ] );
+          }),
+        ]);
 
         const projectVillageData = projectVillageResponse.data.features || [];
         const waterBudgetData = waterBudgetResponse.data.features || [];
         const villagePlanData = villagePlanResponse.data.features || [];
 
         const workData = [
-          ...( shadowWorks.data.features || [] ),
-          ...( originalWorks.data.features || [] ),
+          ...(shadowWorks.data.features || []),
+          ...(originalWorks.data.features || []),
         ];
 
         const districtVillageCounts = {};
@@ -95,78 +94,79 @@ const Summary = ( { resetTrigger } ) => {
         const districtWorkCounts = {};
         const districtGeotaggingCounts = {};
 
-        projectVillageData.forEach( ( feature ) => {
+        projectVillageData.forEach((feature) => {
           const district = feature.properties.district || "Unknown District";
-          if ( !districtVillageCounts[ district ] ) {
-            districtVillageCounts[ district ] = 0;
+          if (!districtVillageCounts[district]) {
+            districtVillageCounts[district] = 0;
           }
-          districtVillageCounts[ district ] += 1;
-        } );
+          districtVillageCounts[district] += 1;
+        });
 
-        waterBudgetData.forEach( ( feature ) => {
+        waterBudgetData.forEach((feature) => {
           const district = feature.properties.district || "Unknown District";
-          if ( !districtWaterBudgetCounts[ district ] ) {
-            districtWaterBudgetCounts[ district ] = 0;
+          if (!districtWaterBudgetCounts[district]) {
+            districtWaterBudgetCounts[district] = 0;
           }
-          districtWaterBudgetCounts[ district ] += 1;
-        } );
+          districtWaterBudgetCounts[district] += 1;
+        });
 
         const distinctVillageIds = new Set();
 
-        villagePlanData.forEach( ( feature ) => {
+        villagePlanData.forEach((feature) => {
           const district = feature.properties.district || "Unknown District";
           const villageId = feature.properties.villageid;
-          const uniqueKey = `${ district }_${ villageId }`;
+          const uniqueKey = `${district}_${villageId}`;
 
-          if ( !distinctVillageIds.has( uniqueKey ) ) {
-            distinctVillageIds.add( uniqueKey );
-            if ( !districtVillagePlanCounts[ district ] ) {
-              districtVillagePlanCounts[ district ] = 0;
+          if (!distinctVillageIds.has(uniqueKey)) {
+            distinctVillageIds.add(uniqueKey);
+            if (!districtVillagePlanCounts[district]) {
+              districtVillagePlanCounts[district] = 0;
             }
-            districtVillagePlanCounts[ district ] += 1;
+            districtVillagePlanCounts[district] += 1;
           }
-        } );
+        });
 
-        workData.forEach( ( feature ) => {
+        workData.forEach((feature) => {
           const district = feature.properties.district || "Unknown District";
           const completionlocation = feature.properties.completionlocation || "";
-          if ( !districtWorkCounts[ district ] ) {
-            districtWorkCounts[ district ] = { completed: 0, incomplete: 0 };
+          if (!districtWorkCounts[district]) {
+            districtWorkCounts[district] = { completed: 0, incomplete: 0 };
           }
 
-          if ( completionlocation ) {
-            districtWorkCounts[ district ].completed += 1;
+          if (completionlocation) {
+            districtWorkCounts[district].completed += 1;
           } else {
-            districtWorkCounts[ district ].incomplete += 1;
+            districtWorkCounts[district].incomplete += 1;
           }
 
           const geometry = feature.properties.startedlocation || "";
-          if ( !districtGeotaggingCounts[ district ] ) {
-            districtGeotaggingCounts[ district ] = { completed: 0, incomplete: 0 };
+          if (!districtGeotaggingCounts[district]) {
+            districtGeotaggingCounts[district] = { completed: 0, incomplete: 0 };
           }
 
-          if ( geometry ) {
-            districtGeotaggingCounts[ district ].completed += 1;
+          if (completionlocation) {
+            districtGeotaggingCounts[district].completed += 1;
           } else {
-            districtGeotaggingCounts[ district ].incomplete += 1;
+            districtGeotaggingCounts[district].incomplete += 1;
           }
-        } );
+        });
 
-        const processedData = Object.keys( districtVillageCounts ).map( ( district ) => {
-          const division = Object.keys( divisionData ).find( ( div ) =>
-            divisionData[ div ].districts.includes( district )
+        const processedData = Object.keys(districtVillageCounts).map((district) => {
+          const division = Object.keys(divisionData).find((div) =>
+            divisionData[div].districts.includes(district)
           ) || "Unknown Division";
-          const totalVillages = districtVillageCounts[ district ] || 0;
-          const completedWaterBudget = districtWaterBudgetCounts[ district ] || 0;
+          const totalVillages = districtVillageCounts[district] || 0;
+          const completedWaterBudget = districtWaterBudgetCounts[district] || 0;
           const incompleteWaterBudget = totalVillages - completedWaterBudget;
-          const villagePlanCount = districtVillagePlanCounts[ district ] || 0;
-          const totalWorks = districtWorkCounts[ district ]?.completed + districtWorkCounts[ district ]?.incomplete || 0;
-          const completedWork = districtWorkCounts[ district ]?.completed || 0;
-          const incompleteWork = districtWorkCounts[ district ]?.incomplete || 0;
-          const geotaggingComplete = districtGeotaggingCounts[ district ]?.completed || 0;
-          const geotaggingIncomplete = districtGeotaggingCounts[ district ]?.incomplete || 0;
+          const villagePlanCount = districtVillagePlanCounts[district] || 0;
+          const totalWorks = districtWorkCounts[district]?.completed + districtWorkCounts[district]?.incomplete || 0;
+          const completedWork = districtWorkCounts[district]?.completed || 0;
+          const incompleteWork = districtWorkCounts[district]?.incomplete || 0;
+          const geotaggingComplete = districtGeotaggingCounts[district]?.completed || 0;
+          const geotaggingIncomplete = districtGeotaggingCounts[district]?.incomplete || 0;
 
           return {
+            key: `${division}-${district}`,
             division,
             district,
             villageCount: totalVillages,
@@ -178,66 +178,153 @@ const Summary = ( { resetTrigger } ) => {
             workIncomplete: incompleteWork,
             geotaggingCompleted: geotaggingComplete,
             geotaggingIncomplete: geotaggingIncomplete,
+            isGroupRow: false
           };
-        } );
+        });
 
-        setGeoData( processedData );
-      } catch ( error ) {
-        console.error( "Error fetching or processing data:", error );
+        setGeoData(processedData);
+      } catch (error) {
+        console.error("Error fetching or processing data:", error);
       } finally {
-        setLoading( false );
+        setLoading(false);
       }
     };
 
     fetchData();
-  }, [] );
+  }, []);
 
-  useEffect( () => {
-    if ( resetTrigger ) {
-      setSelectedDivision( null );
-      setSelectedDistrict( null );
+  useEffect(() => {
+    if (resetTrigger) {
+      setSelectedDivision(null);
+      setSelectedDistrict(null);
     }
-  }, [ resetTrigger ] );
+  }, [resetTrigger]);
 
-  const handleDivisionClick = ( division ) => {
-    setSelectedDivision( division === selectedDivision ? null : division );
-    setSelectedDistrict( null );
-    setCurrentPage( 1 );
+  const handleDivisionClick = (division) => {
+    setSelectedDivision(division === selectedDivision ? null : division);
+    setSelectedDistrict(null);
+    setCurrentPage(1);
   };
 
-  const handleDistrictClick = ( district ) => {
-    setSelectedDistrict( district === selectedDistrict ? null : district );
-    setCurrentPage( 1 );
+  const handleDistrictClick = (district) => {
+    setSelectedDistrict(district === selectedDistrict ? null : district);
+    setCurrentPage(1);
   };
 
-  const filteredData = geoData.filter( ( feature ) => {
-    const isInDivision = !selectedDivision || feature.division === selectedDivision;
-    const isInDistrict = !selectedDistrict || feature.district === selectedDistrict;
+  // Add a helper to prepare grouped data
+  const prepareData = (data) => {
+    let lastDivision = null;
+    return data.map((row) => {
+      const isNewDivision = row.division !== lastDivision;
+      lastDivision = row.division;
+      return {
+        ...row,
+        isNewDivision,
+      };
+    });
+  };
 
-    // Check if the search term matches any column values
-    const matchesSearch =
-      feature.district.toLowerCase().includes( searchTerm.toLowerCase() ) ||
-      feature.division.toLowerCase().includes( searchTerm.toLowerCase() ) ||
-      ( feature.villageCount?.toString().includes( searchTerm ) || "" );
+  const addDivisionTotals = (data) => {
+    const groupedByDivision = data.reduce((result, record) => {
+      if (!result[record.division]) {
+        result[record.division] = [];
+      }
+      result[record.division].push(record);
+      return result;
+    }, {});
 
-    return isInDivision && isInDistrict && matchesSearch;
-  } );
+    const dataWithTotals = [];
 
-  const handleSearchChange = ( e ) => {
-    setSearchTerm( e.target.value ); // Update the search term state
+    Object.entries(groupedByDivision).forEach(([division, records]) => {
+      // Add all records for the division
+      dataWithTotals.push(...records);
+
+      // Calculate totals for this division
+      const divisionTotals = {
+        key: `${division}-totals`, // Unique key for React
+        division: `${division} Totals`,
+        district: "", // Label for the totals row
+        villageCount: records.reduce((sum, item) => sum + (item.villageCount || 0), 0),
+        waterBudgetCompleted: records.reduce((sum, item) => sum + (item.waterBudgetCompleted || 0), 0),
+        waterBudgetIncomplete: records.reduce((sum, item) => sum + (item.waterBudgetIncomplete || 0), 0),
+        villagePlanCount: records.reduce((sum, item) => sum + (item.villagePlanCount || 0), 0),
+        totalWorks: records.reduce((sum, item) => sum + (item.totalWorks || 0), 0),
+        workCompleted: records.reduce((sum, item) => sum + (item.workCompleted || 0), 0),
+        workIncomplete: records.reduce((sum, item) => sum + (item.workIncomplete || 0), 0),
+        geotaggingCompleted: records.reduce((sum, item) => sum + (item.geotaggingCompleted || 0), 0),
+        geotaggingIncomplete: records.reduce((sum, item) => sum + (item.geotaggingIncomplete || 0), 0),
+        isTotalsRow: true, // Flag to style totals rows differently
+      };
+
+      // Add the totals row
+      dataWithTotals.push(divisionTotals);
+    });
+
+    return dataWithTotals;
+  };
+
+  const calculateOverallTotals = (data) => {
+    const filteredData = data.filter(item => !item.isTotalsRow); // Ignore division totals rows
+    return {
+      division: "Overall Totals",
+      district: "",
+      villageCount: filteredData.reduce((sum, item) => sum + (item.villageCount || 0), 0),
+      waterBudgetCompleted: filteredData.reduce((sum, item) => sum + (item.waterBudgetCompleted || 0), 0),
+      waterBudgetIncomplete: filteredData.reduce((sum, item) => sum + (item.waterBudgetIncomplete || 0), 0),
+      villagePlanCount: filteredData.reduce((sum, item) => sum + (item.villagePlanCount || 0), 0),
+      totalWorks: filteredData.reduce((sum, item) => sum + (item.totalWorks || 0), 0),
+      workCompleted: filteredData.reduce((sum, item) => sum + (item.workCompleted || 0), 0),
+      workIncomplete: filteredData.reduce((sum, item) => sum + (item.workIncomplete || 0), 0),
+      geotaggingCompleted: filteredData.reduce((sum, item) => sum + (item.geotaggingCompleted || 0), 0),
+      geotaggingIncomplete: filteredData.reduce((sum, item) => sum + (item.geotaggingIncomplete || 0), 0),
+      isTotalsRow: true,
+    };
+  };
+
+  const getFilteredData = () => {
+    let filtered = geoData;
+
+    if (selectedDivision) {
+      filtered = filtered.filter((item) => item.division === selectedDivision);
+    }
+
+    if (selectedDistrict) {
+      filtered = filtered.filter((item) => item.district === selectedDistrict);
+    }
+
+    if (searchTerm) {
+      filtered = filtered.filter((item) =>
+        item.district.toLowerCase().includes(searchTerm.toLowerCase())
+      );
+    }
+
+    const preparedData = prepareData(addDivisionTotals(filtered));
+    return preparedData;
+  };
+
+  const filteredData = getFilteredData(); // Process the data to include totals
+
+  const handleSearchChange = (e) => {
+    setSearchTerm(e.target.value); // Update the search term state
   };
 
   const handleExport = async () => {
-    if ( filteredData.length === 0 ) {
-      alert( "No data available to export." );
+    if (filteredData.length === 0) {
+      alert("No data available to export.");
       return;
     }
 
-    // Sort the filteredData array
-    const sortedData = filteredData.sort( ( a, b ) => a.district.localeCompare( b.district ) );
+    // Sort the filteredData array by division and district
+    const sortedData = filteredData.sort((a, b) => {
+      if (a.division === b.division) {
+        return a.district.localeCompare(b.district);
+      }
+      return a.division.localeCompare(b.division);
+    });
 
     // Prepare the data rows
-    const dataToExport = sortedData.map( ( item ) => [
+    const dataToExport = sortedData.map((item) => [
+      item.division,
       item.district,
       item.villageCount,
       item.waterBudgetCompleted,
@@ -248,39 +335,40 @@ const Summary = ( { resetTrigger } ) => {
       item.workIncomplete,
       item.geotaggingCompleted,
       item.geotaggingIncomplete,
-    ] );
+    ]);
 
-    // Add totals row
-    const totals = calculateTotals( sortedData );
-    dataToExport.push( [
-      "Total",
-      totals.villageCount,
-      totals.waterBudgetCompleted,
-      totals.waterBudgetIncomplete,
-      totals.villagePlanCount,
-      totals.totalWorks,
-      totals.workCompleted,
-      totals.workIncomplete,
-      totals.geotaggingCompleted,
-      totals.geotaggingIncomplete,
-    ] );
+    // Add the Overall Totals row
+    const overallTotals = calculateOverallTotals(filteredData.filter(item => !item.isTotalsRow));
+    dataToExport.push([
+      overallTotals.division,
+      overallTotals.district,
+      overallTotals.villageCount,
+      overallTotals.waterBudgetCompleted,
+      overallTotals.waterBudgetIncomplete,
+      overallTotals.villagePlanCount,
+      overallTotals.totalWorks,
+      overallTotals.workCompleted,
+      overallTotals.workIncomplete,
+      overallTotals.geotaggingCompleted,
+      overallTotals.geotaggingIncomplete,
+    ]);
 
     // Create a new workbook and worksheet
     const workbook = new ExcelJS.Workbook();
-    const worksheet = workbook.addWorksheet( "Summary Data" );
+    const worksheet = workbook.addWorksheet("Summary Data");
 
     // Define header rows
     const headerRow1 = [
-      "District", "Total Villages", "Water Budget", "Water Budget", "Village Plan",
+      "Division", "District", "Total Villages", "Water Budget", "Water Budget", "Village Plan",
       "Works", "Works", "Works", "Geotagging", "Geotagging",
     ];
     const headerRow2 = [
-      "", "", "Completed", "Incompleted", "", "Total", "Completed", "Incompleted", "Completed", "Incompleted",
+      "", "", "", "Completed", "Incomplete", "", "Total", "Completed", "Incomplete", "Completed", "Incomplete",
     ];
 
     // Add header rows to the worksheet
-    worksheet.addRow( headerRow1 );
-    worksheet.addRow( headerRow2 );
+    worksheet.addRow(headerRow1);
+    worksheet.addRow(headerRow2);
 
     // Apply style to header rows (custom color background and borders)
     const headerStyle = {
@@ -295,69 +383,102 @@ const Summary = ( { resetTrigger } ) => {
       },
     };
 
-    worksheet.getRow( 1 ).eachCell( ( cell ) => {
+    worksheet.getRow(1).eachCell((cell) => {
       cell.style = headerStyle;
-    } );
+    });
 
-    worksheet.getRow( 2 ).eachCell( ( cell ) => {
+    worksheet.getRow(2).eachCell((cell) => {
       cell.style = headerStyle;
-    } );
+    });
 
     // Add data rows with borders
-    dataToExport.forEach( ( row, rowIndex ) => {
-      const excelRow = worksheet.addRow( row );
+    dataToExport.forEach((row, rowIndex) => {
+      const excelRow = worksheet.addRow(row);
 
-      excelRow.eachCell( ( cell ) => {
+      excelRow.eachCell((cell) => {
         cell.border = {
           top: { style: "thin" },
           left: { style: "thin" },
           bottom: { style: "thin" },
           right: { style: "thin" },
         };
-      } );
+      });
 
       // Optional: Apply a different background color for the totals row
-      if ( rowIndex === dataToExport.length - 1 ) {
-        excelRow.eachCell( ( cell ) => {
+      if (rowIndex === dataToExport.length - 1) {
+        excelRow.eachCell((cell) => {
           cell.fill = {
             type: "pattern",
             pattern: "solid",
             fgColor: { argb: "FFFF99" }, // Light yellow for totals
           };
-        } );
+        });
       }
-    } );
+    });
 
     // Merge cells for headers
-    worksheet.mergeCells( "C1:D1" ); // Merge Water Budget header
-    worksheet.mergeCells( "F1:H1" ); // Merge Works header
-    worksheet.mergeCells( "I1:J1" ); // Merge Geotagging header
+    worksheet.mergeCells("D1:E1"); // Merge Water Budget header
+    worksheet.mergeCells("G1:I1"); // Merge Works header
+    worksheet.mergeCells("J1:K1"); // Merge Geotagging header
+
+    // Merge cells for division column
+    let startRow = 3; // Data starts from the third row
+    let currentDivision = dataToExport[0][0];
+    for (let i = 1; i < dataToExport.length; i++) {
+      if (dataToExport[i][0] !== currentDivision) {
+        if (i > startRow) {
+          worksheet.mergeCells(`A${startRow}:A${i + 2}`);
+        }
+        startRow = i + 3; // Adjust for 0-based index and header rows
+        currentDivision = dataToExport[i][0];
+      }
+    }
+    // Merge the last group
+    if (startRow < dataToExport.length + 2) {
+      worksheet.mergeCells(`A${startRow}:A${dataToExport.length + 2}`);
+    }
 
     // Generate the file name
     let fileName = "All Divisions";
-    if ( selectedDivision ) {
+    if (selectedDivision) {
       fileName = selectedDivision;
     }
 
-    if ( selectedDistrict ) {
+    if (selectedDistrict) {
       fileName = selectedDistrict;
     }
 
     // Write the Excel file and trigger download
-    workbook.xlsx.writeBuffer().then( ( buffer ) => {
-      const blob = new Blob( [ buffer ], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" } );
-      const link = document.createElement( "a" );
-      link.href = URL.createObjectURL( blob );
-      link.download = `${ fileName }_${ new Date().toISOString().slice( 0, 10 ) }.xlsx`;
+    workbook.xlsx.writeBuffer().then((buffer) => {
+      const blob = new Blob([buffer], { type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" });
+      const link = document.createElement("a");
+      link.href = URL.createObjectURL(blob);
+      link.download = `${fileName}_${new Date().toISOString().slice(0, 10)}.xlsx`;
       link.click();
-    } );
+    });
   };
 
   const columns = [
     {
-      title: "District", dataIndex: "district", key: "district", align: "center", className: "center", sorter: ( a, b ) => a.division.localeCompare( b.division ), defaultSortOrder: "ascend",
+      title: "Division",
+      dataIndex: "division",
+      key: "division",
+      align: "center",
+      className: "center division-column",
+      sorter: (a, b) => a.division.localeCompare(b.division),
+      defaultSortOrder: "ascend",
+      render: (text, record) => (record.isNewDivision ? text : null),
     },
-    { title: "Village Count", dataIndex: "villageCount", key: "villageCount", align: "center", className: "center", sorter: ( a, b ) => a.villageCount - b.villageCount },
+    {
+      title: "District",
+      dataIndex: "district",
+      key: "district",
+      align: "center",
+      className: "center",
+      sorter: (a, b) => a.district.localeCompare(b.district),
+      defaultSortOrder: "ascend",
+    },
+    { title: "Village Count", dataIndex: "villageCount", key: "villageCount", align: "center", className: "center", sorter: (a, b) => a.villageCount - b.villageCount },
     {
       title: "Water Budget",
       children: [
@@ -367,7 +488,7 @@ const Summary = ( { resetTrigger } ) => {
           key: "waterBudgetCompleted",
           align: "center",
           className: "center",
-          sorter: ( a, b ) => a.waterBudgetCompleted - b.waterBudgetCompleted,
+          sorter: (a, b) => a.waterBudgetCompleted - b.waterBudgetCompleted,
           defaultSortOrder: "ascend",
         },
         {
@@ -376,7 +497,7 @@ const Summary = ( { resetTrigger } ) => {
           key: "waterBudgetIncomplete",
           align: "center",
           className: "center",
-          sorter: ( a, b ) => a.waterBudgetIncomplete - b.waterBudgetIncomplete,
+          sorter: (a, b) => a.waterBudgetIncomplete - b.waterBudgetIncomplete,
           defaultSortOrder: "ascend",
         },
       ],
@@ -387,7 +508,7 @@ const Summary = ( { resetTrigger } ) => {
       key: "villagePlanCount",
       align: "center",
       className: "center",
-      sorter: ( a, b ) => a.villagePlanCount - b.villagePlanCount,
+      sorter: (a, b) => a.villagePlanCount - b.villagePlanCount,
       defaultSortOrder: "ascend",
     },
     {
@@ -399,7 +520,7 @@ const Summary = ( { resetTrigger } ) => {
           key: "totalWorks",
           align: "center",
           className: "center",
-          sorter: ( a, b ) => a.totalWorks - b.totalWorks,
+          sorter: (a, b) => a.totalWorks - b.totalWorks,
           defaultSortOrder: "ascend",
         },
         {
@@ -408,7 +529,7 @@ const Summary = ( { resetTrigger } ) => {
           key: "workCompleted",
           align: "center",
           className: "center",
-          sorter: ( a, b ) => a.workCompleted - b.workCompleted,
+          sorter: (a, b) => a.workCompleted - b.workCompleted,
           defaultSortOrder: "ascend",
         },
         {
@@ -417,7 +538,7 @@ const Summary = ( { resetTrigger } ) => {
           key: "workIncomplete",
           align: "center",
           className: "center",
-          sorter: ( a, b ) => a.workIncomplete - b.workIncomplete,
+          sorter: (a, b) => a.workIncomplete - b.workIncomplete,
           defaultSortOrder: "ascend",
         },
       ],
@@ -431,7 +552,7 @@ const Summary = ( { resetTrigger } ) => {
           key: "geotaggingCompleted",
           align: "center",
           className: "center",
-          sorter: ( a, b ) => a.geotaggingCompleted - b.geotaggingCompleted,
+          sorter: (a, b) => a.geotaggingCompleted - b.geotaggingCompleted,
           defaultSortOrder: "ascend",
         },
         {
@@ -440,76 +561,28 @@ const Summary = ( { resetTrigger } ) => {
           key: "geotaggingIncomplete",
           align: "center",
           className: "center",
-          sorter: ( a, b ) => a.geotaggingIncomplete - b.geotaggingIncomplete,
+          sorter: (a, b) => a.geotaggingIncomplete - b.geotaggingIncomplete,
           defaultSortOrder: "ascend",
         },
       ],
     },
   ];
 
-  const calculateTotals = ( data ) => {
-    return {
-      district: "Total",
-      villageCount: data.reduce( ( sum, item ) => sum + ( item.villageCount || 0 ), 0 ),
-      waterBudgetCompleted: data.reduce( ( sum, item ) => sum + ( item.waterBudgetCompleted || 0 ), 0 ),
-      waterBudgetIncomplete: data.reduce( ( sum, item ) => sum + ( item.waterBudgetIncomplete || 0 ), 0 ),
-      villagePlanCount: data.reduce( ( sum, item ) => sum + ( item.villagePlanCount || 0 ), 0 ),
-      totalWorks: data.reduce( ( sum, item ) => sum + ( item.totalWorks || 0 ), 0 ),
-      workCompleted: data.reduce( ( sum, item ) => sum + ( item.workCompleted || 0 ), 0 ),
-      workIncomplete: data.reduce( ( sum, item ) => sum + ( item.workIncomplete || 0 ), 0 ),
-      geotaggingCompleted: data.reduce( ( sum, item ) => sum + ( item.geotaggingCompleted || 0 ), 0 ),
-      geotaggingIncomplete: data.reduce( ( sum, item ) => sum + ( item.geotaggingIncomplete || 0 ), 0 ),
-    };
-  };
+  // Ensure the table is sorted by division by default
+  const sortedData = filteredData.sort((a, b) => a.division.localeCompare(b.division));
 
-  // Process `geoData` for the bar chart
-  const sortedGeoData = geoData.sort( ( a, b ) => a.district.localeCompare( b.district ) );
-  const xAxisData = sortedGeoData.map( ( item ) => item.district ); // District names for x-axis
-  const rawData = [
-    geoData.map( ( item ) => item.villageCount ),
-    geoData.map( ( item ) => item.waterBudgetCompleted ),
-    geoData.map( ( item ) => item.waterBudgetIncomplete ),
-    geoData.map( ( item ) => item.villagePlanCount ),
-    geoData.map( ( item ) => item.totalWorks ),
-    geoData.map( ( item ) => item.workCompleted ),
-    geoData.map( ( item ) => item.workIncomplete ),
-    geoData.map( ( item ) => item.geotaggingCompleted ),
-    geoData.map( ( item ) => item.geotaggingIncomplete ),
-  ];
-
-  const series = [
-    "Village Count",
-    "Water Budget Completed",
-    "Water Budget Incompleted",
-    "Village Plan",
-    "Total Works",
-    "Work Completed",
-    "Work Incompleted",
-    "Geotagging Completed",
-    "Geotagging Incompleted",
-  ].map( ( name, sid ) => ( {
-    name,
-    type: "bar",
-    stack: "total",
-    barWidth: "80%",
-    label: {
-      show: true,
-      formatter: ( params ) => `${ params.value }`, // Display direct counts
-    },
-    data: rawData[ sid ], // Use direct counts
-  } ) );
-
+  // Define the option variable for ReactECharts
   const option = {
     tooltip: {
       trigger: 'axis', // Trigger tooltip on axis (hover over any point on the line)
       axisPointer: {
         type: 'shadow' // You can change this to 'line' or 'cross' if you prefer a different pointer type
       },
-      formatter: function ( params ) {
-        let tooltipContent = `<strong>${ params[ 0 ].name }</strong><br/>`; // Display the x-axis value (district name)
-        params.forEach( param => {
-          tooltipContent += `${ param.marker } <strong>${ param.seriesName }:</strong> ${ param.value }<br/>`; // Show series name and value
-        } );
+      formatter: function (params) {
+        let tooltipContent = `<strong>${params[0].name}</strong><br/>`; // Display the x-axis value (district name)
+        params.forEach(param => {
+          tooltipContent += `${param.marker} <strong>${param.seriesName}:</strong> ${param.value}<br/>`; // Show series name and value
+        });
         return tooltipContent;
       }
     },
@@ -524,7 +597,7 @@ const Summary = ( { resetTrigger } ) => {
     },
     xAxis: {
       type: "category",
-      data: xAxisData, // District names for x-axis
+      data: geoData.map((item) => item.district), // District names for x-axis
       axisLabel: {
         interval: 0, // Show all labels
         rotate: 45, // Rotate labels 45 degrees for better readability
@@ -533,26 +606,129 @@ const Summary = ( { resetTrigger } ) => {
     },
     yAxis: {
       type: "value",
+      min: 0, // Ensure y-axis starts from 0
       axisLabel: {
-        formatter: ( value ) => value, // Show all tick labels as-is
+        formatter: (value) => value, // Show all tick labels as-is
       },
     },
-    series,
+    series: [
+      {
+        name: "Village Count",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.villageCount), // Use direct counts
+      },
+      {
+        name: "Water Budget Completed",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.waterBudgetCompleted), // Use direct counts
+      },
+      {
+        name: "Water Budget Incompleted",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.waterBudgetIncomplete), // Use direct counts
+      },
+      {
+        name: "Village Plan",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.villagePlanCount), // Use direct counts
+      },
+      {
+        name: "Total Works",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.totalWorks), // Use direct counts
+      },
+      {
+        name: "Work Completed",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.workCompleted), // Use direct counts
+      },
+      {
+        name: "Work Incompleted",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.workIncomplete), // Use direct counts
+      },
+      {
+        name: "Geotagging Completed",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.geotaggingCompleted), // Use direct counts
+      },
+      {
+        name: "Geotagging Incompleted",
+        type: "bar",
+        stack: "total",
+        barWidth: "80%",
+        label: {
+          show: true,
+          formatter: (params) => `${params.value}`, // Display direct counts
+        },
+        data: geoData.map((item) => item.geotaggingIncomplete), // Use direct counts
+      },
+    ],
   };
 
   return (
     <>
       <Flex gap={50} wrap="nowrap">
-        <Row gutter={[ 17, 17 ]} style={{ flexWrap: "nowrap" }}>
+        <Row gutter={[17, 17]} style={{ flexWrap: "nowrap" }}>
           <Col span={8.1}>
-            <Typography.Text style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}>
+            <Typography.Text
+              style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}
+            >
               Jurisdictions
             </Typography.Text>
-            <Row gutter={[ 10, 10 ]} style={{ flexWrap: "nowrap" }}>
+            <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
               <Col span={12}>
                 <Jurisdictions
                   title="Divisions"
-                  data={Object.keys( divisionData )}
+                  data={Object.keys(divisionData)}
                   selectedItem={selectedDivision}
                   onItemClick={handleDivisionClick}
                 />
@@ -560,7 +736,7 @@ const Summary = ( { resetTrigger } ) => {
               <Col span={12}>
                 <Jurisdictions
                   title="Districts"
-                  data={selectedDivision ? divisionData[ selectedDivision ]?.districts || [] : []}
+                  data={selectedDivision ? divisionData[selectedDivision]?.districts || [] : []}
                   selectedItem={selectedDistrict}
                   onItemClick={handleDistrictClick}
                 />
@@ -568,7 +744,7 @@ const Summary = ( { resetTrigger } ) => {
             </Row>
           </Col>
           <Divider type="vertical" style={{ height: "45vh", borderColor: "" }} />
-          <Col span={18} >
+          <Col span={18}>
             {loading ? (
               <Spin size="large" />
             ) : geoData.length === 0 ? (
@@ -577,16 +753,10 @@ const Summary = ( { resetTrigger } ) => {
               <div>
                 <Flex gap="large" justify="space-between" align="center">
                   <Typography.Text
-                    style={{
-                      fontSize: "20px",
-                      fontWeight: "700",
-                      paddingBottom: "10px",
-                      display: "block",
-                    }}
+                    style={{ fontSize: "20px", fontWeight: "700", paddingBottom: "10px", display: "block" }}
                   >
-                    Total Records {`${ Math.min( currentPage * pageSize, filteredData.length ) } / ${ filteredData.length }`}
+                    Total Records {`${filteredData.length} / ${filteredData.length}`}
                   </Typography.Text>
-                  {/* Add a search input */}
                   <Input
                     placeholder="Enter District Name"
                     value={searchTerm}
@@ -595,11 +765,7 @@ const Summary = ( { resetTrigger } ) => {
                   />
                   <Button
                     onClick={handleExport}
-                    style={{
-                      backgroundColor: "#008CBA",
-                      color: "white",
-                      marginBottom: "10px",
-                    }}
+                    style={{ backgroundColor: "#008CBA", color: "white", marginBottom: "10px" }}
                   >
                     Export As Excel
                   </Button>
@@ -610,43 +776,48 @@ const Summary = ( { resetTrigger } ) => {
                   style={{ alignItems: "top", borderColor: "#ff5722" }}
                   size="small"
                   tableLayout="fixed"
-                  dataSource={filteredData}
+                  dataSource={sortedData} // Use sortedData instead of filteredData
+                  rowClassName={(record) =>
+                    record.isTotalsRow ? "totals-row" : record.isNewDivision ? "no-border-row" : ""
+                  }
                   pagination={false}
                   scroll={{ x: "100%" }}
                   bordered
-                  summary={( pageData ) => {
-                    const totals = calculateTotals( pageData );
-
+                  summary={() => {
+                    const totals = calculateOverallTotals(filteredData.filter(item => !item.isTotalsRow));
                     return (
                       <Table.Summary.Row>
                         <Table.Summary.Cell index={0} className="center">
-                          <strong>{totals.district}</strong>
+                          <strong>{totals.division}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={1} className="center">
-                          <strong>{totals.villageCount}</strong>
+                          <strong>{totals.district}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={2} className="center">
-                          <strong>{totals.waterBudgetCompleted}</strong>
+                          <strong>{totals.villageCount}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={3} className="center">
-                          <strong>{totals.waterBudgetIncomplete}</strong>
+                          <strong>{totals.waterBudgetCompleted}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={4} className="center">
-                          <strong>{totals.villagePlanCount}</strong>
+                          <strong>{totals.waterBudgetIncomplete}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={5} className="center">
-                          <strong>{totals.totalWorks}</strong>
+                          <strong>{totals.villagePlanCount}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={6} className="center">
-                          <strong>{totals.workCompleted}</strong>
+                          <strong>{totals.totalWorks}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={7} className="center">
-                          <strong>{totals.workIncomplete}</strong>
+                          <strong>{totals.workCompleted}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={8} className="center">
-                          <strong>{totals.geotaggingCompleted}</strong>
+                          <strong>{totals.workIncomplete}</strong>
                         </Table.Summary.Cell>
                         <Table.Summary.Cell index={9} className="center">
+                          <strong>{totals.geotaggingCompleted}</strong>
+                        </Table.Summary.Cell>
+                        <Table.Summary.Cell index={10} className="center">
                           <strong>{totals.geotaggingIncomplete}</strong>
                         </Table.Summary.Cell>
                       </Table.Summary.Row>
@@ -661,10 +832,10 @@ const Summary = ( { resetTrigger } ) => {
       <Flex gap={20} wrap="nowrap" style={{ height: "600px", marginTop: "100px" }}>
         <ReactECharts option={option} style={{ width: "85vw", height: "100%" }} />
       </Flex>
-
     </>
   );
 };
+
 Summary.propTypes = {
   resetTrigger: PropTypes.bool.isRequired,
   isMapVisible: PropTypes.bool,

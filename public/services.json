@@ -1,5 +1,5 @@
 {
-    "serverUrl": "/reveloadmin35/revelo",
+    "serverUrl": "http://180.149.240.169:8080/reveloadmin35/revelo",
     "securityUrl": "http://180.149.240.169:8081/auth",
     "logoutUrl": "/reveloadmin35/revelo/users/jsstateuser/logout",
     "baseUrl": "/analytics",

@@ -65,3 +65,13 @@
 .custom-table .ant-table-body td {
   border-color: #ff5722;
 }
+
+.custom-table .ant-table-tbody > tr.ant-table-row:hover {
+  background-color: #e0f7fa !important; /* Light cyan background color on hover */
+  cursor: pointer; /* Optional: Change cursor to pointer on hover */
+}
+
+.totals-row {
+  font-weight: bold;
+  background-color: #f7f7f7; /* Light gray background for distinction */
+}

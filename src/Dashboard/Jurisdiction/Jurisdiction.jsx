@@ -3,10 +3,10 @@ import { List, Typography, Space } from "antd";
 
 const Jurisdiction = ({
   title,
-  data,
-  selectedItem,
+  data = [],
+  selectedItem = null,
   onItemClick,
-  placeholder,
+  placeholder = "No data available",
 }) => {
   const sortedData = data
     .slice()
@@ -20,7 +20,6 @@ const Jurisdiction = ({
         </Typography.Text>
         {sortedData && sortedData.length > 0 ? (
           <List
-            // bordered
             dataSource={sortedData}
             style={{ border: "1px solid #dfe6e9", borderRadius: "0px" }}
             renderItem={(item) => (
@@ -51,12 +50,6 @@ Jurisdiction.propTypes = {
   selectedItem: PropTypes.string,
   onItemClick: PropTypes.func.isRequired,
   placeholder: PropTypes.string,
-};
-
-Jurisdiction.defaultProps = {
-  data: [],
-  selectedItem: null,
-  placeholder: "No data available",
 };
 
 export default Jurisdiction;

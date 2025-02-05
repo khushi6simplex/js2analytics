@@ -90,6 +90,11 @@ const Dashboard = () => {
       label: "Geotagging",
       children: <Geotagging />,
     },
+    {
+      key: "11",
+      label: "Statement A",
+      children: "Coming Soon ...",
+    }
   ];
 
   return (
