@@ -49,15 +49,19 @@ const WorkTable: React.FC = () => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
     setSelectedTaluka(null);
+    setSelectedDepartment(null);
     setCurrentPage(1);
   };
   const handleDistrictClick = (district: string) => {
     setSelectedDistrict(selectedDistrict === district ? null : district);
     setSelectedTaluka(null);
+    setSelectedDepartment(null);
     setCurrentPage(1);
   };
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
+    setSelectedDepartment(null);
+    aa;
     setCurrentPage(1);
   };
 
@@ -219,6 +223,8 @@ const WorkTable: React.FC = () => {
   tableData.forEach((item) => {
     tableMap.set(item.deptName, item);
   });
+
+  console.log(tableData, "tableData");
 
   const handleExport = () => {
     exportToExcel({
