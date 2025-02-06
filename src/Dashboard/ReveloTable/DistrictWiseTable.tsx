@@ -1,11 +1,10 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Table, Row, Col, Spin, Empty, Flex, Button, Typography, Divider, Input } from "antd";
 import { fetchGeoData } from "../Data/useGeoData";
-import Jurisdictions from "../Jurisdiction/Jurisdiction"; // Importing Jurisdictions
+import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import { exportToExcel } from "../Excel/Excel";
 import '../Dashboard.css';
-import FloatingMap from "../Map/Map";
 import { panToLocation } from '../utils/mapUtils';
 import axios from "axios";
 import PropTypes from "prop-types";
@@ -13,56 +12,90 @@ import PropTypes from "prop-types";
 interface DistrictWiseTableProps {
   isMapVisible: boolean;
   resetTrigger: boolean;
+  userRole: string;
+  jurisdictionFilters: any;
 }
 
-const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isMapVisible }) => {
-  const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
+const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isMapVisible, userRole, jurisdictionFilters }) => {
+  const [geoData, setGeoData] = useState<any[]>([]);
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
   const [selectedTaluka, setSelectedTaluka] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(true); // Loading state
+  const [loading, setLoading] = useState<boolean>(true);
   const [currentPage, setCurrentPage] = useState<number>(1);
   const [pageSize, setPageSize] = useState<number>(7);
-  const [searchTerm, setSearchTerm] = useState<string>(""); // New state for search
+  const [searchTerm, setSearchTerm] = useState<string>("");
   const mapRef = useRef(null);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        setLoading(true); // Set loading to true while fetching
+        setLoading(true);
         const data = await fetchGeoData();
-        setGeoData(data.features || []); // Ensure it's always an array
+        setGeoData(data.features || []);
       } catch (error) {
         console.error("Error fetching Geoserver data", error);
       } finally {
-        setLoading(false); // Set loading to false after fetching
+        setLoading(false);
       }
     };
     fetchData();
   }, []);
 
-  useEffect( () => {
-    if ( resetTrigger ) {
-      setSelectedDivision( null );
-      setSelectedDistrict( null );
+  useEffect(() => {
+    if (resetTrigger && userRole === "jsstate") {
+      setSelectedDivision(null);
+      setSelectedDistrict(null);
+      setSelectedTaluka(null);
+    } else if (resetTrigger && userRole === "jsdistrict") {
+      setSelectedTaluka(null);
     }
-  }, [ resetTrigger ] );
+  }, [resetTrigger, userRole]);
+
+  const parseDistrictFromFilters = (filterInput: any): string | null => {
+    const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+    const match = filterString.match(/district='([^']+)'/);
+    return match ? match[1] : null;
+  };
+
+  const parseTalukaFromFilters = (filterInput: any): string | null => {
+    const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+    const match = filterString.match(/taluka='([^']+)'/);
+    return match ? match[1] : null;
+  };
+
+  useEffect(() => {
+    if (userRole === 'jsdistrict' || userRole === 'jstaluka') {
+      const districtFilter = jurisdictionFilters || {};
+      const district = parseDistrictFromFilters(districtFilter);
+      if (district) {
+        setSelectedDistrict(district);
+        const division = Object.keys(divisionData).find((div) =>
+          divisionData[div].districts.includes(district)
+        );
+        setSelectedDivision(division || null);
+      }
+    }
+
+    if (userRole === 'jstaluka') {
+      const talukaFilter = jurisdictionFilters || {};
+      const taluka = parseTalukaFromFilters(talukaFilter);
+      if (taluka) {
+        setSelectedTaluka(taluka);
+      }
+    }
+  }, [userRole, jurisdictionFilters]);
 
   const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setSearchTerm(e.target.value); // Update search term
-    setCurrentPage(1); // Reset to first page on search
+    setSearchTerm(e.target.value);
+    setCurrentPage(1);
   };
 
   const getFilteredData = () => {
     const summarizedData = getSummarizedData();
-
     if (!searchTerm.trim()) return summarizedData;
-
     return summarizedData.filter((item) =>
-      Object.values(item)
-        .join(" ")
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+      Object.values(item).join(" ").toLowerCase().includes(searchTerm.toLowerCase())
     );
   };
 
@@ -82,31 +115,10 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(taluka === selectedTaluka ? null : taluka);
     setCurrentPage(1);
-    // const talukaMap = (window as any).__analytics__.talukasMap;
-    // axios.get(talukaMap, {
-    //   params: {
-    //     service: 'WFS',
-    //     version: '1.0.0',
-    //     request: 'GetFeature', 
-    //     typeName: 'obdsws:talukadataset',
-    //     outputFormat: 'application/json',
-    //     cql_filter: `taluka='${taluka}'`
-    //   },
-    // })
-    // .then(response => {
-    //   const feature = response.data.features[0];
-    //   if(feature) {
-    //     const coordinates = feature.geometry.coordinates;
-    //     panToLocation(mapRef.current, coordinates);
-    //   }
-    // })
-    // .catch(error => {
-    //   console.error('Error fetching taluka data: ', error)
-    // })
   };
 
   const calculateTotals = (data) => {
-    const totals = {
+    return {
       key: "totals",
       division: "Total",
       district: "",
@@ -118,100 +130,109 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
       totalWoAmount: data.reduce((sum, item) => sum + (item.totalWoAmount || 0), 0).toFixed(2),
       physicalTargetArea: data.reduce((sum, item) => sum + (item.physicalTargetArea || 0), 0).toFixed(1),
     };
-    return totals;
   };
 
   const getSummarizedData = () => {
-    if (loading) return []; // Return empty array if still loading
-
+    if (loading) return [];
     const dataToUse = geoData || [];
 
     if (selectedTaluka) {
-      const talukaFeatures = dataToUse.filter(
-        (feature) =>
-          feature.properties.taluka === selectedTaluka &&
-          feature.properties.district === selectedDistrict
-      );
-
-      // Summarize data for the selected taluka
-      return [
-        {
-          key: selectedTaluka,
-          taluka: selectedTaluka,
-          district: selectedDistrict,
-          division: selectedDivision,
-          worksCount: talukaFeatures.length,
-          worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
-          worksStarted: talukaFeatures.filter((feature) => feature.properties.startedlocation).length,
-          worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation).length,
-          totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
-          physicalTargetArea: talukaFeatures.reduce(
-            (sum, feature) => sum + (feature.properties.physicaltargetarea || 0), 0),
-        },
-      ];
+      return summarizeTalukaData(dataToUse);
     }
 
     if (selectedDistrict && !selectedTaluka) {
-      const talukas = Array.from(
-        new Set(
-          dataToUse
-            .filter((feature) => feature.properties.district === selectedDistrict)
-            .map((feature) => feature.properties.taluka)
-        )
-      );
-      return talukas.map((taluka) => {
-        const talukaFeatures = dataToUse.filter(
-          (feature) =>
-            feature.properties.taluka === taluka &&
-            feature.properties.district === selectedDistrict
-        );
-        return {
-          key: taluka,
-          taluka,
-          district: selectedDistrict,
-          division: selectedDivision,
-          worksCount: talukaFeatures.length,
-          worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
-          worksStarted: talukaFeatures.filter((feature) => feature.properties.startedlocation).length,
-          worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation).length,
-          totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
-          physicalTargetArea: talukaFeatures.reduce(
-            (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
-            0
-          ),
-        };
-      });
+      return summarizeDistrictData(dataToUse);
     }
 
     if (selectedDivision && !selectedDistrict && !selectedTaluka) {
-      const districts = divisionData[selectedDivision]?.districts || [];
-      return districts.map((district) => {
-        const districtFeatures = dataToUse.filter(
-          (feature) => feature.properties.district === district
-        );
-        const uniqueTalukas = Array.from(
-          new Set(districtFeatures.map((feature) => feature.properties.taluka))
-        );
-
-        return {
-          key: district,
-          taluka: uniqueTalukas.length,
-          division: selectedDivision,
-          district,
-          worksCount: districtFeatures.length,
-          worksGeotagged: districtFeatures.filter((feature) => feature.geometry).length,
-          worksStarted: districtFeatures.filter((feature) => feature.properties.workstartdate).length,
-          worksCompleted: districtFeatures.filter((feature) => feature.properties.wocompletiondate > feature.properties.workstartdate).length,
-          totalWoAmount: districtFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
-          physicalTargetArea: districtFeatures.reduce(
-            (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
-            0
-          ),
-        };
-      });
+      return summarizeDivisionData(dataToUse);
     }
 
     return [];
+  };
+
+  const summarizeTalukaData = (dataToUse) => {
+    const talukaFeatures = dataToUse.filter(
+      (feature) =>
+        feature.properties.taluka === selectedTaluka &&
+        feature.properties.district === selectedDistrict
+    );
+
+    return [
+      {
+        key: selectedTaluka,
+        taluka: selectedTaluka,
+        district: selectedDistrict,
+        division: selectedDivision,
+        worksCount: talukaFeatures.length,
+        worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
+        worksStarted: talukaFeatures.filter((feature) => feature.properties.startedlocation).length,
+        worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation).length,
+        totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
+        physicalTargetArea: talukaFeatures.reduce(
+          (sum, feature) => sum + (feature.properties.physicaltargetarea || 0), 0),
+      },
+    ];
+  };
+
+  const summarizeDistrictData = (dataToUse) => {
+    const talukas = Array.from(
+      new Set(
+        dataToUse
+          .filter((feature) => feature.properties.district === selectedDistrict)
+          .map((feature) => feature.properties.taluka)
+      )
+    );
+    return talukas.map((taluka) => {
+      const talukaFeatures = dataToUse.filter(
+        (feature) =>
+          feature.properties.taluka === taluka &&
+          feature.properties.district === selectedDistrict
+      );
+      return {
+        key: taluka,
+        taluka,
+        district: selectedDistrict,
+        division: selectedDivision,
+        worksCount: talukaFeatures.length,
+        worksGeotagged: talukaFeatures.filter((feature) => feature.geometry).length,
+        worksStarted: talukaFeatures.filter((feature) => feature.properties.startedlocation).length,
+        worksCompleted: talukaFeatures.filter((feature) => feature.properties.completionlocation).length,
+        totalWoAmount: talukaFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
+        physicalTargetArea: talukaFeatures.reduce(
+          (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
+          0
+        ),
+      };
+    });
+  };
+
+  const summarizeDivisionData = (dataToUse) => {
+    const districts = divisionData[selectedDivision]?.districts || [];
+    return districts.map((district) => {
+      const districtFeatures = dataToUse.filter(
+        (feature) => feature.properties.district === district
+      );
+      const uniqueTalukas = Array.from(
+        new Set(districtFeatures.map((feature) => feature.properties.taluka))
+      );
+
+      return {
+        key: district,
+        taluka: uniqueTalukas.length,
+        division: selectedDivision,
+        district,
+        worksCount: districtFeatures.length,
+        worksGeotagged: districtFeatures.filter((feature) => feature.geometry).length,
+        worksStarted: districtFeatures.filter((feature) => feature.properties.workstartdate).length,
+        worksCompleted: districtFeatures.filter((feature) => feature.properties.wocompletiondate > feature.properties.workstartdate).length,
+        totalWoAmount: districtFeatures.reduce((sum, feature) => sum + (feature.properties.woamount || 0), 0),
+        physicalTargetArea: districtFeatures.reduce(
+          (sum, feature) => sum + (feature.properties.physicaltargetarea || 0),
+          0
+        ),
+      };
+    });
   };
 
   const columns = [
@@ -230,7 +251,6 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
     const summarizedData = getSummarizedData();
     const totals = calculateTotals(summarizedData);
 
-    // Append totals as the last row
     const dataWithTotals = [
       ...summarizedData,
       {
@@ -246,27 +266,15 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
       },
     ];
 
-    // Determine the file name based on selection
-    let fileName = "All Divisions"; // Default
-
-    if (selectedDivision) {
-      fileName = selectedDivision; // Use division name if selected
-    }
-
-    if (selectedDistrict) {
-      fileName = selectedDistrict; // Override with district name if selected
-    }
-
-    if (selectedTaluka) {
-      fileName = selectedTaluka; // Override with taluka name if selected
-    }
-
-    // Add the date suffix only once
+    let fileName = "All Divisions";
+    if (selectedDivision) fileName = selectedDivision;
+    if (selectedDistrict) fileName = selectedDistrict;
+    if (selectedTaluka) fileName = selectedTaluka;
     fileName = `${fileName}.xlsx`;
 
     exportToExcel({
       data: dataWithTotals,
-      columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })), // Pass only title and dataIndex
+      columns: columns.map(({ title, dataIndex }) => ({ title, dataIndex })),
       fileName,
       sheetName: "District Wise Work Data",
       tableTitle: "District Wise Work Table",
@@ -286,7 +294,7 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
                 title="Divisions"
                 data={Object.keys(divisionData)}
                 selectedItem={selectedDivision}
-                onItemClick={handleDivisionClick}
+                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDivisionClick}
                 placeholder=""
               />
             </Col>
@@ -295,7 +303,7 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
                 title="Districts"
                 data={selectedDivision ? divisionData[selectedDivision]?.districts || [] : []}
                 selectedItem={selectedDistrict}
-                onItemClick={handleDistrictClick}
+                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDistrictClick}
                 placeholder=""
               />
             </Col>
@@ -314,7 +322,7 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
                     : []
                 }
                 selectedItem={selectedTaluka}
-                onItemClick={handleTalukaClick}
+                onItemClick={userRole === 'jstaluka' ? () => { } : handleTalukaClick}
                 placeholder=""
               />
             </Col>
@@ -323,12 +331,11 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
         <Divider type="vertical" style={{ height: "100%", borderColor: "" }} />
         <Col span={isMapVisible ? 10 : 16} style={{ overflow: "auto" }}>
           {loading ? (
-            <Spin size="large" /> // Show loading spinner
+            <Spin size="large" />
           ) : geoData.length === 0 ? (
-            <Empty description="No data available" /> // Show empty state
+            <Empty description="No data available" />
           ) : (
             <div>
-
               <Flex gap="large" justify="space-between" align="center">
                 <Typography.Text
                   style={{
@@ -341,11 +348,11 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
                   Total Records {`${Math.min(currentPage * pageSize, getSummarizedData().length)} / ${getSummarizedData().length}`}
                 </Typography.Text>
                 <Input
-              placeholder="Search..."
-              value={searchTerm}
-              onChange={handleSearchChange}
-              style={{ width: 200, marginBottom: "10px", marginRight: "-500px" }}
-            />
+                  placeholder="Search..."
+                  value={searchTerm}
+                  onChange={handleSearchChange}
+                  style={{ width: 200, marginBottom: "10px", marginRight: "-500px" }}
+                />
                 <Button
                   onClick={handleExport}
                   style={{
@@ -370,7 +377,7 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
                   current: currentPage,
                   onChange: (page, pageSize) => {
                     setCurrentPage(page);
-                    setPageSize(pageSize)
+                    setPageSize(pageSize);
                   }
                 }}
                 scroll={{ x: "100%" }}
@@ -404,16 +411,9 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
                   );
                 }}
               />
-
             </div>
           )}
         </Col>
-
-        {/* {isMapVisible && (
-          <Col span={8}>
-            <FloatingMap ref={mapRef}/>
-          </Col>
-        )} */}
       </Row>
     </Flex>
   );
@@ -421,6 +421,8 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
 
 DistrictWiseTable.propTypes = {
   resetTrigger: PropTypes.bool.isRequired,
+  userRole: PropTypes.string.isRequired,
+  jurisdictionFilters: PropTypes.object.isRequired,
 };
 
 export default DistrictWiseTable;

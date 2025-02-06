@@ -22,7 +22,13 @@ import type { TabsProps } from "antd";
 import RepairWorks from "../../Dashboard/repairWorks.json";
 import { exportToExcel } from "../Excel/Excel";
 
-function RepairWiseReport() {
+interface RepairWiseReportProps {
+  resetTrigger: boolean;
+  userRole: string;
+  jurisdictionFilters: any;
+}
+
+const RepairWiseReport: React.FC<RepairWiseReportProps> = ({ resetTrigger, userRole, jurisdictionFilters }) => {
   const [loading, setLoading] = useState<boolean>(true);
   const [geoData, setGeoData] = useState<any[]>([]);
   const [selectedDivision, setSelectedDivision] = useState<any>();
@@ -47,6 +53,50 @@ function RepairWiseReport() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (resetTrigger && userRole === "jsstate") {
+      setSelectedDivision(null);
+      setSelectedDistrict(null);
+      setSelectedTaluka(null);
+    } else if (resetTrigger && userRole === "jsdistrict") {
+      setSelectedTaluka(null);
+    }
+  }, [resetTrigger, userRole]);
+
+  const parseDistrictFromFilters = (filterInput: any): string | null => {
+    const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+    const match = filterString.match(/district='([^']+)'/);
+    return match ? match[1] : null;
+  };
+
+  const parseTalukaFromFilters = (filterInput: any): string | null => {
+    const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+    const match = filterString.match(/taluka='([^']+)'/);
+    return match ? match[1] : null;
+  };
+
+  useEffect(() => {
+    if (userRole === 'jsdistrict' || userRole === 'jstaluka') {
+      const districtFilter = jurisdictionFilters || {};
+      const district = parseDistrictFromFilters(districtFilter);
+      if (district) {
+        setSelectedDistrict(district);
+        const division = Object.keys(divisionData).find((div) =>
+          divisionData[div].districts.includes(district)
+        );
+        setSelectedDivision(division || null);
+      }
+    }
+
+    if (userRole === 'jstaluka') {
+      const talukaFilter = jurisdictionFilters || {};
+      const taluka = parseTalukaFromFilters(talukaFilter);
+      if (taluka) {
+        setSelectedTaluka(taluka);
+      }
+    }
+  }, [userRole, jurisdictionFilters]);
 
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(selectedDivision === division ? null : division);
@@ -221,7 +271,7 @@ function RepairWiseReport() {
                 title="Divisions"
                 data={Object.keys(divisionData)}
                 selectedItem={selectedDivision}
-                onItemClick={handleDivisionClick}
+                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDivisionClick}
                 placeholder="No divisions available"
               />
             </Col>
@@ -234,7 +284,7 @@ function RepairWiseReport() {
                     : []
                 }
                 selectedItem={selectedDistrict}
-                onItemClick={handleDistrictClick}
+                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDistrictClick}
                 placeholder=""
               />
             </Col>
@@ -257,7 +307,7 @@ function RepairWiseReport() {
                     : []
                 }
                 selectedItem={selectedTaluka}
-                onItemClick={handleTalukaClick}
+                onItemClick={userRole === 'jstaluka' ? () => { } : handleTalukaClick}
                 placeholder=""
               />
             </Col>

@@ -13,7 +13,7 @@ import Summary from "./ReveloTable/Summary";
 import VillageWiseWork from "./ReveloTable/VillageWiseWork";
 import Geotagging from "./ReveloTable/Geotagging";
 
-const Dashboard = () => {
+const Dashboard = ({ userRole, jurisdictionFilters }) => {
   const [selectedTab, setSelectedTab] = useState("Summary");
   const [isMapVisible, setIsMapVisible] = useState(false);
 
@@ -34,12 +34,12 @@ const Dashboard = () => {
     {
       key: "2",
       label: "District Wise Work",
-      children: <DistrictWiseTable resetTrigger={selectedTab === "1"}/>,
+      children: <DistrictWiseTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
     },
     {
       key: "3",
       label: "Department Wise Work",
-      children: <DepartmentTable />,
+      children: <DepartmentTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
     },
     {
       key: "4",
@@ -58,7 +58,7 @@ const Dashboard = () => {
           </p>
         </Tooltip>
       ),
-      children: <VillageWaterBudget />,
+      children: <VillageWaterBudget resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
     },
     {
       key: "5",
@@ -68,17 +68,17 @@ const Dashboard = () => {
     {
       key: "6",
       label: "Work Completion Report",
-      children: <WorkCompletionReport />,
+      children: <WorkCompletionReport resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
     },
     {
       key: "7",
       label: "Repair Works",
-      children: <RepairWiseReport />,
+      children: <RepairWiseReport resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
     },
     {
       key: "8",
       label: "Work Monitoring",
-      children: <WorkMonitoringTable />,
+      children: <WorkMonitoringTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
     },
     {
       key: "9",
@@ -88,13 +88,13 @@ const Dashboard = () => {
     {
       key: "10",
       label: "Geotagging",
-      children: <Geotagging />,
+      children: <Geotagging resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
     },
     {
       key: "11",
       label: "Statement A",
       children: "Coming Soon ...",
-    }
+    },
   ];
 
   return (

@@ -6,7 +6,13 @@ import { exportToExcel } from "../Excel/Excel";
 import "../Dashboard.css";
 import axios from "axios";
 
-const Goetagging: React.FC = () => {
+interface GoetaggingProps {
+    resetTrigger: boolean;
+    userRole: string;
+    jurisdictionFilters: any;
+}
+
+const Goetagging: React.FC<GoetaggingProps> = ({resetTrigger, userRole, jurisdictionFilters}) => {
     const [geoData, setGeoData] = useState<any[]>([]); // Final processed data
     const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
     const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
@@ -139,6 +145,50 @@ const Goetagging: React.FC = () => {
 
         fetchData();
     }, []);
+
+  useEffect(() => {
+    if (resetTrigger && userRole === "jsstate") {
+      setSelectedDivision(null);
+      setSelectedDistrict(null);
+      setSelectedTaluka(null);
+    } else if (resetTrigger && userRole === "jsdistrict") {
+      setSelectedTaluka(null);
+    }
+  }, [resetTrigger, userRole]);
+  
+      const parseDistrictFromFilters = (filterInput: any): string | null => {
+        const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+        const match = filterString.match(/district='([^']+)'/);
+        return match ? match[1] : null;
+      };
+    
+      const parseTalukaFromFilters = (filterInput: any): string | null => {
+        const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+        const match = filterString.match(/taluka='([^']+)'/);
+        return match ? match[1] : null;
+      };
+    
+      useEffect(() => {
+        if (userRole === 'jsdistrict' || userRole === 'jstaluka') {
+          const districtFilter = jurisdictionFilters || {};
+          const district = parseDistrictFromFilters(districtFilter);
+          if (district) {
+            setSelectedDistrict(district);
+            const division = Object.keys(divisionData).find((div) =>
+              divisionData[div].districts.includes(district)
+            );
+            setSelectedDivision(division || null);
+          }
+        }
+    
+        if (userRole === 'jstaluka') {
+          const talukaFilter = jurisdictionFilters || {};
+          const taluka = parseTalukaFromFilters(talukaFilter);
+          if (taluka) {
+            setSelectedTaluka(taluka);
+          }
+        }
+      }, [userRole, jurisdictionFilters]);
 
     const handleDivisionClick = (division: string) => {
         setSelectedDivision(division === selectedDivision ? null : division);
@@ -357,7 +407,7 @@ const Goetagging: React.FC = () => {
                                 title="Divisions"
                                 data={Object.keys(divisionData)}
                                 selectedItem={selectedDivision}
-                                onItemClick={handleDivisionClick}
+                                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDistrictClick}
                                 placeholder="No divisions available"
                             />
                         </Col>
@@ -370,7 +420,7 @@ const Goetagging: React.FC = () => {
                                         : []
                                 }
                                 selectedItem={selectedDistrict}
-                                onItemClick={handleDistrictClick}
+                                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDistrictClick}
                                 placeholder=""
                             />
                         </Col>
@@ -389,7 +439,7 @@ const Goetagging: React.FC = () => {
                                         : []
                                 }
                                 selectedItem={selectedTaluka}
-                                onItemClick={handleTalukaClick}
+                                onItemClick={userRole === 'jstaluka' ? () => { } : handleTalukaClick}
                                 placeholder=""
                             />
                         </Col>

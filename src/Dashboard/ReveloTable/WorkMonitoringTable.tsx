@@ -17,9 +17,15 @@ import Jurisdictions from "../Jurisdiction/Jurisdiction";
 import divisionData from "../division.json";
 import { fetchGeoData } from "../Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
+
+interface WorkTableProps {
+  resetTrigger: boolean;
+  userRole: string;
+  jurisdictionFilters: any[];
+}
 import { exportToExcel } from "../Excel/Excel";
 
-const WorkTable: React.FC = () => {
+const WorkTable: React.FC<WorkTableProps> = ({resetTrigger, userRole, jurisdictionFilters}) => {
   const [geoData, setGeoData] = useState<any[]>([]); // Ensure this is always an array
   const [loading, setLoading] = useState<boolean>(true); // Loading state
   const [selectedDivision, setSelectedDivision] = useState<any>();
@@ -43,6 +49,50 @@ const WorkTable: React.FC = () => {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (resetTrigger && userRole === "jsstate") {
+      setSelectedDivision(null);
+      setSelectedDistrict(null);
+      setSelectedTaluka(null);
+    } else if (resetTrigger && userRole === "jsdistrict") {
+      setSelectedTaluka(null);
+    }
+  }, [resetTrigger, userRole]);
+
+  const parseDistrictFromFilters = (filterInput: any): string | null => {
+    const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+    const match = filterString.match(/district='([^']+)'/);
+    return match ? match[1] : null;
+  };
+
+  const parseTalukaFromFilters = (filterInput: any): string | null => {
+    const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+    const match = filterString.match(/taluka='([^']+)'/);
+    return match ? match[1] : null;
+  };
+
+  useEffect(() => {
+    if (userRole === 'jsdistrict' || userRole === 'jstaluka') {
+      const districtFilter = jurisdictionFilters || {};
+      const district = parseDistrictFromFilters(districtFilter);
+      if (district) {
+        setSelectedDistrict(district);
+        const division = Object.keys(divisionData).find((div) =>
+          divisionData[div].districts.includes(district)
+        );
+        setSelectedDivision(division || null);
+      }
+    }
+
+    if (userRole === 'jstaluka') {
+      const talukaFilter = jurisdictionFilters || {};
+      const taluka = parseTalukaFromFilters(talukaFilter);
+      if (taluka) {
+        setSelectedTaluka(taluka);
+      }
+    }
+  }, [userRole, jurisdictionFilters]);
 
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(selectedDivision === division ? null : division);
@@ -377,7 +427,7 @@ const WorkTable: React.FC = () => {
                 title="Divisions"
                 data={Object.keys(divisionData)}
                 selectedItem={selectedDivision}
-                onItemClick={handleDivisionClick}
+                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDivisionClick}
                 placeholder="No divisions available"
               />
             </Col>
@@ -390,7 +440,7 @@ const WorkTable: React.FC = () => {
                     : []
                 }
                 selectedItem={selectedDistrict}
-                onItemClick={handleDistrictClick}
+                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDistrictClick}
                 placeholder=""
               />
             </Col>
@@ -413,7 +463,7 @@ const WorkTable: React.FC = () => {
                     : []
                 }
                 selectedItem={selectedTaluka}
-                onItemClick={handleTalukaClick}
+                onItemClick={userRole === 'jstaluka' ? () => { } : handleTalukaClick}
                 placeholder=""
               />
             </Col>

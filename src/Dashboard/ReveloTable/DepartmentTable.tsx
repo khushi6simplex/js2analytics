@@ -19,7 +19,13 @@ import { fetchGeoData } from "../Data/useGeoData";
 import "../../Dashboard/Dashboard.css";
 import { exportToExcel } from "../Excel/Excel";
 
-const WorkTable: React.FC = () => {
+interface DepartmentTableProps {
+  resetTrigger: boolean;
+  userRole: string;
+  jurisdictionFilters: any;
+}
+
+const DepartmentTable: React.FC<DepartmentTableProps> = ({resetTrigger, userRole, jurisdictionFilters}) => {
   const [selectedDivision, setSelectedDivision] = useState<any>();
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [selectedDepartment, setSelectedDepartment] = useState<any>();
@@ -45,6 +51,50 @@ const WorkTable: React.FC = () => {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (resetTrigger && userRole === "jsstate") {
+      setSelectedDivision(null);
+      setSelectedDistrict(null);
+      setSelectedTaluka(null);
+    } else if (resetTrigger && userRole === "jsdistrict") {
+      setSelectedTaluka(null);
+    }
+  }, [resetTrigger, userRole]);
+
+    const parseDistrictFromFilters = (filterInput: any): string | null => {
+      const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+      const match = filterString.match(/district='([^']+)'/);
+      return match ? match[1] : null;
+    };
+  
+    const parseTalukaFromFilters = (filterInput: any): string | null => {
+      const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
+      const match = filterString.match(/taluka='([^']+)'/);
+      return match ? match[1] : null;
+    };
+  
+    useEffect(() => {
+      if (userRole === 'jsdistrict' || userRole === 'jstaluka') {
+        const districtFilter = jurisdictionFilters || {};
+        const district = parseDistrictFromFilters(districtFilter);
+        if (district) {
+          setSelectedDistrict(district);
+          const division = Object.keys(divisionData).find((div) =>
+            divisionData[div].districts.includes(district)
+          );
+          setSelectedDivision(division || null);
+        }
+      }
+  
+      if (userRole === 'jstaluka') {
+        const talukaFilter = jurisdictionFilters || {};
+        const taluka = parseTalukaFromFilters(talukaFilter);
+        if (taluka) {
+          setSelectedTaluka(taluka);
+        }
+      }
+    }, [userRole, jurisdictionFilters]);
+
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
@@ -61,7 +111,6 @@ const WorkTable: React.FC = () => {
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
     setSelectedDepartment(null);
-    aa;
     setCurrentPage(1);
   };
 
@@ -260,7 +309,7 @@ const WorkTable: React.FC = () => {
                 title="Divisions"
                 data={Object.keys(divisionData)}
                 selectedItem={selectedDivision}
-                onItemClick={handleDivisionClick}
+                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDivisionClick}
                 placeholder="No divisions available"
               />
             </Col>
@@ -273,7 +322,7 @@ const WorkTable: React.FC = () => {
                     : []
                 }
                 selectedItem={selectedDistrict}
-                onItemClick={handleDistrictClick}
+                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDistrictClick}
                 placeholder=""
               />
             </Col>
@@ -296,7 +345,7 @@ const WorkTable: React.FC = () => {
                     : []
                 }
                 selectedItem={selectedTaluka}
-                onItemClick={handleTalukaClick}
+                onItemClick={userRole === 'jstaluka' ? () => { } : handleTalukaClick}
                 placeholder=""
               />
             </Col>
@@ -392,4 +441,4 @@ const WorkTable: React.FC = () => {
     </Flex>
   );
 };
-export default WorkTable;
+export default DepartmentTable;

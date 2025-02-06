@@ -14,16 +14,15 @@ export const roleMapping = {
   jsstate: {
     jurisdiction: 'state',
     filters: {
-      taluka: "state='Maharashtra'",
-      district: "state='Maharashtra'",
       state: "state='Maharashtra'",
     },
   },
   jsdistrict: {
     jurisdiction: 'district',
     filters: {
-      taluka: "district='{{jurisdiction}}'",
+      state: "state='Maharashtra'",
       district: "district='{{jurisdiction}}'",
+      taluka: "district='{{jurisdiction}}'",
     },
   },
   jstaluka: {
