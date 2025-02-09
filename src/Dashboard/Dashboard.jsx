@@ -12,6 +12,7 @@ import Header from "./header/Header";
 import Summary from "./ReveloTable/Summary";
 import VillageWiseWork from "./ReveloTable/VillageWiseWork";
 import Geotagging from "./ReveloTable/Geotagging";
+import StatementA from "./ReveloTable/StatementA";
 
 const Dashboard = ({ userRole, jurisdictionFilters }) => {
   const [selectedTab, setSelectedTab] = useState("Summary");

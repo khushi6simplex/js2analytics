@@ -32,7 +32,7 @@ const App = () => {
         const response = await axios.get(`${principalUrl}/access/principal/webnew?callback=somecallback`, {
           headers: {
             "Content-Type": "application/json",
-            Authorization: "Bearer " + localStorage.getItem("keycloakToken"),
+            Authorization: "Bearer " + localStorage.getItem("keycloakToken")
           },
         });
 
