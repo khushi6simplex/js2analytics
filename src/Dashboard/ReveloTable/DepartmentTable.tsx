@@ -25,7 +25,11 @@ interface DepartmentTableProps {
   jurisdictionFilters: any;
 }
 
-const DepartmentTable: React.FC<DepartmentTableProps> = ({resetTrigger, userRole, jurisdictionFilters}) => {
+const DepartmentTable: React.FC<DepartmentTableProps> = ({
+  resetTrigger,
+  userRole,
+  jurisdictionFilters,
+}) => {
   const [selectedDivision, setSelectedDivision] = useState<any>();
   const [selectedDistrict, setSelectedDistrict] = useState<any>();
   const [selectedDepartment, setSelectedDepartment] = useState<any>();
@@ -61,61 +65,70 @@ const DepartmentTable: React.FC<DepartmentTableProps> = ({resetTrigger, userRole
     }
   }, [resetTrigger, userRole]);
 
-    const parseDistrictFromFilters = (filterInput: any): string | null => {
-      const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
-      const match = filterString.match(/district='([^']+)'/);
-      return match ? match[1] : null;
-    };
-  
-    const parseTalukaFromFilters = (filterInput: any): string | null => {
-      const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
-      const match = filterString.match(/taluka='([^']+)'/);
-      return match ? match[1] : null;
-    };
-  
-    useEffect(() => {
-      if (userRole === 'jsdistrict' || userRole === 'jstaluka') {
-        const districtFilter = jurisdictionFilters || {};
-        const district = parseDistrictFromFilters(districtFilter);
-        if (district) {
-          setSelectedDistrict(district);
-          const division = Object.keys(divisionData).find((div) =>
-            divisionData[div].districts.includes(district)
-          );
-          setSelectedDivision(division || null);
-        }
+  const parseDistrictFromFilters = (filterInput: any): string | null => {
+    const filterString =
+      typeof filterInput === "string"
+        ? filterInput
+        : JSON.stringify(filterInput);
+    const match = filterString.match(/district='([^']+)'/);
+    return match ? match[1] : null;
+  };
+
+  const parseTalukaFromFilters = (filterInput: any): string | null => {
+    const filterString =
+      typeof filterInput === "string"
+        ? filterInput
+        : JSON.stringify(filterInput);
+    const match = filterString.match(/taluka='([^']+)'/);
+    return match ? match[1] : null;
+  };
+
+  useEffect(() => {
+    if (userRole === "jsdistrict" || userRole === "jstaluka") {
+      const districtFilter = jurisdictionFilters || {};
+      const district = parseDistrictFromFilters(districtFilter);
+      if (district) {
+        setSelectedDistrict(district);
+        const division = Object.keys(divisionData).find((div) =>
+          divisionData[div].districts.includes(district),
+        );
+        setSelectedDivision(division || null);
       }
-  
-      if (userRole === 'jstaluka') {
-        const talukaFilter = jurisdictionFilters || {};
-        const taluka = parseTalukaFromFilters(talukaFilter);
-        if (taluka) {
-          setSelectedTaluka(taluka);
-        }
+    }
+
+    if (userRole === "jstaluka") {
+      const talukaFilter = jurisdictionFilters || {};
+      const taluka = parseTalukaFromFilters(talukaFilter);
+      if (taluka) {
+        setSelectedTaluka(taluka);
       }
-    }, [userRole, jurisdictionFilters]);
+    }
+  }, [userRole, jurisdictionFilters]);
 
   const handleDivisionClick = (division: string) => {
     setSelectedDivision(selectedDivision === division ? null : division);
     setSelectedDistrict(null);
     setSelectedTaluka(null);
-    setSelectedDepartment(null);
+    // setSelectedDepartment(null);
     setCurrentPage(1);
   };
   const handleDistrictClick = (district: string) => {
     setSelectedDistrict(selectedDistrict === district ? null : district);
     setSelectedTaluka(null);
-    setSelectedDepartment(null);
+    // setSelectedDepartment(null);
     setCurrentPage(1);
   };
   const handleTalukaClick = (taluka: string) => {
     setSelectedTaluka(selectedTaluka === taluka ? null : taluka);
-    setSelectedDepartment(null);
+    // setSelectedDepartment(null);
     setCurrentPage(1);
   };
 
   const handleDepartmentClick = (deptName: string) => {
     setSelectedDepartment(selectedDepartment === deptName ? null : deptName);
+    setSelectedDivision(null);
+    setSelectedDistrict(null);
+    setSelectedTaluka(null);
   };
 
   const filteredFeatures = geoData.filter((feature) => {
@@ -306,10 +319,28 @@ const DepartmentTable: React.FC<DepartmentTableProps> = ({resetTrigger, userRole
           <Row gutter={[10, 10]} style={{ flexWrap: "nowrap" }}>
             <Col span={6}>
               <Jurisdictions
+                title="Department"
+                data={Array.from(
+                  new Set(
+                    geoData.map((feature) => feature.properties.deptName),
+                  ),
+                )}
+                selectedItem={selectedDepartment}
+                onItemClick={handleDepartmentClick}
+                placeholder="No Departments Available"
+              />
+            </Col>
+
+            <Col span={6}>
+              <Jurisdictions
                 title="Divisions"
                 data={Object.keys(divisionData)}
                 selectedItem={selectedDivision}
-                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDivisionClick}
+                onItemClick={
+                  userRole === "jsdistrict" || userRole === "jstaluka"
+                    ? () => {}
+                    : handleDivisionClick
+                }
                 placeholder="No divisions available"
               />
             </Col>
@@ -322,7 +353,11 @@ const DepartmentTable: React.FC<DepartmentTableProps> = ({resetTrigger, userRole
                     : []
                 }
                 selectedItem={selectedDistrict}
-                onItemClick={userRole === 'jsdistrict' || userRole === 'jstaluka' ? () => { } : handleDistrictClick}
+                onItemClick={
+                  userRole === "jsdistrict" || userRole === "jstaluka"
+                    ? () => {}
+                    : handleDistrictClick
+                }
                 placeholder=""
               />
             </Col>
@@ -345,30 +380,10 @@ const DepartmentTable: React.FC<DepartmentTableProps> = ({resetTrigger, userRole
                     : []
                 }
                 selectedItem={selectedTaluka}
-                onItemClick={userRole === 'jstaluka' ? () => { } : handleTalukaClick}
-                placeholder=""
-              />
-            </Col>
-            <Col span={6}>
-              <Jurisdictions
-                title="Department"
-                data={
-                  selectedTaluka
-                    ? Array.from(
-                        new Set(
-                          geoData
-                            .filter(
-                              (feature) =>
-                                feature.properties.taluka === selectedTaluka,
-                            )
-                            .map((feature) => feature.properties.deptName),
-                        ),
-                      )
-                    : []
+                onItemClick={
+                  userRole === "jstaluka" ? () => {} : handleTalukaClick
                 }
-                selectedItem={selectedDepartment}
-                onItemClick={handleDepartmentClick}
-                placeholder="No Departments Available"
+                placeholder=""
               />
             </Col>
           </Row>
