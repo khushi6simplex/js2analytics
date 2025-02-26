@@ -286,8 +286,6 @@ const DepartmentTable: React.FC<DepartmentTableProps> = ({
     tableMap.set(item.deptName, item);
   });
 
-  console.log(tableData, "tableData");
-
   const handleExport = () => {
     exportToExcel({
       data: selectedDivision ? Array.from(tableMap.values()) : [],

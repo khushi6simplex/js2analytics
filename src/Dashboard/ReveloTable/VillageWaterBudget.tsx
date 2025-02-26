@@ -40,7 +40,7 @@ const VillageWaterBudget: React.FC<VillageWaterBudgetProps> = ({ resetTrigger, i
                             typeName: "js2surveydsws:projectvillage_js2project",
                             outputFormat: "json",
                             srsname: "EPSG:3857",
-                            CQL_FILTER: "isselected=true", // Server-side filter for 'isselected=true'
+                            CQL_FILTER: "isselected=true&maxFeatures=50", // Server-side filter for 'isselected=true'
                         },
                     }),
                     axios.get(url, {
@@ -106,49 +106,49 @@ const VillageWaterBudget: React.FC<VillageWaterBudgetProps> = ({ resetTrigger, i
         fetchData();
     }, []);
 
-  useEffect(() => {
-    if (resetTrigger && userRole === "jsstate") {
-      setSelectedDivision(null);
-      setSelectedDistrict(null);
-      setSelectedTaluka(null);
-    } else if (resetTrigger && userRole === "jsdistrict") {
-      setSelectedTaluka(null);
-    }
-  }, [resetTrigger, userRole]);
-    
-      const parseDistrictFromFilters = (filterInput: any): string | null => {
+    useEffect(() => {
+        if (resetTrigger && userRole === "jsstate") {
+            setSelectedDivision(null);
+            setSelectedDistrict(null);
+            setSelectedTaluka(null);
+        } else if (resetTrigger && userRole === "jsdistrict") {
+            setSelectedTaluka(null);
+        }
+    }, [resetTrigger, userRole]);
+
+    const parseDistrictFromFilters = (filterInput: any): string | null => {
         const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
         const match = filterString.match(/district='([^']+)'/);
         return match ? match[1] : null;
-      };
-    
-      const parseTalukaFromFilters = (filterInput: any): string | null => {
+    };
+
+    const parseTalukaFromFilters = (filterInput: any): string | null => {
         const filterString = typeof filterInput === "string" ? filterInput : JSON.stringify(filterInput);
         const match = filterString.match(/taluka='([^']+)'/);
         return match ? match[1] : null;
-      };
-    
-      useEffect(() => {
+    };
+
+    useEffect(() => {
         if (userRole === 'jsdistrict' || userRole === 'jstaluka') {
-          const districtFilter = jurisdictionFilters || {};
-          const district = parseDistrictFromFilters(districtFilter);
-          if (district) {
-            setSelectedDistrict(district);
-            const division = Object.keys(divisionData).find((div) =>
-              divisionData[div].districts.includes(district)
-            );
-            setSelectedDivision(division || null);
-          }
+            const districtFilter = jurisdictionFilters || {};
+            const district = parseDistrictFromFilters(districtFilter);
+            if (district) {
+                setSelectedDistrict(district);
+                const division = Object.keys(divisionData).find((div) =>
+                    divisionData[div].districts.includes(district)
+                );
+                setSelectedDivision(division || null);
+            }
         }
-    
+
         if (userRole === 'jstaluka') {
-          const talukaFilter = jurisdictionFilters || {};
-          const taluka = parseTalukaFromFilters(talukaFilter);
-          if (taluka) {
-            setSelectedTaluka(taluka);
-          }
+            const talukaFilter = jurisdictionFilters || {};
+            const taluka = parseTalukaFromFilters(talukaFilter);
+            if (taluka) {
+                setSelectedTaluka(taluka);
+            }
         }
-      }, [userRole, jurisdictionFilters]);
+    }, [userRole, jurisdictionFilters]);
 
     const handleDivisionClick = (division: string) => {
         setSelectedDivision(division === selectedDivision ? null : division);

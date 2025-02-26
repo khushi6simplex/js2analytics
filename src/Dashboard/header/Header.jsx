@@ -9,25 +9,35 @@ import user from "../../assets/user.png";
 import mrsacLogo from "../../assets/mrsacLogo.png";
 import toolsgrid from "../../assets/toolsgrid.png";
 import userManager from "../../assets/userManager.png";
-import mapIcon from "../../assets/map.png";
+import jsonp from "jsonp"; // Import JSONP
 
-const Header = ({ onMapToggle }) => {
-  const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [isGridOpen, setIsGridOpen] = useState(false);
+const Header = ( { userName } ) => {
+  const [ isMenuOpen, setIsMenuOpen ] = useState( false );
+  const [ isGridOpen, setIsGridOpen ] = useState( false );
 
   const toggleMenu = () => {
-    setIsMenuOpen((prev) => !prev);
+    setIsMenuOpen( ( prev ) => !prev );
   };
 
   const gridMenu = () => {
-    setIsGridOpen((prev) => !prev);
+    setIsGridOpen( ( prev ) => !prev );
   };
 
-  const doLogout = () => {
-    const logoutUrl = window.__analytics__.logoutUrl;
-    axios.post(logoutUrl, "").finally(() => {
+  const handleLogout = () => {
+    const serverUrl = window.__analytics__.serverUrl;
+    const apiUrl = `${ serverUrl }/users/${ userName }/logout?callback=logoutCallback`;
+
+    jsonp( apiUrl, { param: "callback", name: "logoutCallback" }, ( err, response ) => {
+      if ( err ) {
+        console.error( "❌ JSONP Logout Request Failed:", err );
+      } else {
+        console.log( "✅ Logout Successful:", response );
+      }
+
+      // Ensure logout and refresh the page
+      localStorage.removeItem( "keycloakToken" );
       window.location.reload();
-    });
+    } );
   };
 
   return (
@@ -38,7 +48,7 @@ const Header = ({ onMapToggle }) => {
         left: 0,
         width: "100%",
         height: "80px",
-        backgroundImage: `url(${header})`,
+        backgroundImage: `url(${ header })`,
         backgroundSize: "cover",
         backgroundPosition: "center",
         display: "flex",
@@ -119,7 +129,7 @@ const Header = ({ onMapToggle }) => {
               </li>
               <li
                 style={{ padding: "8px 12px", cursor: "pointer" }}
-                onClick={doLogout}
+                onClick={handleLogout}
               >
                 Logout
               </li>
@@ -155,7 +165,7 @@ const Header = ({ onMapToggle }) => {
 };
 
 Header.propTypes = {
-  onMapToggle: PropTypes.func.isRequired,
+  userName: PropTypes.string.isRequired,
 };
 
 export default Header;

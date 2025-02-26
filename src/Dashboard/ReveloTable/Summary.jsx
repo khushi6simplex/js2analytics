@@ -21,6 +21,8 @@ const Summary = ({ resetTrigger }) => {
         setLoading(true);
         const url = window.__analytics__.wbUrl;
 
+        console.log("Fetching data from URL:", url);
+
         const responses = await Promise.all([
           axios.get(url, { params: { service: "WFS", version: "1.0.0", request: "GetFeature", typeName: "js2surveydsws:projectvillage_js2project", outputFormat: "json", srsname: "EPSG:3857", CQL_FILTER: "isselected=true" } }),
           axios.get(url, { params: { service: "WFS", version: "1.0.0", request: "GetFeature", typeName: "js2surveydsws:waterbudget_js2project", outputFormat: "json", srsname: "EPSG:3857" } }),

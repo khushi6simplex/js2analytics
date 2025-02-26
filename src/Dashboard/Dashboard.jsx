@@ -14,7 +14,7 @@ import VillageWiseWork from "./ReveloTable/VillageWiseWork";
 import Geotagging from "./ReveloTable/Geotagging";
 import StatementA from "./ReveloTable/StatementA";
 
-const Dashboard = ({ userRole, jurisdictionFilters }) => {
+const Dashboard = ({ userRole, jurisdictionFilters, userName }) => {
   const [selectedTab, setSelectedTab] = useState("Summary");
   const [isMapVisible, setIsMapVisible] = useState(false);
 
@@ -94,14 +94,14 @@ const Dashboard = ({ userRole, jurisdictionFilters }) => {
     {
       key: "11",
       label: "Statement A",
-      children: "Coming Soon ...",
+      children: <StatementA />,
     },
   ];
 
   return (
     <>
       <Card bordered={false}>
-        <Header onMapToggle={toggleMapVisibility} />
+        <Header onMapToggle={toggleMapVisibility} userName={userName} />
         <Flex vertical justify="center">
           <Flex style={{ marginTop: "0px", marginBottom: "-10px" }}>
             <Typography.Text

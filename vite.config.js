@@ -1,9 +1,8 @@
 import { defineConfig } from 'vite';
 import react from '@vitejs/plugin-react-swc';
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [react()],
+export default defineConfig( {
+  plugins: [ react() ],
   base: '/analytics',
   build: {
     outDir: 'dist',
@@ -14,6 +13,12 @@ export default defineConfig({
         target: 'http://180.149.240.169:8080',
         changeOrigin: true,
       },
+      '/auth': {
+        target: 'http://180.149.240.169:8081', // Authentication server
+        changeOrigin: true,
+        secure: false, // Set to true if using HTTPS
+        rewrite: ( path ) => path.replace( /^\/auth/, '/auth' ),
+      },
     },
   },
-});
+} );

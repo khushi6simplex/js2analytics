@@ -9,9 +9,9 @@ const keycloak = new Keycloak({
 export const initKeycloak = () => {
   return new Promise((resolve, reject) => {
     keycloak
-      .init({ 
-        onLoad: "login-required", 
-        checkLoginIframe: false 
+      .init({
+        onLoad: "login-required",
+        checkLoginIframe: false,
       })
       .then((authenticated) => {
         if (authenticated) {

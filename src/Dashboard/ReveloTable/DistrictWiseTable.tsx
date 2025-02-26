@@ -16,7 +16,7 @@ interface DistrictWiseTableProps {
   jurisdictionFilters: any;
 }
 
-const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isMapVisible, userRole, jurisdictionFilters }) => {
+const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isMapVisible, userRole, jurisdictionFilters = {} }) => {
   const [geoData, setGeoData] = useState<any[]>([]);
   const [selectedDivision, setSelectedDivision] = useState<string | null>(null);
   const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
@@ -333,7 +333,7 @@ const DistrictWiseTable: React.FC<DistrictWiseTableProps> = ({ resetTrigger, isM
           {loading ? (
             <Spin size="large" />
           ) : geoData.length === 0 ? (
-            <Empty description="No data available" />
+            <Empty description="No data available" />   
           ) : (
             <div>
               <Flex gap="large" justify="space-between" align="center">
