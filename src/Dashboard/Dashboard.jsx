@@ -1,6 +1,7 @@
 // Dashboard.jsx
 import { Typography, Tabs, Flex, Card, Divider, Tooltip } from "antd";
 import { useState } from "react";
+import PropTypes from 'prop-types';
 import "./DashBoard.css";
 import DistrictWiseTable from "./ReveloTable/DistrictWiseTable";
 import WorkMonitoringTable from "../Dashboard/ReveloTable/WorkMonitoringTable";
@@ -10,37 +11,36 @@ import VillageWaterBudget from "./ReveloTable/VillageWaterBudget";
 import WorkCompletionReport from "./ReveloTable/WorkCompletionReport";
 import Header from "./header/Header";
 import Summary from "./ReveloTable/Summary";
-import VillageWiseWork from "./ReveloTable/VillageWiseWork";
 import Geotagging from "./ReveloTable/Geotagging";
 import StatementA from "./ReveloTable/StatementA";
 
-const Dashboard = ({ userRole, jurisdictionFilters, userName }) => {
-  const [selectedTab, setSelectedTab] = useState("Summary");
-  const [isMapVisible, setIsMapVisible] = useState(false);
+const Dashboard = ( { userRole, jurisdictionFilters, userName } ) => {
+  const [ selectedTab, setSelectedTab ] = useState( "Summary" );
+  // const [ isMapVisible, setIsMapVisible ] = useState( false );
 
-  const handleTabChange = (key) => {
-    setSelectedTab(key);
+  const handleTabChange = ( key ) => {
+    setSelectedTab( key );
   };
 
-  const toggleMapVisibility = () => {
-    setIsMapVisible((prev) => !prev);
-  };
+  // const toggleMapVisibility = () => {
+  //   setIsMapVisible( ( prev ) => !prev );
+  // };
 
   const items = [
     {
       key: "1",
       label: "Summary",
-      children: <Summary resetTrigger={selectedTab === "1"} isMapVisible={isMapVisible} />,
+      children: <Summary resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters} />,
     },
     {
       key: "2",
       label: "District Wise Work",
-      children: <DistrictWiseTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
+      children: <DistrictWiseTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters} />,
     },
     {
       key: "3",
       label: "Department Wise Work",
-      children: <DepartmentTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
+      children: <DepartmentTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters} />,
     },
     {
       key: "4",
@@ -59,7 +59,7 @@ const Dashboard = ({ userRole, jurisdictionFilters, userName }) => {
           </p>
         </Tooltip>
       ),
-      children: <VillageWaterBudget resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
+      children: <VillageWaterBudget resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters} />,
     },
     {
       key: "5",
@@ -69,17 +69,17 @@ const Dashboard = ({ userRole, jurisdictionFilters, userName }) => {
     {
       key: "6",
       label: "Work Completion Report",
-      children: <WorkCompletionReport resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
+      children: <WorkCompletionReport resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters} />,
     },
     {
       key: "7",
       label: "Repair Works",
-      children: <RepairWiseReport resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
+      children: <RepairWiseReport resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters} />,
     },
     {
       key: "8",
       label: "Work Monitoring",
-      children: <WorkMonitoringTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
+      children: <WorkMonitoringTable resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters} />,
     },
     {
       key: "9",
@@ -89,7 +89,7 @@ const Dashboard = ({ userRole, jurisdictionFilters, userName }) => {
     {
       key: "10",
       label: "Geotagging",
-      children: <Geotagging resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters}/>,
+      children: <Geotagging resetTrigger={selectedTab === "1"} userRole={userRole} jurisdictionFilters={jurisdictionFilters} />,
     },
     {
       key: "11",
@@ -101,7 +101,7 @@ const Dashboard = ({ userRole, jurisdictionFilters, userName }) => {
   return (
     <>
       <Card bordered={false}>
-        <Header onMapToggle={toggleMapVisibility} userName={userName} />
+        <Header userName={userName} />
         <Flex vertical justify="center">
           <Flex style={{ marginTop: "0px", marginBottom: "-10px" }}>
             <Typography.Text
@@ -130,6 +130,11 @@ const Dashboard = ({ userRole, jurisdictionFilters, userName }) => {
       </Card>
     </>
   );
+};
+Dashboard.propTypes = {
+  userRole: PropTypes.string.isRequired,
+  jurisdictionFilters: PropTypes.array.isRequired,
+  userName: PropTypes.string.isRequired,
 };
 
 export default Dashboard;

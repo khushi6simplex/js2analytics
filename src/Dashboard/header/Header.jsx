@@ -9,7 +9,6 @@ import user from "../../assets/user.png";
 import mrsacLogo from "../../assets/mrsacLogo.png";
 import toolsgrid from "../../assets/toolsgrid.png";
 import userManager from "../../assets/userManager.png";
-import jsonp from "jsonp"; // Import JSONP
 
 const Header = ( { userName } ) => {
   const [ isMenuOpen, setIsMenuOpen ] = useState( false );
@@ -23,21 +22,26 @@ const Header = ( { userName } ) => {
     setIsGridOpen( ( prev ) => !prev );
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
     const serverUrl = window.__analytics__.serverUrl;
-    const apiUrl = `${ serverUrl }/users/${ userName }/logout?callback=logoutCallback`;
+    const apiUrl = `${ serverUrl }/users/${ userName }/logout`;
 
-    jsonp( apiUrl, { param: "callback", name: "logoutCallback" }, ( err, response ) => {
-      if ( err ) {
-        console.error( "❌ JSONP Logout Request Failed:", err );
-      } else {
-        console.log( "✅ Logout Successful:", response );
-      }
+    try {
+      const token = localStorage.getItem( "keycloakToken" );
+      const response = await axios.post( apiUrl, {}, {
+        headers: {
+          Authorization: `Bearer ${ token }`
+        }
+      } );
+
+      console.log( "✅ Logout Successful:", response.data );
 
       // Ensure logout and refresh the page
       localStorage.removeItem( "keycloakToken" );
       window.location.reload();
-    } );
+    } catch ( err ) {
+      console.error( "❌ Logout Request Failed:", err );
+    }
   };
 
   return (
